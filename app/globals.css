@@ -7,9 +7,9 @@
 }
 
 .nav-text {
-    @apply text-[#8F5C1D] hover:text-[#C1843A] transition-colors;
+    @apply text-[#FEBE98] hover:text-[#D88A4D] transition-colors;
 }
 
 html {
-    background-color: #fff4e1;
+    background-color: #fff8e1;
 }

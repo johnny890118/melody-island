@@ -27,12 +27,24 @@ const Navbar = ({ onLogin }) => {
 
     return (
         <>
-            <header className="fixed top-0 left-0 right-0 z-50 bg-[#FEBE98]">
+            <header className="fixed top-0 left-0 right-0 z-50 bg-black/90">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex justify-between items-center py-5 mx-auto c-space">
-                        <Link href="/" className="nav-text font-bold text-xl">
-                            Melody Island
-                        </Link>
+                        <div className="flex items-center gap-2">
+                            <Image
+                                src="/music-island-logo.png"
+                                alt="Google logo"
+                                width={40}
+                                height={40}
+                                className="w-10 h-10"
+                            />
+                            <Link
+                                href="/"
+                                className="nav-text font-bold text-xl"
+                            >
+                                Melody Island
+                            </Link>
+                        </div>
                         <div>
                             {auth.currentUser ? (
                                 <button onClick={handleLogout}>登出</button>
