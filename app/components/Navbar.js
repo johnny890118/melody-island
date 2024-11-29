@@ -48,7 +48,9 @@ const Navbar = ({ onLogin }) => {
                                         height={16}
                                         className="w-4 h-4"
                                     />
-                                    <p className="nav-text text-base">登入</p>
+                                    <p className="nav-text text-base font-bold">
+                                        登入
+                                    </p>
                                 </button>
                             )}
                         </div>
