@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import AuthManager from "./components/AuthManager";
+import Navbar from "./components/Navbar";
 import RoomCreatorButton from "./components/RoomCreatorButton";
 import RoomJoinerButton from "./components/RoomJoinerButton";
 import MyRoomButton from "./components/MyRoomButton";
@@ -32,9 +32,9 @@ const HomePage = () => {
 
     return (
         <div>
-            <AuthManager onLogin={setUser} />
+            <Navbar onLogin={setUser} />
             <div style={{ textAlign: "center", marginTop: "50px" }}>
-                <h1>Welcome to Song Room</h1>
+                <h1>Melody Island</h1>
                 {user ? (
                     roomId ? (
                         <>
@@ -49,8 +49,8 @@ const HomePage = () => {
                     )
                 ) : (
                     <>
-                        <RoomJoinerButton />
                         <p>Log in to create a room.</p>
+                        <RoomJoinerButton />
                     </>
                 )}
             </div>
