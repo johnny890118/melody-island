@@ -44,12 +44,11 @@ const Navbar = ({ onLogin }) => {
                                     <Image
                                         src="/google.png"
                                         alt="Google logo"
-                                        width={20}
-                                        height={20}
+                                        width={16}
+                                        height={16}
+                                        className="w-4 h-4"
                                     />
-                                    <p className="nav-text text-lg md:text-base">
-                                        登入 / 註冊
-                                    </p>
+                                    <p className="nav-text text-base">登入</p>
                                 </button>
                             )}
                         </div>

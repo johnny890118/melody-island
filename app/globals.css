@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.c-space {
+    @apply sm:px-10 px-5;
+}
+
 .nav-text {
     @apply text-neutral-400 hover:text-white transition-colors;
 }
