@@ -33,7 +33,7 @@ const HomePage = () => {
     return (
         <div>
             <Navbar onLogin={setUser} />
-            <div style={{ textAlign: "center", marginTop: "50px" }}>
+            <div style={{ textAlign: "center", marginTop: "118px" }}>
                 <h1>Melody Island</h1>
                 {user ? (
                     roomId ? (
