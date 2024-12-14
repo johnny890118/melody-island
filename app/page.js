@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import RoomCreatorButton from "./components/RoomCreatorButton";
 import RoomJoinerButton from "./components/RoomJoinerButton";
 import MyRoomButton from "./components/MyRoomButton";
-import { db } from "./firebaseConfig";
+import { db } from "./config/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 const HomePage = () => {

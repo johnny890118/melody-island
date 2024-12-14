@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { auth, provider } from "../firebaseConfig";
+import { auth, provider } from "../config/firebase";
 import { signInWithPopup, signOut } from "firebase/auth";
 import Image from "next/image";
 import Link from "next/link";
