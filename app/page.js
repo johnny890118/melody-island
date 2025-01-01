@@ -1,58 +1,87 @@
 "use client";
-import { useState, useEffect } from "react";
-import Navbar from "./components/Navbar";
-import RoomCreatorButton from "./components/RoomCreatorButton";
-import RoomJoinerButton from "./components/RoomJoinerButton";
-import MyRoomButton from "./components/MyRoomButton";
+
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "./config/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
+import CustomDialog from "@/components/CustomDialog";
 
 const HomePage = () => {
-    const [user, setUser] = useState(null);
-    const [roomId, setRoomId] = useState(null);
+    const user = useSelector((state) => state.auth.user);
+    const [userRoom, setUserRoom] = useState(null);
+    const router = useRouter();
 
-    useEffect(() => {
-        const fetchUserRoom = async () => {
-            if (!user) return;
-
-            const q = query(
-                collection(db, "rooms"),
-                where("createdBy", "==", user.uid)
-            );
-            const querySnapshot = await getDocs(q);
-            if (!querySnapshot.empty) {
-                setRoomId(querySnapshot.docs[0].id);
-            } else {
-                setRoomId(null);
-            }
+    const handleCreateRoom = async ({ roomName, roomPassword }) => {
+        const newRoomId = uuidv4();
+        const roomData = {
+            name: roomName,
+            password: roomPassword,
+            createdBy: user.uid,
+            id: newRoomId,
+            playlist: [],
+            currentVideo: null,
+            timestamp: null,
         };
+        await setDoc(doc(db, "rooms", newRoomId), roomData);
+        setUserRoom(newRoomId);
+        router.push(`/room/${newRoomId}`);
+    };
 
-        fetchUserRoom();
-    }, [user]);
+    const handleJoinRoom = async ({ roomId, roomPassword }) => {
+        const roomDoc = await getDoc(doc(db, "rooms", roomId));
+        if (!roomDoc.exists()) return alert("Room not found.");
+
+        const roomData = roomDoc.data();
+        if (roomData.password !== roomPassword)
+            return alert("Incorrect password.");
+
+        router.push(`/room/${roomId}`);
+    };
 
     return (
-        <div>
-            <Navbar onLogin={setUser} />
-            <div style={{ textAlign: "center", marginTop: "118px" }}>
-                <h1>Melody Island</h1>
-                {user ? (
-                    roomId ? (
-                        <>
-                            <MyRoomButton roomId={roomId} />
-                            <RoomJoinerButton />
-                        </>
-                    ) : (
-                        <>
-                            <RoomCreatorButton user={user} />
-                            <RoomJoinerButton />
-                        </>
-                    )
+        <div className="p-4 mt-[80px]">
+            <h1 className="text-2xl mb-4">Welcome to Melody Island</h1>
+            <div className="space-y-4">
+                {userRoom ? (
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        onClick={() => router.push(`/room/${userRoom}`)}
+                    >
+                        My Room
+                    </button>
                 ) : (
-                    <>
-                        <p>Log in to create a room.</p>
-                        <RoomJoinerButton />
-                    </>
+                    <CustomDialog
+                        title="Create Room"
+                        description="Enter details to create a new room."
+                        inputs={[
+                            { label: "roomName", placeholder: "Room Name" },
+                            {
+                                label: "roomPassword",
+                                placeholder: "Password",
+                                type: "password",
+                            },
+                        ]}
+                        onConfirm={handleCreateRoom}
+                        triggerLabel="Create Room"
+                    />
                 )}
+
+                <CustomDialog
+                    title="Join Room"
+                    description="Enter Room ID and Password to join an existing room."
+                    inputs={[
+                        { label: "roomId", placeholder: "Room ID" },
+                        {
+                            label: "roomPassword",
+                            placeholder: "Password",
+                            type: "password",
+                        },
+                    ]}
+                    onConfirm={handleJoinRoom}
+                    triggerLabel="Join Room"
+                />
             </div>
         </div>
     );
