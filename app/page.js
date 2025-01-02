@@ -41,9 +41,9 @@ const HomePage = () => {
     };
 
     return (
-        <div className="p-4 mt-[80px]">
+        <div className="p-4 mt-[80px] bg-[#fff8e1]">
             <h1 className="text-2xl mb-4">Welcome to Melody Island</h1>
-            <div className="space-y-4">
+            <div className="space-y-4 flex flex-col">
                 {userRoom ? (
                     <button
                         className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -53,34 +53,34 @@ const HomePage = () => {
                     </button>
                 ) : (
                     <CustomDialog
-                        title="Create Room"
-                        description="Enter details to create a new room."
+                        title="創建島嶼"
+                        description="輸入屬於您的島嶼名稱及密碼"
                         inputs={[
-                            { label: "roomName", placeholder: "Room Name" },
+                            { label: "islandName", placeholder: "島嶼名稱" },
                             {
-                                label: "roomPassword",
-                                placeholder: "Password",
+                                label: "islandPassword",
+                                placeholder: "密碼",
                                 type: "password",
                             },
                         ]}
                         onConfirm={handleCreateRoom}
-                        triggerLabel="Create Room"
+                        triggerLabel="創建島嶼"
                     />
                 )}
 
                 <CustomDialog
-                    title="Join Room"
-                    description="Enter Room ID and Password to join an existing room."
+                    title="加入島嶼"
+                    description="輸入島嶼 ID及密碼"
                     inputs={[
-                        { label: "roomId", placeholder: "Room ID" },
+                        { label: "islandId", placeholder: "島嶼 ID" },
                         {
-                            label: "roomPassword",
-                            placeholder: "Password",
+                            label: "islandPassword",
+                            placeholder: "密碼",
                             type: "password",
                         },
                     ]}
                     onConfirm={handleJoinRoom}
-                    triggerLabel="Join Room"
+                    triggerLabel="加入島嶼"
                 />
             </div>
         </div>

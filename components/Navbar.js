@@ -3,9 +3,9 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUser, login, logout } from "@/store/authSlice";
-import { Button } from "./ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "./ui/button";
 
 const Navbar = () => {
     const user = useSelector((state) => state.auth.user);
