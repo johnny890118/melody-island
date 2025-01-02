@@ -13,7 +13,7 @@ import {
     collection,
 } from "firebase/firestore";
 import { db } from "./config/firebase";
-import { v4 as uuidv4 } from "uuid";
+import { nanoid } from "nanoid";
 import CustomDialog from "@/components/CustomDialog";
 
 const HomePage = () => {
@@ -22,7 +22,7 @@ const HomePage = () => {
     const router = useRouter();
 
     const handleCreateRoom = async ({ islandName, islandPassword }) => {
-        const newIslandId = uuidv4();
+        const newIslandId = nanoid(10);
         const islandData = {
             name: islandName,
             password: islandPassword,
