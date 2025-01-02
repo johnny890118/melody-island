@@ -2,20 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-.c-space {
-    @apply sm:px-10 px-5;
-}
-
-.nav-text {
-    @apply text-[#FEBE98] hover:text-[#D88A4D] transition-colors;
-}
-
-html {
-    background-color: #fff8e1;
-}
-
 @layer base {
-  :root {
+    :root {
         --background: 0 0% 100%;
         --foreground: 0 0% 3.9%;
         --card: 0 0% 100%;
@@ -42,7 +30,7 @@ html {
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
     }
-  .dark {
+    .dark {
         --background: 0 0% 3.9%;
         --foreground: 0 0% 98%;
         --card: 0 0% 3.9%;
@@ -71,10 +59,22 @@ html {
 }
 
 @layer base {
-  * {
-    @apply border-border;
+    * {
+        @apply border-border;
     }
-  body {
-    @apply bg-background text-foreground;
+    body {
+        @apply bg-background text-foreground;
     }
+}
+
+html {
+    background-color: #fff8e1;
+}
+
+.c-space {
+    @apply sm:px-10 px-5;
+}
+
+.nav-text {
+    @apply text-[#FEBE98] hover:text-[#D88A4D] transition-colors;
 }

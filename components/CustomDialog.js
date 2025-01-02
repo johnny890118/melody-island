@@ -21,6 +21,8 @@ const CustomDialog = ({
     const [values, setValues] = useState({});
 
     const handleChange = (key, value) => {
+        console.log(key, value);
+
         setValues((prev) => ({ ...prev, [key]: value }));
     };
 
