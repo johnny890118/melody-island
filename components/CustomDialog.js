@@ -30,8 +30,8 @@ const CustomDialog = ({
 
     return (
         <Dialog>
-            <DialogTrigger asChild>
-                <Button>{triggerLabel}</Button>
+            <DialogTrigger className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800">
+                {triggerLabel}
             </DialogTrigger>
             <DialogContent>
                 <DialogTitle>{title}</DialogTitle>
