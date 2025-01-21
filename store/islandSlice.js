@@ -6,7 +6,7 @@ const initialState = {
   islandName: '',
   playlist: [],
   currentVideo: null,
-  timestamp: null,
+  timestamp: 0,
   isPlaying: false,
   isLoading: false,
 };
