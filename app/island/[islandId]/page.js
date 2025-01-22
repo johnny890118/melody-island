@@ -1,27 +1,23 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { setPlaylist, setCurrentVideo } from '@/store/islandSlice';
 import YouTube from 'react-youtube';
 import { db } from '@/app/config/firebase';
 import { FaSearch, FaPlay, FaTrash } from 'react-icons/fa';
 import { IoMdAdd } from 'react-icons/io';
 
 const IslandPage = () => {
-  const { islandId, islandName, playlist, currentVideo, islandOwner } = useSelector(
-    (state) => state.island,
-  );
+  const { islandId, islandName, islandOwner } = useSelector((state) => state.island);
   const authEmail = useSelector((state) => state.auth?.user?.email) || '';
-  const isOwner = islandOwner === authEmail;
-  const dispatch = useDispatch();
-
+  const [islandData, setIslandData] = useState({});
   const [player, setPlayer] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [hasOwnerPlayed, setHasOwnerPlayed] = useState(false);
+  const [isIslandDataReady, setIsIslandDataReady] = useState(false);
+  const isOwner = islandOwner === authEmail;
 
   useEffect(() => {
     if (!islandId) return;
@@ -29,19 +25,26 @@ const IslandPage = () => {
     const unsubscribe = onSnapshot(doc(db, 'islands', islandId), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        dispatch(setPlaylist(data.playlist));
-        dispatch(setCurrentVideo({ video: data.currentVideo }));
+        setIslandData(data);
       }
     });
 
     return () => unsubscribe();
-  }, [islandId, dispatch]);
+  }, [islandId]);
+
+  useEffect(() => {
+    console.log('islandData', islandData);
+
+    if (Object.keys(islandData).length > 0) {
+      setIsIslandDataReady(true);
+    }
+  }, [islandData]);
 
   const onPlayerReady = (event) => {
     setPlayer(event.target);
 
-    if (currentVideo && hasOwnerPlayed) {
-      event.target.loadVideoById(currentVideo);
+    if (islandData.currentVideo) {
+      event.target.loadVideoById(islandData.currentVideo);
       event.target.playVideo();
     }
   };
@@ -84,39 +87,49 @@ const IslandPage = () => {
   };
 
   const handleAddSong = async (videoId, title, thumbnail) => {
-    const currentPlaylist = Array.isArray(playlist) ? playlist : [];
-    if (currentPlaylist.some((item) => item.videoId === videoId)) {
+    if (!isIslandDataReady) return;
+
+    console.log('isIslandDataReady', isIslandDataReady);
+
+    if (islandData.playlist.some((item) => item.videoId === videoId)) {
       alert('該項目已在播放清單中');
       return;
     }
 
-    const newPlaylist = [...currentPlaylist, { videoId, title, thumbnail }];
+    const newPlaylist = [...islandData.playlist, { videoId, title, thumbnail }];
     await updateDoc(doc(db, 'islands', islandId), {
       playlist: newPlaylist,
     });
-    dispatch(setPlaylist(newPlaylist));
   };
 
   const handleRemoveSong = async (index) => {
+    if (!isIslandDataReady) return;
+
+    const playlist = islandData.playlist;
+    const currentVideo = islandData.currentVideo;
+
     const isRemoveCurrentVideo = playlist[index].videoId === currentVideo;
     const newPlaylist = playlist.filter((_, i) => i !== index);
     const nextVideoId =
       newPlaylist.length > 0 ? newPlaylist[index]?.videoId || newPlaylist[0]?.videoId : '';
 
     if (isRemoveCurrentVideo) {
-      dispatch(setCurrentVideo({ video: nextVideoId }));
+      await updateDoc(doc(db, 'islands', islandId), {
+        currentVideo: nextVideoId,
+        playlist: newPlaylist,
+      });
+    } else {
+      await updateDoc(doc(db, 'islands', islandId), {
+        playlist: newPlaylist,
+      });
     }
-
-    await updateDoc(doc(db, 'islands', islandId), {
-      currentVideo: nextVideoId,
-      playlist: newPlaylist,
-    });
-
-    dispatch(setPlaylist(newPlaylist));
   };
 
   const changeSong = async (direction) => {
-    if (!isOwner || !playlist.length) return;
+    if (!isOwner || !isIslandDataReady || !islandData.playlist.length) return;
+
+    const playlist = islandData.playlist;
+    const currentVideo = islandData.currentVideo;
 
     const currentIndex = playlist.findIndex((item) => item.videoId === currentVideo);
     const nextIndex =
@@ -128,7 +141,6 @@ const IslandPage = () => {
     await updateDoc(doc(db, 'islands', islandId), {
       currentVideo: newVideo.videoId,
     });
-    dispatch(setCurrentVideo({ video: newVideo.videoId }));
 
     if (player) {
       player.loadVideoById(newVideo.videoId);
@@ -142,9 +154,6 @@ const IslandPage = () => {
     await updateDoc(doc(db, 'islands', islandId), {
       currentVideo: videoId,
     });
-    dispatch(setCurrentVideo({ video: videoId }));
-
-    setHasOwnerPlayed(true);
 
     if (player) {
       player.loadVideoById(videoId);
@@ -210,13 +219,15 @@ const IslandPage = () => {
       <section className="bg-gray-800 p-8 rounded-lg">
         <p className="text-3xl font-bold text-green-300">播放清單</p>
         <ul>
-          {playlist.map((item, index) => (
+          {islandData?.playlist?.map((item, index) => (
             <li
               key={index}
               className="flex items-center rounded-lg p-4 hover:bg-gray-700 transition"
             >
               <img src={item.thumbnail} alt={item.title} className="w-20 h-12 rounded-md mr-4" />
-              {item.videoId === currentVideo && <FaPlay className="text-[#fff8e1] mr-2" />}
+              {item.videoId === islandData.currentVideo && (
+                <FaPlay className="text-[#fff8e1] mr-2" />
+              )}
               <div
                 className="flex-1 text-lg font-medium text-white cursor-pointer truncate"
                 onClick={() => playFromPlaylist(item.videoId)}
@@ -235,16 +246,15 @@ const IslandPage = () => {
       </section>
 
       {/* 播放器 */}
-      {isOwner && currentVideo && (
+      {isOwner && islandData.currentVideo && (
         <div className="flex w-full mb-28 justify-center">
           <YouTube
-            videoId={currentVideo}
+            videoId={islandData.currentVideo}
             onReady={onPlayerReady}
             onStateChange={onPlayerStateChange}
-            onPlay={() => setHasOwnerPlayed(true)}
             opts={{
               playerVars: {
-                autoplay: hasOwnerPlayed && 1,
+                autoplay: 1,
                 showinfo: 0,
                 rel: 0,
                 modestbranding: 1,
