@@ -23,8 +23,9 @@ const HomePage = () => {
       createdBy: user.email,
       id: newIslandId,
       playlist: [],
-      currentVideo: null,
+      currentVideo: '',
       timestamp: 0,
+      isPlaying: false,
     };
 
     await setDoc(doc(db, 'islands', newIslandId), islandData);
@@ -40,8 +41,6 @@ const HomePage = () => {
 
     const islandData = islandDoc.data();
     if (islandData.password !== islandPassword) return alert('密碼錯誤');
-
-    console.log('islandData.createdBy', islandData.createdBy);
 
     dispatch(setIslandOwner(islandData.createdBy));
     dispatch(setIslandId(islandData.id));
