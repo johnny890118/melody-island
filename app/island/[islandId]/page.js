@@ -33,8 +33,6 @@ const IslandPage = () => {
   }, [islandId]);
 
   useEffect(() => {
-    console.log('islandData', islandData);
-
     if (Object.keys(islandData).length > 0) {
       setIsIslandDataReady(true);
     }
@@ -88,8 +86,6 @@ const IslandPage = () => {
 
   const handleAddSong = async (videoId, title, thumbnail) => {
     if (!isIslandDataReady) return;
-
-    console.log('isIslandDataReady', isIslandDataReady);
 
     if (islandData.playlist.some((item) => item.videoId === videoId)) {
       alert('該項目已在播放清單中');
@@ -149,8 +145,6 @@ const IslandPage = () => {
   };
 
   const playFromPlaylist = async (videoId) => {
-    if (!isOwner) return;
-
     await updateDoc(doc(db, 'islands', islandId), {
       currentVideo: videoId,
     });
