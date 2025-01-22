@@ -4,10 +4,6 @@ const initialState = {
   islandOwner: '',
   islandId: '',
   islandName: '',
-  playlist: [],
-  currentVideo: '',
-  timestamp: 0,
-  isPlaying: false,
   isLoading: false,
 };
 
@@ -24,16 +20,6 @@ const islandSlice = createSlice({
     setIslandName(state, action) {
       state.islandName = action.payload;
     },
-    setPlaylist(state, action) {
-      state.playlist = action.payload;
-    },
-    setCurrentVideo(state, action) {
-      state.currentVideo = action.payload.video;
-      state.timestamp = action.payload.timestamp;
-    },
-    setPlayPause(state) {
-      state.isPlaying = !state.isPlaying;
-    },
     setIsLoading(state, action) {
       state.isLoading = action.payload;
     },
@@ -43,14 +29,6 @@ const islandSlice = createSlice({
   },
 });
 
-export const {
-  setIslandOwner,
-  setIslandId,
-  setIslandName,
-  setPlaylist,
-  setCurrentVideo,
-  setPlayPause,
-  setIsLoading,
-  clearIsland,
-} = islandSlice.actions;
+export const { setIslandOwner, setIslandId, setIslandName, setIsLoading, clearIsland } =
+  islandSlice.actions;
 export default islandSlice.reducer;
