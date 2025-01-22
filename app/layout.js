@@ -3,6 +3,7 @@ import StoreProvider from './StoreProvider';
 export const metadata = {
   title: 'Melody Island',
   description: 'Platforms for listening to music on various islands.',
+  icons: '/music-island-logo.png',
 };
 
 const RootLayout = ({ children }) => {
