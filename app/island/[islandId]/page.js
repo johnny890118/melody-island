@@ -41,8 +41,10 @@ const IslandPage = () => {
   const onPlayerReady = (event) => {
     setPlayer(event.target);
 
-    if (islandData.currentVideo) {
-      event.target.loadVideoById(islandData.currentVideo);
+    const currentVideo = islandData.currentVideo;
+
+    if (currentVideo) {
+      event.target.loadVideoById(currentVideo);
       event.target.playVideo();
     }
   };
@@ -87,12 +89,14 @@ const IslandPage = () => {
   const handleAddSong = async (videoId, title, thumbnail) => {
     if (!isIslandDataReady) return;
 
-    if (islandData.playlist.some((item) => item.videoId === videoId)) {
+    const playlist = islandData.playlist;
+
+    if (playlist.some((item) => item.videoId === videoId)) {
       alert('該項目已在播放清單中');
       return;
     }
 
-    const newPlaylist = [...islandData.playlist, { videoId, title, thumbnail }];
+    const newPlaylist = [...playlist, { videoId, title, thumbnail }];
     await updateDoc(doc(db, 'islands', islandId), {
       playlist: newPlaylist,
     });
