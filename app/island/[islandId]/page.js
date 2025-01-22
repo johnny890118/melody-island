@@ -42,10 +42,12 @@ const IslandPage = () => {
     setPlayer(event.target);
 
     const currentVideo = islandData.currentVideo;
-
     if (currentVideo) {
-      event.target.loadVideoById(currentVideo);
-      event.target.playVideo();
+      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000; // 秒數
+      event.target.loadVideoById(currentVideo, elapsedTime);
+      if (islandData.isPlaying) {
+        event.target.playVideo();
+      }
     }
   };
 
@@ -55,7 +57,23 @@ const IslandPage = () => {
     const playerState = event.data;
     if (playerState === 0) {
       changeSong('next');
+    } else if (playerState === 1) {
+      updatePlayState(true);
+    } else if (playerState === 2) {
+      updatePlayState(false);
     }
+  };
+
+  const updatePlayState = async (isPlaying) => {
+    if (!islandData.currentVideo || !isOwner) return;
+
+    const currentTime = player.getCurrentTime();
+    const newStartTime = new Date().getTime() - currentTime * 1000; // 以毫秒計算
+
+    await updateDoc(doc(db, 'islands', islandId), {
+      isPlaying,
+      startTime: newStartTime,
+    });
   };
 
   const handleSearchSongs = async () => {
@@ -138,25 +156,27 @@ const IslandPage = () => {
         : (currentIndex - 1 + playlist.length) % playlist.length;
 
     const newVideo = playlist[nextIndex];
+    const startTime = new Date().getTime(); // 設定新影片開始的時間戳
     await updateDoc(doc(db, 'islands', islandId), {
       currentVideo: newVideo.videoId,
+      startTime,
+      isPlaying: true,
     });
 
-    if (player) {
-      player.loadVideoById(newVideo.videoId);
-      player.playVideo();
-    }
+    player.loadVideoById(newVideo.videoId);
+    player.playVideo();
   };
 
   const playFromPlaylist = async (videoId) => {
+    const startTime = new Date().getTime();
     await updateDoc(doc(db, 'islands', islandId), {
       currentVideo: videoId,
+      startTime,
+      isPlaying: true,
     });
 
-    if (player) {
-      player.loadVideoById(videoId);
-      player.playVideo();
-    }
+    player.loadVideoById(videoId);
+    player.playVideo();
   };
 
   return (
@@ -244,8 +264,8 @@ const IslandPage = () => {
       </section>
 
       {/* 播放器 */}
-      {isOwner && islandData.currentVideo && (
-        <div className="flex w-full mb-28 justify-center">
+      {islandData.currentVideo && (
+        <div className="flex w-full mb-28 justify-center pointer-events-none">
           <YouTube
             videoId={islandData.currentVideo}
             onReady={onPlayerReady}
