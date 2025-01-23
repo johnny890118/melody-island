@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import YouTube from 'react-youtube';
@@ -12,11 +12,12 @@ const IslandPage = () => {
   const { islandId, islandName, islandOwner } = useSelector((state) => state.island);
   const authEmail = useSelector((state) => state.auth?.user?.email) || '';
   const [islandData, setIslandData] = useState({});
-  const [player, setPlayer] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isIslandDataReady, setIsIslandDataReady] = useState(false);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const player = useRef(null);
   const isOwner = islandOwner === authEmail;
 
   useEffect(() => {
@@ -33,13 +34,27 @@ const IslandPage = () => {
   }, [islandId]);
 
   useEffect(() => {
-    if (Object.keys(islandData).length > 0) {
+    if (Object.keys(islandData).length) {
       setIsIslandDataReady(true);
     }
   }, [islandData]);
 
+  useEffect(() => {
+    if (!isPlayerReady || !islandData?.currentVideo || !player.current) return;
+
+    try {
+      player.current.loadVideoById(islandData.currentVideo);
+      player.current.playVideo();
+    } catch (err) {
+      console.log('Error loading video:', err);
+    }
+  }, [isPlayerReady, islandData.currentVideo]);
+
   const onPlayerReady = (event) => {
-    setPlayer(event.target);
+    if (!event.target) return;
+
+    player.current = event.target;
+    setIsPlayerReady(true);
 
     const currentVideo = islandData.currentVideo;
     if (currentVideo) {
@@ -67,7 +82,7 @@ const IslandPage = () => {
   const updatePlayState = async (isPlaying) => {
     if (!islandData.currentVideo || !isOwner) return;
 
-    const currentTime = player.getCurrentTime();
+    const currentTime = player.current.getCurrentTime();
     const newStartTime = new Date().getTime() - currentTime * 1000;
 
     await updateDoc(doc(db, 'islands', islandId), {
@@ -128,8 +143,9 @@ const IslandPage = () => {
 
     const isRemoveCurrentVideo = playlist[index].videoId === currentVideo;
     const newPlaylist = playlist.filter((_, i) => i !== index);
-    const nextVideoId =
-      newPlaylist.length > 0 ? newPlaylist[index]?.videoId || newPlaylist[0]?.videoId : '';
+    const nextVideoId = newPlaylist.length
+      ? newPlaylist[index]?.videoId || newPlaylist[0]?.videoId
+      : '';
 
     if (isRemoveCurrentVideo) {
       await updateDoc(doc(db, 'islands', islandId), {
@@ -162,9 +178,6 @@ const IslandPage = () => {
       startTime,
       isPlaying: true,
     });
-
-    player.loadVideoById(newVideo.videoId);
-    player.playVideo();
   };
 
   const playFromPlaylist = async (videoId) => {
@@ -174,9 +187,6 @@ const IslandPage = () => {
       startTime,
       isPlaying: true,
     });
-
-    player.loadVideoById(videoId);
-    player.playVideo();
   };
 
   return (

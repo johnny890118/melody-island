@@ -24,7 +24,7 @@ const HomePage = () => {
       id: newIslandId,
       playlist: [],
       currentVideo: '',
-      timestamp: 0,
+      startTime: 0,
       isPlaying: false,
     };
 
