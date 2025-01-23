@@ -43,7 +43,7 @@ const IslandPage = () => {
 
     const currentVideo = islandData.currentVideo;
     if (currentVideo) {
-      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000; // 秒數
+      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
       event.target.loadVideoById(currentVideo, elapsedTime);
       if (islandData.isPlaying) {
         event.target.playVideo();
@@ -68,7 +68,7 @@ const IslandPage = () => {
     if (!islandData.currentVideo || !isOwner) return;
 
     const currentTime = player.getCurrentTime();
-    const newStartTime = new Date().getTime() - currentTime * 1000; // 以毫秒計算
+    const newStartTime = new Date().getTime() - currentTime * 1000;
 
     await updateDoc(doc(db, 'islands', islandId), {
       isPlaying,
@@ -156,7 +156,7 @@ const IslandPage = () => {
         : (currentIndex - 1 + playlist.length) % playlist.length;
 
     const newVideo = playlist[nextIndex];
-    const startTime = new Date().getTime(); // 設定新影片開始的時間戳
+    const startTime = new Date().getTime();
     await updateDoc(doc(db, 'islands', islandId), {
       currentVideo: newVideo.videoId,
       startTime,
