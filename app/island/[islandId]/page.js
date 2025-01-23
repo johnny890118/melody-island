@@ -6,8 +6,6 @@ import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import YouTube from 'react-youtube';
 import { db } from '@/app/config/firebase';
 import { FaSearch, FaPlay, FaTrash, FaStepBackward, FaPause, FaStepForward } from 'react-icons/fa';
-import { AiFillMuted } from 'react-icons/ai';
-import { RiVolumeMuteFill } from 'react-icons/ri';
 import { IoMdAdd } from 'react-icons/io';
 
 const IslandPage = () => {
@@ -19,7 +17,6 @@ const IslandPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isIslandDataReady, setIsIslandDataReady] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const [isMute, setIsMute] = useState(false);
   const player = useRef(null);
   const isOwner = islandOwner === authEmail;
 
@@ -375,14 +372,6 @@ const IslandPage = () => {
             className="p-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-full"
           >
             <FaStepForward />
-          </button>
-          <button
-            onClick={() => {
-              setIsMute((prev) => !prev);
-            }}
-            className="text-gray-300 hover:text-white"
-          >
-            {isMute ? <RiVolumeMuteFill /> : <AiFillMuted />}
           </button>
         </div>
         <div className="flex-1 basis-1/3" />
