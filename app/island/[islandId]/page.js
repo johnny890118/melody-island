@@ -5,7 +5,9 @@ import { useSelector } from 'react-redux';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import YouTube from 'react-youtube';
 import { db } from '@/app/config/firebase';
-import { FaSearch, FaPlay, FaTrash } from 'react-icons/fa';
+import { FaSearch, FaPlay, FaTrash, FaStepBackward, FaPause, FaStepForward } from 'react-icons/fa';
+import { AiFillMuted } from 'react-icons/ai';
+import { RiVolumeMuteFill } from 'react-icons/ri';
 import { IoMdAdd } from 'react-icons/io';
 
 const IslandPage = () => {
@@ -17,6 +19,7 @@ const IslandPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isIslandDataReady, setIsIslandDataReady] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [isMute, setIsMute] = useState(false);
   const player = useRef(null);
   const isOwner = islandOwner === authEmail;
 
@@ -45,10 +48,24 @@ const IslandPage = () => {
     try {
       player.current.loadVideoById(islandData.currentVideo);
       player.current.playVideo();
-    } catch (err) {
-      console.log('Error loading video:', err);
+    } catch (e) {
+      console.log('Error loading video:', e);
     }
   }, [isPlayerReady, islandData.currentVideo]);
+
+  useEffect(() => {
+    if (!isPlayerReady || !isIslandDataReady) return;
+
+    try {
+      if (islandData.isPlaying) {
+        player.current.playVideo();
+      } else {
+        player.current.pauseVideo();
+      }
+    } catch (e) {
+      console.log('Error play pause video:', e);
+    }
+  }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
 
   const onPlayerReady = (event) => {
     if (!event.target) return;
@@ -160,7 +177,7 @@ const IslandPage = () => {
   };
 
   const changeSong = async (direction) => {
-    if (!isOwner || !isIslandDataReady || !islandData.playlist.length) return;
+    if (!isIslandDataReady || !islandData.playlist.length) return;
 
     const playlist = islandData.playlist;
     const currentVideo = islandData.currentVideo;
@@ -181,12 +198,34 @@ const IslandPage = () => {
   };
 
   const playFromPlaylist = async (videoId) => {
+    if (!isIslandDataReady) return;
+
     const startTime = new Date().getTime();
     await updateDoc(doc(db, 'islands', islandId), {
       currentVideo: videoId,
       startTime,
       isPlaying: true,
     });
+  };
+
+  const handlePlayPause = async () => {
+    if (!isIslandDataReady || !isPlayerReady) return;
+
+    const isPlaying = !islandData.isPlaying;
+
+    if (isPlaying) {
+      const currentTime = player.current.getCurrentTime();
+      const newStartTime = new Date().getTime() - currentTime * 1000;
+
+      await updateDoc(doc(db, 'islands', islandId), {
+        isPlaying,
+        startTime: newStartTime,
+      });
+    } else {
+      await updateDoc(doc(db, 'islands', islandId), {
+        isPlaying,
+      });
+    }
   };
 
   return (
@@ -291,6 +330,48 @@ const IslandPage = () => {
           />
         </div>
       )}
+
+      {/* 播放控制 */}
+      <div className="flex justify-between fixed bottom-0 left-0 right-0 z-50 bg-black/90">
+        {islandData?.playlist?.map(
+          ({ videoId, thumbnail, title }) =>
+            videoId === islandData?.currentVideo && (
+              <div key={videoId} className="flex flex-1 basis-1/3 gap-4 items-center">
+                <img src={thumbnail} alt={title} className="h-16 rounded-md" />
+                <p className="text-white">{title}</p>
+              </div>
+            ),
+        )}
+        <div className="flex flex-1 basis-1/3 justify-center gap-4 items-center">
+          <button
+            onClick={() => changeSong('prev')}
+            className="p-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-full"
+          >
+            <FaStepBackward />
+          </button>
+          <button
+            onClick={handlePlayPause}
+            className="p-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-full"
+          >
+            {islandData?.isPlaying ? <FaPause /> : <FaPlay />}
+          </button>
+          <button
+            onClick={() => changeSong('next')}
+            className="p-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-full"
+          >
+            <FaStepForward />
+          </button>
+          <button
+            onClick={() => {
+              setIsMute((prev) => !prev);
+            }}
+            className="text-gray-300 hover:text-white"
+          >
+            {isMute ? <RiVolumeMuteFill /> : <AiFillMuted />}
+          </button>
+        </div>
+        <div className="flex-1 basis-1/3" />
+      </div>
     </div>
   );
 };
