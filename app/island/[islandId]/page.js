@@ -240,93 +240,26 @@ const IslandPage = () => {
     }
   };
 
+  const handlePlay = async () => {
+    if (!isIslandDataReady || !isPlayerReady) return;
+
+    try {
+      const currentTime = player.current.getCurrentTime();
+      const newStartTime = new Date().getTime() - currentTime * 1000;
+
+      await updateDoc(doc(db, 'islands', islandId), {
+        isPlaying: true,
+        startTime: newStartTime,
+      });
+    } catch (error) {
+      console.error('Error updating pause:', error);
+    }
+  };
+
   return (
-    <div className="flex flex-col justify-between mt-20 gap-8 mx-40">
-      <div className="flex justify-between items-center">
-        <p className="font-bold text-[#fff8e1]">島嶼ID：{islandId}</p>
-        <div className="flex bg-gray-700 rounded-full">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="搜尋音樂..."
-            className="flex-1 px-8 py-3 text-white placeholder-gray-400 focus:outline-none bg-transparent"
-          />
-          <button
-            onClick={handleSearchSongs}
-            className="px-8 py-3 flex items-center text-gray-200 hover:text-white"
-          >
-            <FaSearch />
-          </button>
-        </div>
-        <p className="font-bold text-[#fff8e1]">島嶼名稱：{islandName}</p>
-      </div>
-
-      {/* 搜尋結果 */}
-      <section className="bg-gray-800 p-8 rounded-lg">
-        <p className="text-3xl font-bold text-green-300">搜尋結果</p>
-        {isLoading ? (
-          <div className="text-center text-white">Loading...</div>
-        ) : (
-          <ul>
-            {searchResults.map((result) => (
-              <li
-                key={result.videoId}
-                className="flex items-center rounded-lg p-4 hover:bg-gray-700 transition"
-              >
-                <img
-                  src={result.thumbnail}
-                  alt={result.title}
-                  className="w-20 h-12 rounded-md mr-4"
-                />
-                <div className="flex-1">
-                  <p className="text-lg font-medium text-white truncate">{result.title}</p>
-                </div>
-                <button
-                  onClick={() => handleAddSong(result.videoId, result.title, result.thumbnail)}
-                  className="bg-gray-600 hover:bg-gray-500 text-white font-bold p-3 rounded-full"
-                >
-                  <IoMdAdd />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* 播放清單 */}
-      <section className="bg-gray-800 p-8 rounded-lg">
-        <p className="text-3xl font-bold text-green-300">播放清單</p>
-        <ul>
-          {islandData?.playlist?.map((item, index) => (
-            <li
-              key={index}
-              className="flex items-center rounded-lg p-4 hover:bg-gray-700 transition"
-            >
-              <img src={item.thumbnail} alt={item.title} className="w-20 h-12 rounded-md mr-4" />
-              {item.videoId === islandData.currentVideo && (
-                <FaPlay className="text-[#fff8e1] mr-2" />
-              )}
-              <div
-                className="flex-1 text-lg font-medium text-white cursor-pointer truncate"
-                onClick={() => playFromPlaylist(item.videoId)}
-              >
-                {item.title}
-              </div>
-              <button
-                onClick={() => handleRemoveSong(index)}
-                className="text-gray-400 hover:text-white p-3"
-              >
-                <FaTrash />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* 播放器 */}
-      {islandData.currentVideo && (
-        <div className="flex w-full mb-28 justify-center pointer-events-none">
+    <div className="flex flex-col justify-between mt-20 gap-16 mx-40 min-h-dvh">
+      <div className="flex gap-8">
+        <div className="flex pointer-events-none">
           <YouTube
             videoId={islandData.currentVideo}
             onReady={onPlayerReady}
@@ -341,9 +274,104 @@ const IslandPage = () => {
             }}
           />
         </div>
-      )}
+        <div className="flex flex-col justify-between">
+          <div className="flex flex-col gap-2">
+            <p className="font-bold text-[#fff8e1]">島嶼ID：{islandId}</p>
+            <p className="font-bold text-[#fff8e1]">島嶼名稱：{islandName}</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-white text-3xl">現正播放：</p>
+            {islandData?.playlist?.map(
+              ({ videoId, title }) =>
+                videoId === islandData?.currentVideo && (
+                  <p className="text-white text-3xl font-bold" key={videoId}>
+                    {title}
+                  </p>
+                ),
+            )}
+          </div>
+          <button
+            className="flex text-gray-900 bg-[#fff8e1] rounded-full p-4 w-32 justify-center items-center gap-2 hover:scale-105 transition"
+            onClick={handlePlay}
+          >
+            <FaPlay />
+            播放
+          </button>
+        </div>
+      </div>
 
-      {/* 播放控制 */}
+      <div className="flex flex-col gap-2">
+        <p className="font-bold text-[#fff8e1] px-2 text-2xl">播放清單</p>
+        <div className="h-[1px] bg-gray-700 px-2"></div>
+        {islandData?.playlist && islandData.playlist.length > 0 ? (
+          islandData.playlist.map(({ videoId, title, thumbnail }, index) => (
+            <div key={videoId} className="flex items-center rounded-lg p-2 hover:bg-gray-800 group">
+              <img src={thumbnail} alt={title} className="w-20 h-12 rounded-md mr-4" />
+              {videoId === islandData.currentVideo && <FaPlay className="text-[#fff8e1] mr-2" />}
+              <div
+                className="flex-1 font-bold text-white cursor-pointer truncate"
+                onClick={() => playFromPlaylist(videoId)}
+              >
+                {title}
+              </div>
+              <button
+                onClick={() => handleRemoveSong(index)}
+                className="text-gray-400 hover:text-white p-3 group-hover:block hidden transition"
+              >
+                <FaTrash />
+              </button>
+            </div>
+          ))
+        ) : (
+          <p className="text-white p-2">幫你的播放清單加入項目吧！</p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2 mb-20">
+        <p className="font-bold text-[#fff8e1] px-2 text-2xl">為你的播放清單找些內容</p>
+        <div className="h-[1px] bg-gray-700 px-2"></div>
+        <div className="flex bg-gray-700 rounded-md w-80 my-2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="搜尋"
+            className="flex-1 px-8 py-3 text-white placeholder-gray-400 focus:outline-none bg-transparent"
+          />
+          <button
+            onClick={handleSearchSongs}
+            className="px-8 py-3 flex items-center text-gray-200 hover:text-white"
+          >
+            <FaSearch />
+          </button>
+        </div>
+        {isLoading ? (
+          <div className="text-center text-white">Loading...</div>
+        ) : (
+          <>
+            {searchResults.map((result) => (
+              <div
+                key={result.videoId}
+                className="flex items-center rounded-lg p-2 hover:bg-gray-700 transition"
+              >
+                <img
+                  src={result.thumbnail}
+                  alt={result.title}
+                  className="w-20 h-12 rounded-md mr-4"
+                />
+                <p className="flex-1 font-bold text-white truncate">{result.title}</p>
+                <button
+                  onClick={() => handleAddSong(result.videoId, result.title, result.thumbnail)}
+                  className="text-gray-400 hover:text-white p-2 rounded-full border border-gray-400 hover:border-white"
+                >
+                  <IoMdAdd />
+                </button>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+
       <div className="flex justify-between fixed bottom-0 left-0 right-0 z-50 bg-black/90">
         {islandData?.playlist?.map(
           ({ videoId, thumbnail, title }) =>
