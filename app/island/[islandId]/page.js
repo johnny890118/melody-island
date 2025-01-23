@@ -47,7 +47,6 @@ const IslandPage = () => {
 
     try {
       player.current.loadVideoById(islandData.currentVideo);
-      player.current.playVideo();
     } catch (e) {
       console.log('Error loading video:', e);
     }
@@ -67,6 +66,22 @@ const IslandPage = () => {
     }
   }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
 
+  useEffect(() => {
+    if (!isOwner) return;
+
+    const updateIslandPause = async () => {
+      try {
+        await updateDoc(doc(db, 'islands', islandId), {
+          isPlaying: false,
+        });
+      } catch (error) {
+        console.error('Error updating pause:', error);
+      }
+    };
+
+    updateIslandPause();
+  }, [isOwner]);
+
   const onPlayerReady = (event) => {
     if (!event.target) return;
 
@@ -77,8 +92,8 @@ const IslandPage = () => {
     if (currentVideo) {
       const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
       event.target.loadVideoById(currentVideo, elapsedTime);
-      if (islandData.isPlaying) {
-        event.target.playVideo();
+      if (!islandData.isPlaying || isOwner) {
+        event.target.pauseVideo();
       }
     }
   };
@@ -321,7 +336,7 @@ const IslandPage = () => {
             onStateChange={onPlayerStateChange}
             opts={{
               playerVars: {
-                autoplay: 1,
+                autoplay: islandData.isPlaying ? 1 : 0,
                 showinfo: 0,
                 rel: 0,
                 modestbranding: 1,
