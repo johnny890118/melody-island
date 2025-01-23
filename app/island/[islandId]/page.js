@@ -40,7 +40,7 @@ const IslandPage = () => {
   }, [islandData]);
 
   useEffect(() => {
-    if (!isPlayerReady || !islandData?.currentVideo || !player.current) return;
+    if (!isPlayerReady || !islandData?.currentVideo) return;
 
     try {
       player.current.loadVideoById(islandData.currentVideo);
