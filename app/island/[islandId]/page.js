@@ -259,7 +259,7 @@ const IslandPage = () => {
   return (
     <div className="flex flex-col justify-between mt-20 gap-16 mx-40 min-h-dvh">
       <div className="flex gap-8">
-        <div className="flex pointer-events-none">
+        <div className="flex pointer-events-none border border-gray-800">
           <YouTube
             videoId={islandData.currentVideo}
             onReady={onPlayerReady}
@@ -352,7 +352,7 @@ const IslandPage = () => {
             {searchResults.map((result) => (
               <div
                 key={result.videoId}
-                className="flex items-center rounded-lg p-2 hover:bg-gray-700 transition"
+                className="flex items-center rounded-lg p-2 hover:bg-gray-800 transition"
               >
                 <img
                   src={result.thumbnail}
@@ -373,31 +373,35 @@ const IslandPage = () => {
       </div>
 
       <div className="flex justify-between fixed bottom-0 left-0 right-0 z-50 bg-black/90">
-        {islandData?.playlist?.map(
-          ({ videoId, thumbnail, title }) =>
-            videoId === islandData?.currentVideo && (
-              <div key={videoId} className="flex flex-1 basis-1/3 gap-4 items-center">
-                <img src={thumbnail} alt={title} className="h-16 rounded-md" />
-                <p className="text-white">{title}</p>
-              </div>
-            ),
+        {isIslandDataReady && islandData.playlist.length > 0 ? (
+          islandData.playlist.map(
+            ({ videoId, thumbnail, title }) =>
+              videoId === islandData?.currentVideo && (
+                <div key={videoId} className="flex flex-1 basis-1/3 gap-4 items-center">
+                  <img src={thumbnail} alt={title} className="h-16 rounded-md" />
+                  <p className="text-white">{title}</p>
+                </div>
+              ),
+          )
+        ) : (
+          <div className="flex-1 basis-1/3 h-16" />
         )}
         <div className="flex flex-1 basis-1/3 justify-center gap-4 items-center">
           <button
             onClick={() => changeSong('prev')}
-            className="p-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-full"
+            className="p-3 text-gray-300 hover:text-white font-bold rounded-full"
           >
             <FaStepBackward />
           </button>
           <button
             onClick={handlePlayPause}
-            className="p-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-full"
+            className="p-3 text-gray-300 hover:text-white font-bold rounded-full border border-gray-300 hover:border-white"
           >
             {islandData?.isPlaying ? <FaPause /> : <FaPlay />}
           </button>
           <button
             onClick={() => changeSong('next')}
-            className="p-3 bg-gray-600 hover:bg-gray-500 text-white font-bold rounded-full"
+            className="p-3 text-gray-300 hover:text-white font-bold rounded-full"
           >
             <FaStepForward />
           </button>
