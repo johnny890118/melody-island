@@ -71,8 +71,8 @@ const IslandPage = () => {
         await updateDoc(doc(db, 'islands', islandId), {
           isPlaying: false,
         });
-      } catch (error) {
-        console.error('Error updating pause:', error);
+      } catch (e) {
+        console.e('Error updating pause:', e);
       }
     };
 
@@ -251,8 +251,8 @@ const IslandPage = () => {
         isPlaying: true,
         startTime: newStartTime,
       });
-    } catch (error) {
-      console.error('Error updating pause:', error);
+    } catch (e) {
+      console.log('Error updating play:', e);
     }
   };
 
