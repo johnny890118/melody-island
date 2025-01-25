@@ -141,8 +141,8 @@ const IslandPage = () => {
         thumbnail: item.snippet.thumbnails.default.url,
       }));
       setSearchResults(results);
-    } catch (err) {
-      console.log(err);
+    } catch (e) {
+      console.log('search songs error:', e);
     } finally {
       setIsLoading(false);
     }
