@@ -212,7 +212,16 @@ const IslandPage = () => {
   const playFromPlaylist = async (videoId) => {
     if (!isIslandDataReady) return;
 
+    await updateDoc(doc(db, 'islands', islandId), {
+      isPlaying: false,
+    });
+
+    if (islandData.currentVideo === videoId && player.current) {
+      player.current.loadVideoById(videoId, 0);
+    }
+
     const startTime = new Date().getTime();
+
     await updateDoc(doc(db, 'islands', islandId), {
       currentVideo: videoId,
       startTime,
@@ -244,12 +253,17 @@ const IslandPage = () => {
     if (!isIslandDataReady || !isPlayerReady) return;
 
     try {
-      const currentTime = player.current.getCurrentTime();
-      const newStartTime = new Date().getTime() - currentTime * 1000;
+      await updateDoc(doc(db, 'islands', islandId), {
+        isPlaying: false,
+      });
+
+      player.current.loadVideoById(islandData.currentVideo, 0);
+
+      const startTime = new Date().getTime();
 
       await updateDoc(doc(db, 'islands', islandId), {
         isPlaying: true,
-        startTime: newStartTime,
+        startTime,
       });
     } catch (e) {
       console.log('Error updating play:', e);
