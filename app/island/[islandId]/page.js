@@ -3,10 +3,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import YouTube from 'react-youtube';
 import { db } from '@/app/config/firebase';
 import { FaSearch, FaPlay, FaTrash, FaStepBackward, FaPause, FaStepForward } from 'react-icons/fa';
 import { IoMdAdd } from 'react-icons/io';
+import Player from '@/components/Player';
 
 const IslandPage = () => {
   const { islandId, islandName, islandOwner } = useSelector((state) => state.island);
@@ -272,47 +272,22 @@ const IslandPage = () => {
 
   return (
     <div className="flex flex-col justify-between mt-20 gap-16 mx-40 min-h-dvh">
-      <div className="flex gap-8">
-        <div className="flex pointer-events-none border border-gray-800">
-          <YouTube
-            videoId={islandData.currentVideo}
-            onReady={onPlayerReady}
-            onStateChange={onPlayerStateChange}
-            opts={{
-              playerVars: {
-                autoplay: islandData.isPlaying ? 1 : 0,
-                showinfo: 0,
-                rel: 0,
-                modestbranding: 1,
-              },
-            }}
-          />
-        </div>
-        <div className="flex flex-col justify-between">
+      <Player
+        videoId={islandData.currentVideo}
+        onPlayerReady={onPlayerReady}
+        onPlayerStateChange={onPlayerStateChange}
+        isPlaying={islandData.isPlaying}
+        topInfo={
           <div className="flex flex-col gap-2">
             <p className="font-bold text-[#fff8e1]">島嶼ID：{islandId}</p>
             <p className="font-bold text-[#fff8e1]">島嶼名稱：{islandName}</p>
           </div>
-          <div className="flex flex-col gap-2">
-            <p className="text-white text-3xl">現正播放：</p>
-            {islandData?.playlist?.map(
-              ({ videoId, title }) =>
-                videoId === islandData?.currentVideo && (
-                  <p className="text-white text-3xl font-bold" key={videoId}>
-                    {title}
-                  </p>
-                ),
-            )}
-          </div>
-          <button
-            className="flex text-gray-900 bg-[#fff8e1] rounded-full p-4 w-32 justify-center items-center gap-2 hover:scale-105 transition"
-            onClick={handlePlay}
-          >
-            <FaPlay />
-            播放
-          </button>
-        </div>
-      </div>
+        }
+        nowPlayingTitle={
+          islandData?.playlist?.find(({ videoId }) => videoId === islandData?.currentVideo)?.title
+        }
+        handlePlay={handlePlay}
+      />
 
       <div className="flex flex-col gap-2">
         <p className="font-bold text-[#fff8e1] px-2 text-2xl">播放清單</p>
