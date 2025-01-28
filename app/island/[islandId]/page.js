@@ -273,10 +273,10 @@ const IslandPage = () => {
   return (
     <div className="flex flex-col justify-between mt-20 gap-16 mx-40 min-h-dvh">
       <Player
-        videoId={islandData.currentVideo}
+        videoId={islandData?.currentVideo}
         onPlayerReady={onPlayerReady}
         onPlayerStateChange={onPlayerStateChange}
-        isPlaying={islandData.isPlaying}
+        isPlaying={islandData?.isPlaying}
         topInfo={
           <div className="flex flex-col gap-2">
             <p className="font-bold text-[#fff8e1]">島嶼ID：{islandId}</p>
