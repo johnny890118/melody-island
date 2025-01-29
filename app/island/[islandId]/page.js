@@ -188,6 +188,7 @@ const IslandPage = () => {
     if (isRemoveCurrentVideo) {
       await updateDoc(doc(db, 'islands', islandId), {
         currentVideo: nextVideoId,
+        startTime: new Date().getTime(),
         playlist: newPlaylist,
       });
     } else {
