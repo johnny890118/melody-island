@@ -73,7 +73,7 @@ const IslandPage = () => {
   }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
-    if (!isOwner) return;
+    if (!isOwner || !islandId) return;
 
     const updateIslandPause = async () => {
       try {
@@ -86,7 +86,7 @@ const IslandPage = () => {
     };
 
     updateIslandPause();
-  }, [isOwner]);
+  }, [isOwner, islandId]);
 
   const onPlayerReady = (event) => {
     if (typeof event.target !== 'object' || !Object.keys(event.target).length) return;
@@ -271,7 +271,7 @@ const IslandPage = () => {
       />
 
       <SearchArea
-        searchQueryOnChange={(e) => (searchQuery.current = e.target.value)}
+        searchQueryOnChange={(value) => (searchQuery.current = value)}
         handleSearchSongs={handleSearchSongs}
         isSearching={isSearching}
         searchResults={searchResults}
