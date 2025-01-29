@@ -211,8 +211,6 @@ const IslandPage = () => {
     if (!isIslandDataReady || !isPlayerReady) return;
 
     const isPlaying = !islandData.isPlaying;
-    const currentTime = player.current.getCurrentTime();
-    const newStartTime = new Date().getTime() - currentTime * 1000;
 
     if (isPlaying) {
       const currentTime = player.current.getCurrentTime();
