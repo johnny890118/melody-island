@@ -26,8 +26,7 @@ const IslandPage = () => {
 
     const unsubscribe = onSnapshot(doc(db, 'islands', islandId), (docSnap) => {
       if (docSnap.exists()) {
-        const data = docSnap.data();
-        setIslandData(data);
+        setIslandData(docSnap.data());
       }
     });
 
@@ -41,31 +40,42 @@ const IslandPage = () => {
   }, [islandData]);
 
   useEffect(() => {
-    if (!isPlayerReady || !islandData?.currentVideo) return;
+    if (!isPlayerReady || !isIslandDataReady || !islandData.currentVideo) return;
+
+    console.log('isPlayerReady', isPlayerReady);
+    console.log('isIslandDataReady', isIslandDataReady);
+    console.log('islandData.currentVideo', islandData.currentVideo);
 
     try {
-      player.current.loadVideoById(islandData.currentVideo);
+      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
+      player.current.loadVideoById(islandData.currentVideo, elapsedTime);
+      console.log('islandData.startTime', islandData.startTime);
+      console.log('elapsedTime', elapsedTime);
     } catch (e) {
       console.log('Error loading video:', e);
     }
-  }, [isPlayerReady, islandData.currentVideo]);
+  }, [islandData.currentVideo, islandData.startTime, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
     if (!isPlayerReady || !isIslandDataReady) return;
 
     try {
+      console.log('islandData.isPlaying', islandData.isPlaying);
+
       if (islandData.isPlaying) {
         player.current.playVideo();
       } else {
         player.current.pauseVideo();
       }
     } catch (e) {
-      console.log('Error play pause video:', e);
+      console.log('Error play/pause video:', e);
     }
   }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
     if (!isOwner) return;
+
+    console.log('updateIslandPause');
 
     const updateIslandPause = async () => {
       try {
@@ -81,44 +91,43 @@ const IslandPage = () => {
   }, [isOwner]);
 
   const onPlayerReady = (event) => {
-    if (!event.target) return;
+    if (typeof event.target !== 'object' || !Object.keys(event.target).length) return;
 
     player.current = event.target;
     setIsPlayerReady(true);
+  };
 
+  const handleChangeSong = async (direction) => {
+    if (!isIslandDataReady || !islandData.playlist.length) return;
+
+    const playlist = islandData.playlist;
     const currentVideo = islandData.currentVideo;
-    if (currentVideo) {
-      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
-      event.target.loadVideoById(currentVideo, elapsedTime);
-      if (!islandData.isPlaying || isOwner) {
-        event.target.pauseVideo();
-      }
-    }
+    const currentIndex = playlist.findIndex((item) => item.videoId === currentVideo);
+
+    if (currentIndex === -1) return;
+
+    const nextIndex =
+      direction === 'next'
+        ? (currentIndex + 1) % playlist.length
+        : (currentIndex - 1 + playlist.length) % playlist.length;
+
+    const newVideo = playlist[nextIndex];
+
+    await updateDoc(doc(db, 'islands', islandId), {
+      currentVideo: newVideo.videoId,
+      startTime: new Date().getTime(),
+      isPlaying: true,
+    });
   };
 
   const onPlayerStateChange = (event) => {
     if (!isOwner) return;
 
     const playerState = event.data;
+
     if (playerState === 0) {
-      changeSong('next');
-    } else if (playerState === 1) {
-      updatePlayState(true);
-    } else if (playerState === 2) {
-      updatePlayState(false);
+      handleChangeSong('next');
     }
-  };
-
-  const updatePlayState = async (isPlaying) => {
-    if (!islandData.currentVideo || !isOwner) return;
-
-    const currentTime = player.current.getCurrentTime();
-    const newStartTime = new Date().getTime() - currentTime * 1000;
-
-    await updateDoc(doc(db, 'islands', islandId), {
-      isPlaying,
-      startTime: newStartTime,
-    });
   };
 
   const handleSearchSongs = async () => {
@@ -136,12 +145,13 @@ const IslandPage = () => {
       if (!response.ok) throw new Error('搜尋失敗，請稍後再試');
 
       const data = await response.json();
-      const results = data.items.map((item) => ({
-        videoId: item.id.videoId,
-        title: item.snippet.title,
-        thumbnail: item.snippet.thumbnails.default.url,
-      }));
-      setSearchResults(results);
+      setSearchResults(
+        data.items.map((item) => ({
+          videoId: item.id.videoId,
+          title: item.snippet.title,
+          thumbnail: item.snippet.thumbnails.default.url,
+        })),
+      );
     } catch (e) {
       console.log('search songs error:', e);
     } finally {
@@ -152,7 +162,7 @@ const IslandPage = () => {
   const handleAddSong = async (videoId, title, thumbnail) => {
     if (!isIslandDataReady) return;
 
-    const playlist = islandData.playlist;
+    const playlist = islandData.playlist || [];
 
     if (playlist.some((item) => item.videoId === videoId)) {
       alert('該項目已在播放清單中');
@@ -189,43 +199,12 @@ const IslandPage = () => {
     }
   };
 
-  const changeSong = async (direction) => {
-    if (!isIslandDataReady || !islandData.playlist.length) return;
-
-    const playlist = islandData.playlist;
-    const currentVideo = islandData.currentVideo;
-
-    const currentIndex = playlist.findIndex((item) => item.videoId === currentVideo);
-    const nextIndex =
-      direction === 'next'
-        ? (currentIndex + 1) % playlist.length
-        : (currentIndex - 1 + playlist.length) % playlist.length;
-
-    const newVideo = playlist[nextIndex];
-    const startTime = new Date().getTime();
-    await updateDoc(doc(db, 'islands', islandId), {
-      currentVideo: newVideo.videoId,
-      startTime,
-      isPlaying: true,
-    });
-  };
-
   const playFromPlaylist = async (videoId) => {
     if (!isIslandDataReady) return;
 
     await updateDoc(doc(db, 'islands', islandId), {
-      isPlaying: false,
-    });
-
-    if (islandData.currentVideo === videoId && player.current) {
-      player.current.loadVideoById(videoId, 0);
-    }
-
-    const startTime = new Date().getTime();
-
-    await updateDoc(doc(db, 'islands', islandId), {
       currentVideo: videoId,
-      startTime,
+      startTime: new Date().getTime(),
       isPlaying: true,
     });
   };
@@ -234,6 +213,10 @@ const IslandPage = () => {
     if (!isIslandDataReady || !isPlayerReady) return;
 
     const isPlaying = !islandData.isPlaying;
+    const currentTime = player.current.getCurrentTime();
+    const newStartTime = new Date().getTime() - currentTime * 1000;
+
+    console.log('handlePlayPause', isPlaying, newStartTime);
 
     if (isPlaying) {
       const currentTime = player.current.getCurrentTime();
@@ -251,28 +234,19 @@ const IslandPage = () => {
   };
 
   const handlePlay = async () => {
-    if (!isIslandDataReady || !isPlayerReady) return;
+    if (!isIslandDataReady || islandData.isPlaying) return;
 
     try {
-      await updateDoc(doc(db, 'islands', islandId), {
-        isPlaying: false,
-      });
-
-      player.current.loadVideoById(islandData.currentVideo, 0);
-
-      const startTime = new Date().getTime();
+      const currentTime = player.current.getCurrentTime();
+      const newStartTime = new Date().getTime() - currentTime * 1000;
 
       await updateDoc(doc(db, 'islands', islandId), {
         isPlaying: true,
-        startTime,
+        startTime: newStartTime,
       });
     } catch (e) {
       console.log('Error updating play:', e);
     }
-  };
-
-  const searchQueryOnChange = (value) => {
-    searchQuery.current = value;
   };
 
   return (
@@ -303,7 +277,7 @@ const IslandPage = () => {
       />
 
       <SearchArea
-        searchQueryOnChange={searchQueryOnChange}
+        searchQueryOnChange={(e) => (searchQuery.current = e.target.value)}
         handleSearchSongs={handleSearchSongs}
         isSearching={isSearching}
         searchResults={searchResults}
@@ -319,7 +293,7 @@ const IslandPage = () => {
           islandData?.playlist?.find(({ videoId }) => videoId === islandData?.currentVideo)
             ?.title || ''
         }
-        changeSong={changeSong}
+        handleChangeSong={handleChangeSong}
         handlePlayPause={handlePlayPause}
         isPlaying={islandData?.isPlaying || false}
       />

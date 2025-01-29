@@ -3,7 +3,7 @@
 import React from 'react';
 import { FaPause, FaPlay, FaStepBackward, FaStepForward } from 'react-icons/fa';
 
-const PlayerControls = ({ thumbnail, title, changeSong, handlePlayPause, isPlaying }) => {
+const PlayerControls = ({ thumbnail, title, handleChangeSong, handlePlayPause, isPlaying }) => {
   return (
     <div className="flex justify-between fixed bottom-0 left-0 right-0 z-50 bg-black/90">
       {thumbnail && title ? (
@@ -16,7 +16,7 @@ const PlayerControls = ({ thumbnail, title, changeSong, handlePlayPause, isPlayi
       )}
       <div className="flex flex-1 basis-1/3 justify-center gap-4 items-center">
         <button
-          onClick={() => changeSong('prev')}
+          onClick={() => handleChangeSong('prev')}
           className="p-3 text-gray-300 hover:text-white font-bold rounded-full"
         >
           <FaStepBackward />
@@ -28,7 +28,7 @@ const PlayerControls = ({ thumbnail, title, changeSong, handlePlayPause, isPlayi
           {isPlaying ? <FaPause /> : <FaPlay />}
         </button>
         <button
-          onClick={() => changeSong('next')}
+          onClick={() => handleChangeSong('next')}
           className="p-3 text-gray-300 hover:text-white font-bold rounded-full"
         >
           <FaStepForward />
