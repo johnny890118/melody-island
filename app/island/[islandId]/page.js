@@ -42,40 +42,38 @@ const IslandPage = () => {
   useEffect(() => {
     if (!isPlayerReady || !isIslandDataReady || !islandData.currentVideo) return;
 
-    console.log('isPlayerReady', isPlayerReady);
-    console.log('isIslandDataReady', isIslandDataReady);
-    console.log('islandData.currentVideo', islandData.currentVideo);
+    const timer = setTimeout(() => {
+      try {
+        const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
+        player.current.loadVideoById(islandData.currentVideo, elapsedTime);
+      } catch (e) {
+        console.log('Error loading video:', e);
+      }
+    }, 500);
 
-    try {
-      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
-      player.current.loadVideoById(islandData.currentVideo, elapsedTime);
-      console.log('islandData.startTime', islandData.startTime);
-      console.log('elapsedTime', elapsedTime);
-    } catch (e) {
-      console.log('Error loading video:', e);
-    }
+    return () => clearTimeout(timer);
   }, [islandData.currentVideo, islandData.startTime, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
     if (!isPlayerReady || !isIslandDataReady) return;
 
-    try {
-      console.log('islandData.isPlaying', islandData.isPlaying);
-
-      if (islandData.isPlaying) {
-        player.current.playVideo();
-      } else {
-        player.current.pauseVideo();
+    const timer = setTimeout(() => {
+      try {
+        if (islandData.isPlaying) {
+          player.current.playVideo();
+        } else {
+          player.current.pauseVideo();
+        }
+      } catch (e) {
+        console.log('Error play/pause video:', e);
       }
-    } catch (e) {
-      console.log('Error play/pause video:', e);
-    }
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
     if (!isOwner) return;
-
-    console.log('updateIslandPause');
 
     const updateIslandPause = async () => {
       try {
@@ -215,8 +213,6 @@ const IslandPage = () => {
     const isPlaying = !islandData.isPlaying;
     const currentTime = player.current.getCurrentTime();
     const newStartTime = new Date().getTime() - currentTime * 1000;
-
-    console.log('handlePlayPause', isPlaying, newStartTime);
 
     if (isPlaying) {
       const currentTime = player.current.getCurrentTime();
