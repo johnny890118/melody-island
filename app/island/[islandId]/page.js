@@ -8,6 +8,7 @@ import Player from '@/components/Player';
 import Playlist from '@/components/Playlist';
 import SearchArea from '@/components/SearchArea';
 import PlayerControls from '@/components/PlayerControls';
+import { LuCopy, LuCopyCheck } from 'react-icons/lu';
 
 const IslandPage = () => {
   const { islandId, islandName, islandOwner } = useSelector((state) => state.island);
@@ -17,6 +18,7 @@ const IslandPage = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [isIslandDataReady, setIsIslandDataReady] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const searchQuery = useRef('');
   const player = useRef({});
   const isOwner = islandOwner === authEmail;
@@ -241,6 +243,20 @@ const IslandPage = () => {
     }
   };
 
+  const handleCopy = (textToCopy) => {
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => {
+          setIsCopied(false);
+        }, 1000);
+      })
+      .catch((error) => {
+        console.error('Failed to copy text: ', error);
+      });
+  };
+
   return (
     <div className="flex flex-col justify-between mt-20 gap-16 mx-40 min-h-dvh">
       <Player
@@ -250,7 +266,12 @@ const IslandPage = () => {
         isPlaying={islandData?.isPlaying || false}
         topInfo={
           <div className="flex flex-col gap-2">
-            <p className="font-bold text-[#fff8e1]">島嶼ID：{islandId}</p>
+            <div className="flex gap-2 items-center">
+              <p className="font-bold text-[#fff8e1]">島嶼ID：{islandId}</p>
+              <button className="text-[#fff8e1]" onClick={() => handleCopy(islandId)}>
+                {isCopied ? <LuCopyCheck /> : <LuCopy />}
+              </button>
+            </div>
             <p className="font-bold text-[#fff8e1]">島嶼名稱：{islandName}</p>
           </div>
         }
