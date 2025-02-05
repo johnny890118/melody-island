@@ -51,7 +51,7 @@ const IslandPage = () => {
       } catch (e) {
         console.log('Error loading video:', e);
       }
-    }, 500);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [islandData.currentVideo, islandData.startTime, isPlayerReady, isIslandDataReady]);
@@ -69,7 +69,7 @@ const IslandPage = () => {
       } catch (e) {
         console.log('Error play/pause video:', e);
       }
-    }, 500);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
