@@ -27,19 +27,21 @@ const CustomDialog = ({
   return (
     <Dialog>
       {disabled ? (
-        <div className="bg-gray-800 text-[#fff8e1] font-bold p-4 rounded-xl w-96 opacity-50 cursor-not-allowed flex justify-center">
+        <div className="bg-gray-800 text-[#fff8e1] font-bold p-4 rounded-xl w-full sm:w-96 opacity-50 cursor-not-allowed flex justify-center">
           {triggerLabel}
         </div>
       ) : (
-        <DialogTrigger className="bg-gray-800 text-[#fff8e1] font-bold p-4 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition-transform transform w-96 active:scale-95">
+        <DialogTrigger className="bg-gray-800 text-[#fff8e1] font-bold p-4 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition-transform transform w-full sm:w-96 active:scale-95">
           {triggerLabel}
         </DialogTrigger>
       )}
 
-      <DialogContent className="bg-gray-900 text-white">
+      <DialogContent className="bg-gray-900 text-white max-w-lg mx-auto p-6 rounded-lg">
         <div className="space-y-6">
-          <DialogTitle className="text-xl font-bold text-[#fff8e1]">{title}</DialogTitle>
-          <DialogDescription className="text-gray-300">{description}</DialogDescription>
+          <DialogTitle className="text-lg sm:text-xl font-bold text-[#fff8e1]">{title}</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base text-gray-300">
+            {description}
+          </DialogDescription>
 
           <div className="space-y-4">
             {inputs.map(({ label, placeholder, type }, index) => (

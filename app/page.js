@@ -83,12 +83,14 @@ const HomePage = () => {
   }, [user]);
 
   return (
-    <div className="h-dvh flex flex-col justify-center items-center space-y-6">
-      <h1 className="text-4xl font-bold text-[#fff8e1] mb-6 text-center">歡迎來到 Melody Island</h1>
+    <div className="h-dvh flex flex-col justify-center items-center space-y-6 px-4 md:px-8 max-w-4xl mx-auto">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#fff8e1] mb-6 text-center">
+        歡迎來到 Melody Island
+      </h1>
 
       {islandId ? (
         <button
-          className="bg-gray-800 text-[#fff8e1] font-bold px-8 py-4 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition-transform transform w-96 active:scale-95"
+          className="bg-gray-800 text-[#fff8e1] font-bold p-4 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition-transform transform w-full sm:w-96 active:scale-95"
           onClick={() => router.push(`/island/${islandId}`)}
         >
           我的島嶼

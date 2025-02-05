@@ -77,3 +77,10 @@ body {
 .c-space {
   @apply sm:px-10 px-5;
 }
+
+iframe {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
+}
