@@ -89,7 +89,10 @@ const HomePage = () => {
       </h1>
 
       {islandId ? (
-        <button className="bg-white" onClick={() => router.push(`/island/${islandId}`)}>
+        <button
+          className="bg-gray-800 text-[#fff8e1] font-bold p-4 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition w-full sm:w-96 active:scale-95"
+          onClick={() => router.push(`/island/${islandId}`)}
+        >
           我的島嶼
         </button>
       ) : (
