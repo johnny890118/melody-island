@@ -62,8 +62,8 @@ const IslandPage = () => {
     const timer = setTimeout(() => {
       try {
         if (islandData.isPlaying) {
-          player.current.unMute();
           player.current.playVideo();
+          player.current.unMute();
         } else {
           player.current.pauseVideo();
         }
