@@ -5,7 +5,7 @@ const Loading = () => {
   const { isLoading } = useSelector((state) => state.island);
 
   return isLoading ? (
-    <div className="flex h-dvh w-dvw items-center justify-center fixed z-[999] bg-black/70 flex-col gap-4">
+    <div className="flex h-dvh w-dvw items-center justify-center fixed z-[999] bg-black/90 flex-col gap-4">
       <svg
         className="w-12 h-12 text-gray-800 animate-spin"
         viewBox="0 0 64 64"
