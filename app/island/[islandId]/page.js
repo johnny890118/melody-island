@@ -63,7 +63,6 @@ const IslandPage = () => {
       try {
         if (islandData.isPlaying) {
           player.current.playVideo();
-          player.current.unMute();
         } else {
           player.current.pauseVideo();
         }

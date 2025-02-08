@@ -29,7 +29,6 @@ const Player = ({
               showinfo: 0,
               rel: 0,
               modestbranding: 1,
-              mute: 1,
             },
           }}
         />
