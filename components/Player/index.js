@@ -25,9 +25,11 @@ const Player = ({
           onStateChange={onPlayerStateChange}
           opts={{
             playerVars: {
+              autoplay: isPlaying ? 1 : 0,
               showinfo: 0,
               rel: 0,
               modestbranding: 1,
+              enablejsapi: 1,
             },
           }}
         />
