@@ -7,7 +7,13 @@ import { doc, getDoc, setDoc, query, where, getDocs, collection } from 'firebase
 import { db } from './config/firebase';
 import { nanoid } from 'nanoid';
 import CustomDialog from '@/components/CustomDialog';
-import { setIslandOwner, setIslandId, setIslandName, clearIsland } from '@/store/islandSlice';
+import {
+  setIslandOwner,
+  setIslandId,
+  setIslandName,
+  clearIsland,
+  setIsLoading,
+} from '@/store/islandSlice';
 
 const HomePage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -50,6 +56,7 @@ const HomePage = () => {
 
   useEffect(() => {
     const checkUserIsland = async () => {
+      dispatch(setIsLoading(true));
       if (user && user.email) {
         const islandsRef = collection(db, 'islands');
         const q = query(islandsRef, where('createdBy', '==', user.email));
@@ -71,6 +78,7 @@ const HomePage = () => {
         dispatch(setIslandId(''));
         dispatch(setIslandName(''));
       }
+      dispatch(setIsLoading(false));
     };
 
     checkUserIsland();
