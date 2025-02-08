@@ -18,21 +18,14 @@ const Player = ({
     <div className="flex flex-col w-full gap-4 md:flex-row">
       <div className="w-full md:hidden">{topInfo}</div>
       <div className="pointer-events-none w-full aspect-video md:basis-1/2 border border-gray-800">
-        <YouTube
-          className="w-full h-full player"
-          videoId={videoId}
-          onReady={onPlayerReady}
-          onStateChange={onPlayerStateChange}
-          opts={{
-            playerVars: {
-              autoplay: isPlaying ? 1 : 0,
-              showinfo: 0,
-              rel: 0,
-              modestbranding: 1,
-              enablejsapi: 1,
-            },
-          }}
-        />
+        <iframe
+          width="100%"
+          height="100%"
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=${isPlaying ? 1 : 0}&mute=1`}
+          frameborder="0"
+          allow="autoplay; encrypted-media"
+          allowfullscreen
+        ></iframe>
       </div>
       <div className="flex w-full flex-col gap-4 md:basis-1/2 justify-between">
         <div className="w-full hidden md:block">{topInfo}</div>
