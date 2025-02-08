@@ -3,6 +3,7 @@
 import React from 'react';
 import YouTube from 'react-youtube';
 import { FaPlay } from 'react-icons/fa';
+import './player.scss';
 
 const Player = ({
   videoId,
@@ -18,7 +19,7 @@ const Player = ({
       <div className="w-full md:hidden">{topInfo}</div>
       <div className="pointer-events-none w-full aspect-video md:basis-1/2 border border-gray-800">
         <YouTube
-          className="w-full h-full"
+          className="w-full h-full player"
           videoId={videoId}
           onReady={onPlayerReady}
           onStateChange={onPlayerStateChange}
