@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '@/app/config/firebase';
 import Player from '@/components/Player';
@@ -9,19 +9,37 @@ import Playlist from '@/components/Playlist';
 import SearchArea from '@/components/SearchArea';
 import PlayerControls from '@/components/PlayerControls';
 import { LuCopy, LuCopyCheck } from 'react-icons/lu';
+import { setIsLoading } from '@/store/islandSlice';
 
 const IslandPage = () => {
   const { islandId, islandName, islandOwner } = useSelector((state) => state.island);
   const authEmail = useSelector((state) => state.auth?.user?.email) || '';
+  const dispatch = useDispatch();
   const [islandData, setIslandData] = useState({});
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isIslandDataReady, setIsIslandDataReady] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isMute, setIsMute] = useState(true);
+  const [isSuffle, setIsSuffle] = useState(false);
   const searchQuery = useRef('');
   const player = useRef({});
   const isOwner = islandOwner === authEmail;
+
+  useEffect(() => {
+    if (!isPlayerReady || !isIslandDataReady) return;
+
+    try {
+      if (isMute) {
+        player.current.mute();
+      } else {
+        player.current.unMute();
+      }
+    } catch (e) {
+      console.log('Error mute/unmute video:', e);
+    }
+  }, [isMute, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
     if (!islandId) return;
@@ -44,34 +62,26 @@ const IslandPage = () => {
   useEffect(() => {
     if (!isPlayerReady || !isIslandDataReady || !islandData.currentVideo) return;
 
-    const timer = setTimeout(() => {
-      try {
-        const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
-        player.current.loadVideoById(islandData.currentVideo, elapsedTime);
-      } catch (e) {
-        console.log('Error loading video:', e);
-      }
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    try {
+      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
+      player.current.loadVideoById(islandData.currentVideo, elapsedTime);
+    } catch (e) {
+      console.log('Error loading video:', e);
+    }
   }, [islandData.currentVideo, islandData.startTime, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
     if (!isPlayerReady || !isIslandDataReady) return;
 
-    const timer = setTimeout(() => {
-      try {
-        if (islandData.isPlaying) {
-          player.current.playVideo();
-        } else {
-          player.current.pauseVideo();
-        }
-      } catch (e) {
-        console.log('Error play/pause video:', e);
+    try {
+      if (islandData.isPlaying) {
+        player.current.playVideo();
+      } else {
+        player.current.pauseVideo();
       }
-    }, 1000);
-
-    return () => clearTimeout(timer);
+    } catch (e) {
+      console.log('Error play/pause video:', e);
+    }
   }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
@@ -90,11 +100,22 @@ const IslandPage = () => {
     updateIslandPause();
   }, [isOwner, islandId]);
 
+  useEffect(() => {
+    if (!isPlayerReady) {
+      dispatch(setIsLoading(true));
+    } else {
+      dispatch(setIsLoading(false));
+    }
+  }, [isPlayerReady]);
+
   const onPlayerReady = (event) => {
     if (typeof event.target !== 'object' || !Object.keys(event.target).length) return;
 
     player.current = event.target;
-    setIsPlayerReady(true);
+
+    setTimeout(() => {
+      setIsPlayerReady(true);
+    }, 2000);
   };
 
   const handleChangeSong = async (direction) => {
@@ -309,6 +330,10 @@ const IslandPage = () => {
         handleChangeSong={handleChangeSong}
         handlePlayPause={handlePlayPause}
         isPlaying={islandData?.isPlaying || false}
+        isMute={isMute}
+        handleMute={() => setIsMute((prev) => !prev)}
+        isSuffle={isSuffle}
+        handleShuffle={() => setIsSuffle((prev) => !prev)}
       />
     </div>
   );
