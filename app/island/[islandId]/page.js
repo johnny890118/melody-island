@@ -85,22 +85,6 @@ const IslandPage = () => {
   }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
-    if (!isOwner || !islandId) return;
-
-    const updateIslandPause = async () => {
-      try {
-        await updateDoc(doc(db, 'islands', islandId), {
-          isPlaying: false,
-        });
-      } catch (e) {
-        console.log('Error updating pause:', e);
-      }
-    };
-
-    updateIslandPause();
-  }, [isOwner, islandId]);
-
-  useEffect(() => {
     if (!isPlayerReady) {
       dispatch(setIsLoading(true));
     } else {
