@@ -73,7 +73,3 @@ body {
   margin: 0;
   padding: 0;
 }
-
-.c-space {
-  @apply sm:px-10 px-5;
-}

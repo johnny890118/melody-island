@@ -27,11 +27,11 @@ const CustomDialog = ({
   return (
     <Dialog>
       {disabled ? (
-        <div className="bg-gray-800 text-[#fff8e1] font-bold p-4 rounded-xl w-full sm:w-96 opacity-50 cursor-not-allowed flex justify-center">
+        <div className="bg-gray-800 text-[#fff8e1] font-bold p-3 rounded-xl w-full sm:w-80 opacity-50 cursor-not-allowed flex justify-center">
           {triggerLabel}
         </div>
       ) : (
-        <DialogTrigger className="bg-gray-800 text-[#fff8e1] font-bold p-4 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition w-full sm:w-96 active:scale-95">
+        <DialogTrigger className="bg-gray-800 text-[#fff8e1] font-bold p-3 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition w-full sm:w-80 active:scale-95">
           {triggerLabel}
         </DialogTrigger>
       )}

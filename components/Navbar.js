@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { fetchUser, login, logout } from '@/store/authSlice';
 import Link from 'next/link';
 import { Button } from './ui/button';
+import { Dancing_Script } from 'next/font/google';
+
+const dancingScript = Dancing_Script({ subsets: ['latin'], weight: '700' });
 
 const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
@@ -27,13 +30,12 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-5">
           <div className="flex items-center gap-2">
-            <img
-              src="/music-island-logo.png"
-              alt="Melody Island Logo"
-              className="w-8 h-8 sm:w-10 sm:h-10"
-            />
+            <img src="/music-island-logo.png" alt="Melody Island Logo" className="w-8 h-8" />
 
-            <Link href="/" className="text-[#fff8e1] font-bold text-lg sm:text-2xl">
+            <Link
+              href="/"
+              className={`text-[#fff8e1] font-bold text-lg sm:text-2xl ${dancingScript.className}`}
+            >
               Melody Island
             </Link>
           </div>
@@ -49,11 +51,7 @@ const Navbar = () => {
               </Button>
             ) : (
               <div className="flex items-center gap-2 sm:gap-4">
-                <img
-                  src={user.photoURL}
-                  alt="user photo"
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full"
-                />
+                <img src={user.photoURL} alt="user photo" className="w-8 h-8 rounded-full" />
                 <Button
                   onClick={() => dispatch(logout())}
                   className="bg-gray-800 text-[#fff8e1] font-bold px-4 py-2 rounded-md hover:bg-[#fff8e1] hover:text-gray-800 transition-transform transform active:scale-95 text-xs"
