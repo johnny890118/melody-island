@@ -1,4 +1,6 @@
-import React, { Suspense, useState } from 'react';
+'use client';
+
+import React, { Suspense, useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Loader from '@/components/Loader';
 import Island from '@/components/models/Island';
@@ -7,37 +9,51 @@ import Plane from './models/Plane';
 
 const Hero = () => {
   const [isRotating, setIsRotating] = useState(false);
+  const [screenSize, setScreenSize] = useState({
+    islandScale: [1, 1, 1],
+    islandPosition: [0, -10, -43],
+    islandRotation: [-0.001, 4.7, 0],
+    planeScale: [3, 3, 3],
+    planePosition: [0, -3.5, -4],
+  });
 
-  const adjustIslandForScreenSize = () => {
-    let screenScale = null;
-    let screenPosition = [0, -10, -43];
-    let rotation = [-0.001, 4.7, 0];
+  useEffect(() => {
+    const adjustIslandForScreenSize = () => {
+      let screenScale = null;
+      let screenPosition = [0, -10, -43];
+      let rotation = [-0.001, 4.7, 0];
 
-    if (window.innerHeight < 768) {
-      screenScale = [0.9, 0.9, 0.9];
-    } else {
-      screenScale = [1, 1, 1];
-    }
+      if (window.innerHeight < 768) {
+        screenScale = [0.9, 0.9, 0.9];
+      } else {
+        screenScale = [1, 1, 1];
+      }
 
-    return [screenScale, screenPosition, rotation];
-  };
+      return { screenScale, screenPosition, rotation };
+    };
 
-  const adjustPlaneForScreenSize = () => {
-    let screenScale, screenPosition;
+    const adjustPlaneForScreenSize = () => {
+      let screenScale, screenPosition;
 
-    if (window.innerHeight < 768) {
-      screenScale = [1.5, 1.5, 1.5];
-      screenPosition = [0, -1.5, 0];
-    } else {
-      screenScale = [3, 3, 3];
-      screenPosition = [0, -3.5, -4];
-    }
+      if (window.innerHeight < 768) {
+        screenScale = [1.5, 1.5, 1.5];
+        screenPosition = [0, -1.5, 0];
+      } else {
+        screenScale = [3, 3, 3];
+        screenPosition = [0, -3.5, -4];
+      }
 
-    return [screenScale, screenPosition];
-  };
+      return { screenScale, screenPosition };
+    };
 
-  const [islandScale, islandPosition, islandRotation] = adjustIslandForScreenSize();
-  const [planeScale, planePosition] = adjustPlaneForScreenSize();
+    setScreenSize({
+      islandScale: adjustIslandForScreenSize().screenScale,
+      islandPosition: adjustIslandForScreenSize().screenPosition,
+      islandRotation: adjustIslandForScreenSize().rotation,
+      planeScale: adjustPlaneForScreenSize().screenScale,
+      planePosition: adjustPlaneForScreenSize().screenPosition,
+    });
+  }, []);
 
   return (
     <section className="h-dvh w-full">
@@ -52,16 +68,16 @@ const Hero = () => {
 
           <Bird />
           <Island
-            scale={islandScale}
-            position={islandPosition}
-            rotation={islandRotation}
+            scale={screenSize.islandScale}
+            position={screenSize.islandPosition}
+            rotation={screenSize.islandRotation}
             isRotating={isRotating}
             setIsRotating={setIsRotating}
           />
           <Plane
             isRotating={isRotating}
-            scale={planeScale}
-            position={planePosition}
+            scale={screenSize.planeScale}
+            position={screenSize.planePosition}
             rotation={[0, 20, 0]}
           />
         </Suspense>
