@@ -145,10 +145,6 @@ const HomePage = () => {
           />
         </div>
       </div>
-
-      <div className="absolute bottom-2 left-2">
-        <img src="" alt="" />
-      </div>
     </div>
   );
 };
