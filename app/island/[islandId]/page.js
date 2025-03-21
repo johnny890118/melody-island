@@ -157,7 +157,7 @@ const IslandPage = () => {
     const isPlaying = !islandData.isPlaying;
 
     if (isPlaying) {
-      const currentTime = player.current.getCurrentTime();
+      const currentTime = player.current.getCurrentTime() || 0;
       const newStartTime = new Date().getTime() - currentTime * 1000;
 
       await updateDoc(doc(db, 'islands', islandId), {
@@ -215,11 +215,18 @@ const IslandPage = () => {
   useEffect(() => {
     if (!islandId) return;
 
-    const unsubscribe = onSnapshot(doc(db, 'islands', islandId), (docSnap) => {
-      if (docSnap.exists()) {
-        setIslandData(docSnap.data());
-      }
-    });
+    const unsubscribe = onSnapshot(
+      doc(db, 'islands', islandId),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          setIslandData(docSnap.data());
+        }
+      },
+      (e) => {
+        console.log('Error fetching island data:', e);
+        alert('目前無法取得您的島嶼資訊，請稍後再重新嘗試');
+      },
+    );
 
     return () => unsubscribe();
   }, [islandId]);
