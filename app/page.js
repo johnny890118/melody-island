@@ -15,6 +15,7 @@ import {
   setIsLoading,
 } from '@/store/islandSlice';
 import Hero from '@/components/Hero';
+import { Button } from '@/components/ui/button';
 
 const HomePage = () => {
   const { user } = useSelector((state) => state.auth);
@@ -92,7 +93,7 @@ const HomePage = () => {
   }, [user]);
 
   return (
-    <div className="w-full flex flex-col items-center px-4 md:px-8 relative">
+    <div className="w-full flex flex-col items-center relative">
       <Hero />
 
       <div className="absolute top-24 space-y-6">
@@ -103,12 +104,9 @@ const HomePage = () => {
 
         <div className="flex flex-col gap-4 w-full items-center">
           {islandId ? (
-            <button
-              className="bg-gray-800 text-[#fff8e1] font-bold p-3 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition w-full sm:w-80 active:scale-95"
-              onClick={() => router.push(`/island/${islandId}`)}
-            >
+            <Button className="heroBtn" onClick={() => router.push(`/island/${islandId}`)}>
               我的島嶼
-            </button>
+            </Button>
           ) : (
             <CustomDialog
               title="創建島嶼"

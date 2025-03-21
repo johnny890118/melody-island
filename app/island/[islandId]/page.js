@@ -21,7 +21,7 @@ const IslandPage = () => {
   const [isIslandDataReady, setIsIslandDataReady] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [isMute, setIsMute] = useState(true);
+  const [isMute, setIsMute] = useState(false);
   const [isSuffle, setIsSuffle] = useState(false);
   const searchQuery = useRef('');
   const player = useRef({});
@@ -262,6 +262,12 @@ const IslandPage = () => {
       });
   };
 
+  useEffect(() => {
+    if (window.innerWidth < 1024) {
+      setIsMute(true);
+    }
+  }, []);
+
   return (
     <div className="flex flex-col justify-between mt-20 gap-16 px-4 sm:px-6 min-h-dvh w-full lg:px-8 max-w-7xl mx-auto">
       <Player
@@ -272,12 +278,12 @@ const IslandPage = () => {
         topInfo={
           <div className="flex justify-between items-center md:items-start md:flex-col gap-2">
             <div className="flex gap-2 items-center">
-              <p className="font-bold text-[#fff8e1] text-sm lg:text-base">島嶼ID：{islandId}</p>
+              <p className="islandInfoText">島嶼ID：{islandId}</p>
               <button className="text-[#fff8e1]" onClick={() => handleCopy(islandId)}>
                 {isCopied ? <LuCopyCheck /> : <LuCopy />}
               </button>
             </div>
-            <p className="font-bold text-[#fff8e1] text-sm lg:text-base">島嶼名稱：{islandName}</p>
+            <p className="islandInfoText">島嶼名稱：{islandName}</p>
           </div>
         }
         nowPlayingTitle={

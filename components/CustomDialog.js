@@ -31,9 +31,7 @@ const CustomDialog = ({
           {triggerLabel}
         </div>
       ) : (
-        <DialogTrigger className="bg-gray-800 text-[#fff8e1] font-bold p-3 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition w-full sm:w-80 active:scale-95">
-          {triggerLabel}
-        </DialogTrigger>
+        <DialogTrigger className="heroBtn">{triggerLabel}</DialogTrigger>
       )}
 
       <DialogContent className="bg-gray-900 text-white max-w-lg mx-auto p-6 rounded-lg">

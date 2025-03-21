@@ -67,6 +67,15 @@
   }
 }
 
+@layer utilities {
+  .heroBtn {
+    @apply bg-gray-800/70 text-[#fff8e1] font-bold p-3 rounded-xl hover:bg-[#fff8e1] hover:text-gray-800 transition w-full sm:w-80 active:scale-95 text-base;
+  }
+  .islandInfoText {
+    @apply font-bold text-[#fff8e1] text-sm lg:text-base;
+  }
+}
+
 body {
   background: linear-gradient(#000000, #111827);
   box-sizing: border-box;
