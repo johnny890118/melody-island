@@ -27,75 +27,11 @@ const IslandPage = () => {
   const player = useRef({});
   const isOwner = islandOwner === authEmail;
 
-  useEffect(() => {
-    if (!isPlayerReady || !isIslandDataReady) return;
-
-    try {
-      if (isMute) {
-        player.current.mute();
-      } else {
-        player.current.unMute();
-      }
-    } catch (e) {
-      console.log('Error mute/unmute video:', e);
-    }
-  }, [isMute, isPlayerReady, isIslandDataReady]);
-
-  useEffect(() => {
-    if (!islandId) return;
-
-    const unsubscribe = onSnapshot(doc(db, 'islands', islandId), (docSnap) => {
-      if (docSnap.exists()) {
-        setIslandData(docSnap.data());
-      }
-    });
-
-    return () => unsubscribe();
-  }, [islandId]);
-
-  useEffect(() => {
-    if (Object.keys(islandData).length) {
-      setIsIslandDataReady(true);
-    }
-  }, [islandData]);
-
-  useEffect(() => {
-    if (!isPlayerReady || !isIslandDataReady || !islandData.currentVideo) return;
-
-    try {
-      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
-      player.current.loadVideoById(islandData.currentVideo, elapsedTime);
-    } catch (e) {
-      console.log('Error loading video:', e);
-    }
-  }, [islandData.currentVideo, islandData.startTime, isPlayerReady, isIslandDataReady]);
-
-  useEffect(() => {
-    if (!isPlayerReady || !isIslandDataReady) return;
-
-    try {
-      if (islandData.isPlaying) {
-        player.current.playVideo();
-      } else {
-        player.current.pauseVideo();
-      }
-    } catch (e) {
-      console.log('Error play/pause video:', e);
-    }
-  }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
-
-  useEffect(() => {
-    if (!isPlayerReady) {
-      dispatch(setIsLoading(true));
-    } else {
-      dispatch(setIsLoading(false));
-    }
-  }, [isPlayerReady]);
-
   const onPlayerReady = (event) => {
     if (typeof event.target !== 'object' || !Object.keys(event.target).length) return;
 
     player.current = event.target;
+    player.current.mute();
 
     setTimeout(() => {
       setIsPlayerReady(true);
@@ -263,8 +199,75 @@ const IslandPage = () => {
   };
 
   useEffect(() => {
+    if (!isPlayerReady || !isIslandDataReady) return;
+
+    try {
+      if (isMute) {
+        player.current.mute();
+      } else {
+        player.current.unMute();
+      }
+    } catch (e) {
+      console.log('Error mute/unmute video:', e);
+    }
+  }, [isMute, isPlayerReady, isIslandDataReady]);
+
+  useEffect(() => {
+    if (!islandId) return;
+
+    const unsubscribe = onSnapshot(doc(db, 'islands', islandId), (docSnap) => {
+      if (docSnap.exists()) {
+        setIslandData(docSnap.data());
+      }
+    });
+
+    return () => unsubscribe();
+  }, [islandId]);
+
+  useEffect(() => {
+    if (Object.keys(islandData).length) {
+      setIsIslandDataReady(true);
+    }
+  }, [islandData]);
+
+  useEffect(() => {
+    if (!isPlayerReady || !isIslandDataReady || !islandData.currentVideo) return;
+
+    try {
+      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
+      player.current.loadVideoById(islandData.currentVideo, elapsedTime);
+    } catch (e) {
+      console.log('Error loading video:', e);
+    }
+  }, [islandData.currentVideo, islandData.startTime, isPlayerReady, isIslandDataReady]);
+
+  useEffect(() => {
+    if (!isPlayerReady || !isIslandDataReady) return;
+
+    try {
+      if (islandData.isPlaying) {
+        player.current.playVideo();
+      } else {
+        player.current.pauseVideo();
+      }
+    } catch (e) {
+      console.log('Error play/pause video:', e);
+    }
+  }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
+
+  useEffect(() => {
+    if (!isPlayerReady) {
+      dispatch(setIsLoading(true));
+    } else {
+      dispatch(setIsLoading(false));
+    }
+  }, [isPlayerReady]);
+
+  useEffect(() => {
     if (window.innerWidth < 1024) {
       setIsMute(true);
+    } else {
+      setIsMute(false);
     }
   }, []);
 
