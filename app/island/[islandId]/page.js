@@ -257,8 +257,10 @@ const IslandPage = () => {
       if (islandData.isPlaying) {
         setTimeout(() => {
           player.current.pauseVideo();
+          player.current.unmute();
           setTimeout(() => {
             player.current.playVideo();
+            if (isMute) player.current.mute();
           }, 300);
         }, 500);
       } else {
