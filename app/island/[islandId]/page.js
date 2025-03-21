@@ -39,7 +39,7 @@ const IslandPage = () => {
   };
 
   const handleChangeSong = async (direction) => {
-    if (!isIslandDataReady || !islandData.playlist.length) return;
+    if (!isIslandDataReady || !islandData?.playlist?.length) return;
 
     const playlist = islandData.playlist;
     const currentVideo = islandData.currentVideo;
@@ -72,7 +72,7 @@ const IslandPage = () => {
   };
 
   const handleSearchSongs = async () => {
-    if (!searchQuery.current) return;
+    if (!searchQuery.current || !searchQuery.current.trim()) return;
 
     setIsSearching(true);
     const API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY;
@@ -125,7 +125,7 @@ const IslandPage = () => {
     const isRemoveCurrentVideo = playlist[index].videoId === currentVideo;
     const newPlaylist = playlist.filter((_, i) => i !== index);
     const nextVideoId = newPlaylist.length
-      ? newPlaylist[index]?.videoId || newPlaylist[0]?.videoId
+      ? newPlaylist[index]?.videoId || newPlaylist[0]?.videoId || ''
       : '';
 
     if (isRemoveCurrentVideo) {
@@ -234,6 +234,8 @@ const IslandPage = () => {
   useEffect(() => {
     if (Object.keys(islandData).length) {
       setIsIslandDataReady(true);
+    } else {
+      setIsIslandDataReady(false);
     }
   }, [islandData]);
 
@@ -253,7 +255,12 @@ const IslandPage = () => {
 
     try {
       if (islandData.isPlaying) {
-        player.current.playVideo();
+        setTimeout(() => {
+          player.current.pauseVideo();
+          setTimeout(() => {
+            player.current.playVideo();
+          }, 300);
+        }, 500);
       } else {
         player.current.pauseVideo();
       }
