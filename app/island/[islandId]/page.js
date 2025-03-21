@@ -255,25 +255,14 @@ const IslandPage = () => {
 
     try {
       if (islandData.isPlaying) {
-        setTimeout(() => {
-          player.current.mute();
-          player.current.pauseVideo();
-
-          setTimeout(() => {
-            player.current.playVideo();
-
-            setTimeout(() => {
-              if (!isMute) player.current.unMute();
-            }, 300);
-          }, 300);
-        }, 500);
+        player.current.playVideo();
       } else {
         player.current.pauseVideo();
       }
     } catch (e) {
       console.log('Error play/pause video:', e);
     }
-  }, [islandData.isPlaying, isPlayerReady, isIslandDataReady, isMute]);
+  }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
     if (!isPlayerReady) {
