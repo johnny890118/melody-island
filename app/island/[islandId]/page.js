@@ -15,6 +15,7 @@ const IslandPage = () => {
   const { islandId, islandName, islandOwner } = useSelector((state) => state.island);
   const authEmail = useSelector((state) => state.auth?.user?.email) || '';
   const dispatch = useDispatch();
+
   const [islandData, setIslandData] = useState({});
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -31,7 +32,6 @@ const IslandPage = () => {
     if (typeof event.target !== 'object' || !Object.keys(event.target).length) return;
 
     player.current = event.target;
-    player.current.mute();
 
     setTimeout(() => {
       setIsPlayerReady(true);
