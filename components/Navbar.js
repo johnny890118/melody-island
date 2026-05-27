@@ -15,9 +15,18 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
+  const handleLogin = async () => {
+    try {
+      await dispatch(login()).unwrap();
+    } catch (error) {
+      console.error('Firebase login failed:', error);
+      alert(`登入失敗：${error?.code || 'unknown'}\n${error?.message || ''}`);
+    }
+  };
+
   useEffect(() => {
     dispatch(fetchUser());
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     if (!user) {
@@ -43,7 +52,8 @@ const Navbar = () => {
           <div>
             {!user ? (
               <Button
-                onClick={() => dispatch(login())}
+                type="button"
+                onClick={handleLogin}
                 className="flex items-center gap-2 bg-gray-800 text-[#fff8e1] font-bold px-4 py-2 rounded-md hover:bg-[#fff8e1] hover:text-gray-800 transition-transform transform active:scale-95 text-xs"
               >
                 <img src="/google.png" alt="Google Logo" className="w-3 h-3" />
