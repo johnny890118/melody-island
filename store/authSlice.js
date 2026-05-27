@@ -3,7 +3,6 @@ import { auth } from '@/app/config/firebase';
 import {
   onAuthStateChanged,
   signInWithPopup,
-  signInWithRedirect,
   GoogleAuthProvider,
   signOut,
 } from 'firebase/auth';
@@ -23,11 +22,6 @@ export const login = createAsyncThunk('auth/login', async (_, { rejectWithValue 
     const { uid, email, displayName, photoURL } = result.user;
     return { uid, email, displayName, photoURL };
   } catch (error) {
-    if (error.code === 'auth/popup-blocked') {
-      await signInWithRedirect(auth, provider);
-      return null;
-    }
-
     return rejectWithValue({
       code: error.code,
       message: error.message,
