@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { auth } from '@/app/config/firebase';
 import {
+  getRedirectResult,
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithRedirect,
   GoogleAuthProvider,
   signOut,
 } from 'firebase/auth';
@@ -13,21 +14,16 @@ const initialState = {
   error: null,
 };
 
-// 登入
-export const login = createAsyncThunk('auth/login', async (_, { rejectWithValue }) => {
-  const provider = new GoogleAuthProvider();
+const getUserPayload = (user) => {
+  const { uid, email, displayName, photoURL } = user;
+  return { uid, email, displayName, photoURL };
+};
 
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const { uid, email, displayName, photoURL } = result.user;
-    return { uid, email, displayName, photoURL };
-  } catch (error) {
-    return rejectWithValue({
-      code: error.code,
-      message: error.message,
-    });
-  }
-});
+// 登入
+export const startGoogleLogin = () => {
+  const provider = new GoogleAuthProvider();
+  return signInWithRedirect(auth, provider);
+};
 
 // 登出
 export const logout = createAsyncThunk('auth/logout', async () => {
@@ -35,17 +31,32 @@ export const logout = createAsyncThunk('auth/logout', async () => {
 });
 
 // 獲取當前用戶
-export const fetchUser = createAsyncThunk('auth/fetchUser', async () => {
-  return new Promise((resolve) => {
-    onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        const { uid, email, displayName, photoURL } = currentUser;
-        resolve({ uid, email, displayName, photoURL });
-      } else {
-        resolve(null);
-      }
+export const fetchUser = createAsyncThunk('auth/fetchUser', async (_, { rejectWithValue }) => {
+  try {
+    const redirectResult = await getRedirectResult(auth);
+
+    if (redirectResult?.user) {
+      return getUserPayload(redirectResult.user);
+    }
+  } catch (error) {
+    return rejectWithValue({
+      code: error.code || 'auth/redirect-result-error',
+      message: error.message || String(error),
+    });
+  }
+
+  const currentUser = await new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user);
     });
   });
+
+  if (currentUser) {
+    return getUserPayload(currentUser);
+  }
+
+  return null;
 });
 
 // Slice 配置
@@ -60,11 +71,6 @@ const authSlice = createSlice({
         state.status = 'idle';
         state.error = null;
       })
-      .addCase(login.fulfilled, (state, action) => {
-        state.user = action.payload;
-        state.status = 'idle';
-        state.error = null;
-      })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.status = 'idle';
@@ -73,30 +79,19 @@ const authSlice = createSlice({
       .addCase(fetchUser.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(login.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
       .addCase(logout.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(login.rejected, (state, action) => {
+      .addCase(fetchUser.rejected, (state, action) => {
         state.status = 'idle';
         state.error = action.payload || {
           code: action.error.code,
           message: action.error.message,
         };
       })
-      .addCase(fetchUser.rejected, (state, action) => {
-        state.status = 'idle';
-        state.error = {
-          code: action.error.code,
-          message: action.error.message,
-        };
-      })
       .addCase(logout.rejected, (state, action) => {
         state.status = 'idle';
-        state.error = {
+        state.error = action.payload || {
           code: action.error.code,
           message: action.error.message,
         };

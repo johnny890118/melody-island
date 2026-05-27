@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import { fetchUser, login, logout } from '@/store/authSlice';
+import { fetchUser, logout, startGoogleLogin } from '@/store/authSlice';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { Dancing_Script } from 'next/font/google';
@@ -17,7 +17,7 @@ const Navbar = () => {
 
   const handleLogin = async () => {
     try {
-      await dispatch(login()).unwrap();
+      await startGoogleLogin();
     } catch (error) {
       console.error('Firebase login failed:', error);
       alert(`登入失敗：${error?.code || 'unknown'}\n${error?.message || ''}`);
