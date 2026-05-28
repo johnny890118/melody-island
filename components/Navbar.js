@@ -35,15 +35,15 @@ const Navbar = () => {
   }, [user, router]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90">
+    <nav className="fixed left-0 right-0 top-0 z-50 border-b border-white/10 bg-[#05080d]/70 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-5">
+        <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-2">
             <img src="/music-island-logo.png" alt="Melody Island Logo" className="w-8 h-8" />
 
             <Link
               href="/"
-              className={`text-[#fff8e1] font-bold text-lg sm:text-2xl ${dancingScript.className}`}
+              className={`text-lg font-bold text-[#fff8e1] drop-shadow sm:text-2xl ${dancingScript.className}`}
             >
               Melody Island
             </Link>
@@ -54,17 +54,21 @@ const Navbar = () => {
               <Button
                 type="button"
                 onClick={handleLogin}
-                className="flex items-center gap-2 bg-gray-800 text-[#fff8e1] font-bold px-4 py-2 rounded-md hover:bg-[#fff8e1] hover:text-gray-800 transition-transform transform active:scale-95 text-xs"
+                className="glass-button flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold"
               >
                 <img src="/google.png" alt="Google Logo" className="w-3 h-3" />
                 登入
               </Button>
             ) : (
               <div className="flex items-center gap-2 sm:gap-4">
-                <img src={user.photoURL} alt="user photo" className="w-8 h-8 rounded-full" />
+                <img
+                  src={user.photoURL}
+                  alt="user photo"
+                  className="h-8 w-8 rounded-full border border-white/20"
+                />
                 <Button
                   onClick={() => dispatch(logout())}
-                  className="bg-gray-800 text-[#fff8e1] font-bold px-4 py-2 rounded-md hover:bg-[#fff8e1] hover:text-gray-800 transition-transform transform active:scale-95 text-xs"
+                  className="glass-button rounded-lg px-4 py-2 text-xs font-bold"
                 >
                   登出
                 </Button>

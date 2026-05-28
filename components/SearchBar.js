@@ -5,7 +5,7 @@ import { FaSearch } from 'react-icons/fa';
 
 const SearchBar = ({ onChange, handleSearchSongs }) => {
   return (
-    <div className="flex bg-gray-700 rounded-md py-3 px-4 w-full">
+    <div className="flex w-full rounded-lg border border-white/10 bg-black/25 px-4 py-3 backdrop-blur-md">
       <input
         type="text"
         onChange={(e) => onChange(e.target.value)}
@@ -15,11 +15,11 @@ const SearchBar = ({ onChange, handleSearchSongs }) => {
           }
         }}
         placeholder="搜尋"
-        className="flex-1 text-white placeholder-gray-400 focus:outline-none bg-transparent placeholder:text-sm placeholder:lg:text-base text-sm lg:text-base"
+        className="flex-1 bg-transparent text-sm text-white placeholder:text-sm placeholder:text-white/40 focus:outline-none lg:text-base placeholder:lg:text-base"
       />
       <button
         onClick={handleSearchSongs}
-        className="flex items-center text-gray-200 hover:text-white"
+        className="flex items-center text-[#dfe7dc] hover:text-[#f5d77a]"
       >
         <FaSearch />
       </button>

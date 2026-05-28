@@ -5,9 +5,9 @@ import PlaylistItem from './PlaylistItem';
 
 const Playlist = ({ playlist, currentVideo, playFromPlaylist, handleRemoveSong }) => {
   return (
-    <div className="flex flex-col gap-2">
-      <p className="font-bold text-[#fff8e1] px-2 lg:text-2xl"># 播放清單</p>
-      <div className="h-[1px] bg-gray-700 px-2"></div>
+    <div className="glass-panel-soft flex flex-col gap-2 rounded-lg p-3">
+      <p className="section-title"># 播放清單</p>
+      <div className="section-divider"></div>
       {playlist.length > 0 ? (
         playlist.map(({ videoId, title, thumbnail }, index) => (
           <PlaylistItem
@@ -22,7 +22,7 @@ const Playlist = ({ playlist, currentVideo, playFromPlaylist, handleRemoveSong }
           />
         ))
       ) : (
-        <p className="text-white p-2">幫你的播放清單加入項目吧！</p>
+        <p className="p-2 text-[#dfe7dc]">幫你的播放清單加入項目吧！</p>
       )}
     </div>
   );

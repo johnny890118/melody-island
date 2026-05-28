@@ -27,17 +27,17 @@ const CustomDialog = ({
   return (
     <Dialog>
       {disabled ? (
-        <div className="bg-gray-800 text-[#fff8e1] font-bold p-3 rounded-xl w-full sm:w-80 opacity-50 cursor-not-allowed flex justify-center">
+        <div className="glass-button flex min-h-12 w-full cursor-not-allowed items-center justify-center rounded-lg px-3 py-2.5 text-center text-xs font-bold leading-tight opacity-50 sm:text-sm">
           {triggerLabel}
         </div>
       ) : (
         <DialogTrigger className="heroBtn">{triggerLabel}</DialogTrigger>
       )}
 
-      <DialogContent className="bg-gray-900 text-white max-w-lg mx-auto p-6 rounded-lg">
+      <DialogContent className="glass-panel mx-auto max-w-lg rounded-lg p-6 text-white">
         <div className="space-y-6">
-          <DialogTitle className="text-lg sm:text-xl font-bold text-[#fff8e1]">{title}</DialogTitle>
-          <DialogDescription className="text-sm sm:text-base text-gray-300">
+          <DialogTitle className="text-lg font-bold text-[#fff8e1] sm:text-xl">{title}</DialogTitle>
+          <DialogDescription className="text-sm text-[#dfe7dc] sm:text-base">
             {description}
           </DialogDescription>
 
@@ -49,14 +49,14 @@ const CustomDialog = ({
                 placeholder={placeholder}
                 value={values[label] || ''}
                 onChange={(e) => handleChange(label, e.target.value)}
-                className="w-full px-4 py-2 bg-gray-800 text-white rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full rounded-lg border border-white/10 bg-black/25 px-4 py-2 text-white placeholder:text-white/40 focus:border-[#f5d77a]/60 focus:outline-none focus:ring-2 focus:ring-[#f5d77a]/20"
               />
             ))}
           </div>
 
           <Button
             onClick={handleConfirm}
-            className="w-full font-bold py-2 rounded-md bg-[#fff8e1] text-gray-800 hover:bg-[#fff8e1] hover:text-gray-800 transition-transform transform active:scale-95"
+            className="glass-button-primary w-full rounded-lg py-2 font-bold"
           >
             {confirmLabel}
           </Button>

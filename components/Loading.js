@@ -5,9 +5,9 @@ const Loading = () => {
   const { isLoading } = useSelector((state) => state.island);
 
   return isLoading ? (
-    <div className="flex h-dvh w-dvw items-center justify-center fixed z-[999] bg-black/90 flex-col gap-4">
+    <div className="fixed z-[999] flex h-dvh w-dvw flex-col items-center justify-center gap-4 bg-[#05080d]/85 backdrop-blur-xl">
       <svg
-        className="w-12 h-12 text-gray-800 animate-spin"
+        className="h-12 w-12 animate-spin text-white/15"
         viewBox="0 0 64 64"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -27,10 +27,10 @@ const Loading = () => {
           strokeWidth="5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-gray-400"
+          className="text-[#f5d77a]"
         ></path>
       </svg>
-      <p className="text-gray-400">載入中...</p>
+      <p className="text-[#dfe7dc]">載入中...</p>
     </div>
   ) : null;
 };

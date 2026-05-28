@@ -4,8 +4,8 @@ import React from 'react';
 const Loader = () => {
   return (
     <Html>
-      <div className="flex justify-self-center items-center">
-        <div className="w-20 h-20 border-2 border-opacity-20 border-blue-500 rounded-full animate-spin"></div>
+      <div className="flex items-center justify-self-center">
+        <div className="h-20 w-20 animate-spin rounded-full border-2 border-[#f5d77a]/30 border-t-[#f5d77a]"></div>
       </div>
     </Html>
   );

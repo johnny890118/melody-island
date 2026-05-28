@@ -5,12 +5,12 @@ import { MdAdd } from 'react-icons/md';
 
 const SearchResultItem = ({ videoId, thumbnail, title, handleAddSong }) => {
   return (
-    <div className="flex items-center rounded-lg p-2 hover:bg-gray-800 transition">
-      <img src={thumbnail} alt={title} className="aspect-video w-16 md:w-20 rounded-md mr-4" />
-      <p className="flex-1 font-bold text-white truncate text-sm lg:text-base">{title}</p>
+    <div className="flex items-center rounded-lg border border-transparent p-2 transition hover:border-white/10 hover:bg-white/[0.07]">
+      <img src={thumbnail} alt={title} className="mr-4 aspect-video w-16 rounded-md md:w-20" />
+      <p className="flex-1 truncate text-sm font-bold text-[#fff8e1] lg:text-base">{title}</p>
       <button
         onClick={() => handleAddSong(videoId, title, thumbnail)}
-        className="text-gray-400 hover:text-white px-2"
+        className="px-2 text-white/50 hover:text-[#f5d77a]"
       >
         <MdAdd />
       </button>

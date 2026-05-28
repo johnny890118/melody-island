@@ -24,48 +24,48 @@ const PlayerControls = ({
   handleShuffle,
 }) => {
   return (
-    <div className="flex justify-center fixed bottom-0 left-0 right-0 z-50 bg-black/90 w-full p-2 min-h-14">
+    <div className="fixed bottom-0 left-0 right-0 z-50 flex min-h-20 w-full justify-center border-t border-white/10 bg-[#05080d]/75 px-4 py-3 backdrop-blur-xl">
       {thumbnail && title ? (
-        <div className="hidden sm:flex gap-2 items-center w-2/3 lg:w-1/3">
-          <img src={thumbnail} alt={title} className="h-12 aspect-video" />
-          <p className="text-white truncate flex-1 text-sm lg:text-base">{title}</p>
+        <div className="hidden w-2/3 items-center gap-3 sm:flex lg:w-1/3">
+          <img src={thumbnail} alt={title} className="aspect-video h-14 rounded-md" />
+          <p className="flex-1 truncate text-base text-[#fff8e1] lg:text-lg">{title}</p>
         </div>
       ) : (
-        <div className="hidden w-2/3 h-12" />
+        <div className="hidden h-14 w-2/3" />
       )}
-      <div className="flex justify-end gap-4 items-center sm:w-1/3 lg:mr-0 lg:justify-center">
+      <div className="flex items-center justify-center gap-3 sm:w-1/3 sm:justify-end lg:mr-0 lg:justify-center">
         <button
-          className="text-gray-300 hover:text-white font-bold rounded-full"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-lg text-[#dfe7dc] transition hover:bg-white/10 hover:text-[#f5d77a]"
           onClick={handleShuffle}
         >
           {isSuffle ? <FaShuffle /> : <FaRightLeft />}
         </button>
         <button
           onClick={() => handleChangeSong('prev')}
-          className="text-gray-300 hover:text-white font-bold rounded-full"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-lg text-[#dfe7dc] transition hover:bg-white/10 hover:text-[#f5d77a]"
         >
           <FaBackwardStep />
         </button>
         <button
           onClick={handlePlayPause}
-          className="text-gray-300 hover:text-white font-bold border border-gray-300 hover:border-white rounded-full p-3"
+          className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/10 text-lg text-[#fff8e1] transition hover:border-[#f5d77a]/60 hover:bg-[#f5d77a]/10 hover:text-[#f5d77a]"
         >
           {isPlaying ? <FaPause /> : <FaPlay />}
         </button>
         <button
           onClick={() => handleChangeSong('next')}
-          className="text-gray-300 hover:text-white font-bold rounded-full"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-lg text-[#dfe7dc] transition hover:bg-white/10 hover:text-[#f5d77a]"
         >
           <FaForwardStep />
         </button>
         <button
-          className="text-gray-300 hover:text-white font-bold rounded-full"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-lg text-[#dfe7dc] transition hover:bg-white/10 hover:text-[#f5d77a]"
           onClick={handleMute}
         >
           {isMute ? <FaVolumeXmark /> : <FaVolumeHigh />}
         </button>
       </div>
-      <div className="hidden lg:block w-1/3"></div>
+      <div className="hidden w-1/3 lg:block"></div>
     </div>
   );
 };

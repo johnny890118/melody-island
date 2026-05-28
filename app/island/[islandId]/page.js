@@ -281,21 +281,21 @@ const IslandPage = () => {
   }, []);
 
   return (
-    <div className="flex flex-col justify-between mt-20 gap-16 px-4 sm:px-6 min-h-dvh w-full lg:px-8 max-w-7xl mx-auto">
+    <div className="mx-auto mt-24 flex min-h-dvh w-full max-w-7xl flex-col justify-between gap-8 px-4 pb-32 sm:px-6 lg:px-8">
       <Player
         videoId={islandData?.currentVideo || ''}
         onPlayerReady={onPlayerReady}
         onPlayerStateChange={onPlayerStateChange}
         isPlaying={islandData?.isPlaying || false}
         topInfo={
-          <div className="flex justify-between items-center md:items-start md:flex-col gap-2">
-            <div className="flex gap-2 items-center">
+          <div className="flex justify-between gap-2 md:flex-col md:items-start">
+            <div className="glass-chip flex items-center gap-2 rounded-lg px-3 py-2">
               <p className="islandInfoText">島嶼ID：{islandId}</p>
-              <button className="text-[#fff8e1]" onClick={() => handleCopy(islandId)}>
+              <button className="text-[#fff8e1] hover:text-[#f5d77a]" onClick={() => handleCopy(islandId)}>
                 {isCopied ? <LuCopyCheck /> : <LuCopy />}
               </button>
             </div>
-            <p className="islandInfoText">島嶼名稱：{islandName}</p>
+            <p className="glass-chip islandInfoText rounded-lg px-3 py-2">島嶼名稱：{islandName}</p>
           </div>
         }
         nowPlayingTitle={

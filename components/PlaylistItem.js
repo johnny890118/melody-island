@@ -13,18 +13,21 @@ const PlaylistItem = ({
   currentItemIndex,
 }) => {
   return (
-    <div key={videoId} className="flex items-center rounded-lg p-2 hover:bg-gray-800 group">
-      <img src={thumbnail} alt={title} className="aspect-video w-16 md:w-20 rounded-md mr-4" />
-      {videoId === currentVideo && <FaPlay className="text-[#fff8e1] mr-2" />}
+    <div
+      key={videoId}
+      className="group flex items-center rounded-lg border border-transparent p-2 transition hover:border-white/10 hover:bg-white/[0.07]"
+    >
+      <img src={thumbnail} alt={title} className="mr-4 aspect-video w-16 rounded-md md:w-20" />
+      {videoId === currentVideo && <FaPlay className="mr-2 text-[#f5d77a]" />}
       <div
-        className="flex-1 font-bold text-white cursor-pointer truncate text-sm lg:text-base"
+        className="flex-1 cursor-pointer truncate text-sm font-bold text-[#fff8e1] lg:text-base"
         onClick={() => playFromPlaylist(videoId)}
       >
         {title}
       </div>
       <button
         onClick={() => handleRemoveSong(currentItemIndex)}
-        className="text-gray-400 hover:text-white px-2 group-hover:block lg:hidden"
+        className="px-2 text-white/50 hover:text-[#f5d77a] group-hover:block lg:hidden"
       >
         <FaRegTrashAlt />
       </button>

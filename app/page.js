@@ -93,18 +93,23 @@ const HomePage = () => {
   }, [user]);
 
   return (
-    <div className="w-full flex flex-col items-center relative">
+    <div className="relative flex w-full flex-col items-center overflow-hidden">
       <Hero />
 
-      <div className="absolute top-24 space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#fff8e1]">一起登島，聆聽共鳴</h1>
-          <p className="text-[#fff8e1]">在每一座島上，分享你們的音樂</p>
+      <div className="absolute left-1/2 top-24 w-[min(92vw,520px)] -translate-x-1/2 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-4 shadow-xl shadow-black/20 backdrop-blur-md sm:px-5 lg:top-28">
+        <div className="space-y-1.5 text-center">
+          <h1 className="text-xl font-bold tracking-normal text-[#fff8e1] sm:text-2xl">
+            一起登島，聆聽共鳴
+          </h1>
+          <p className="text-xs text-[#dfe7dc] sm:text-sm">在每一座島上，分享你們的音樂</p>
         </div>
 
-        <div className="flex flex-col gap-4 w-full items-center">
+        <div className="mt-4 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2">
           {islandId ? (
-            <Button className="heroBtn" onClick={() => router.push(`/island/${islandId}`)}>
+            <Button
+              className="glass-button min-h-12 w-full rounded-lg border-[#f5d77a]/80 bg-[#f5d77a]/20 px-3 py-2.5 text-xs font-bold leading-tight shadow-[#f5d77a]/20 ring-1 ring-[#f5d77a]/45 hover:border-[#f5d77a] sm:text-sm"
+              onClick={() => router.push(`/island/${islandId}`)}
+            >
               我的島嶼
             </Button>
           ) : (
