@@ -39,24 +39,33 @@ export const fetchUser = createAsyncThunk('auth/fetchUser', async (_, { rejectWi
       return getUserPayload(redirectResult.user);
     }
   } catch (error) {
+    if (error.code !== 'auth/no-redirect-result') {
+      return rejectWithValue({
+        code: error.code || 'auth/redirect-result-error',
+        message: error.message || String(error),
+      });
+    }
+  }
+
+  try {
+    const currentUser = await new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        unsubscribe();
+        resolve(user);
+      });
+    });
+
+    if (currentUser) {
+      return getUserPayload(currentUser);
+    }
+
+    return null;
+  } catch (error) {
     return rejectWithValue({
-      code: error.code || 'auth/redirect-result-error',
+      code: error.code || 'auth/state-error',
       message: error.message || String(error),
     });
   }
-
-  const currentUser = await new Promise((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe();
-      resolve(user);
-    });
-  });
-
-  if (currentUser) {
-    return getUserPayload(currentUser);
-  }
-
-  return null;
 });
 
 // Slice 配置
