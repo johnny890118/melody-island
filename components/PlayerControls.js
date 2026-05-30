@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import {
   FaVolumeHigh,
   FaVolumeXmark,
@@ -20,14 +21,20 @@ const PlayerControls = ({
   isPlaying,
   isMute,
   handleMute,
-  isSuffle,
+  isShuffle,
   handleShuffle,
 }) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 flex min-h-20 w-full justify-center border-t border-white/10 bg-[#05080d]/75 px-4 py-3 backdrop-blur-xl">
       {thumbnail && title ? (
         <div className="hidden w-2/3 items-center gap-3 sm:flex lg:w-1/3">
-          <img src={thumbnail} alt={title} className="aspect-video h-14 rounded-md" />
+          <Image
+            src={thumbnail}
+            alt={title}
+            width={100}
+            height={56}
+            className="aspect-video h-14 w-auto rounded-md object-cover"
+          />
           <p className="flex-1 truncate text-base text-[#fff8e1] lg:text-lg">{title}</p>
         </div>
       ) : (
@@ -38,7 +45,7 @@ const PlayerControls = ({
           className="flex h-10 w-10 items-center justify-center rounded-full text-lg text-[#dfe7dc] transition hover:bg-white/10 hover:text-[#f5d77a]"
           onClick={handleShuffle}
         >
-          {isSuffle ? <FaShuffle /> : <FaRightLeft />}
+          {isShuffle ? <FaShuffle /> : <FaRightLeft />}
         </button>
         <button
           onClick={() => handleChangeSong('prev')}

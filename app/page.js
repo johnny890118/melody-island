@@ -3,7 +3,16 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import { doc, getDoc, setDoc, query, where, getDocs, collection } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  query,
+  where,
+  getDocs,
+  collection,
+  serverTimestamp,
+} from 'firebase/firestore';
 import { db } from './config/firebase';
 import { nanoid } from 'nanoid';
 import CustomDialog from '@/components/CustomDialog';
@@ -32,8 +41,16 @@ const HomePage = () => {
       id: newIslandId,
       playlist: [],
       currentVideo: '',
-      startTime: 0,
+      positionMs: 0,
       isPlaying: false,
+      playbackUpdatedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      lastChangedBy: user.email,
+      permissions: {
+        guestsCanControlPlayback: true,
+        guestsCanEditQueue: true,
+        guestsCanSkip: true,
+      },
     };
 
     await setDoc(doc(db, 'islands', newIslandId), islandData);
@@ -84,13 +101,13 @@ const HomePage = () => {
     };
 
     checkUserIsland();
-  }, [user, router]);
+  }, [dispatch, user, router]);
 
   useEffect(() => {
     if (user) return;
 
-    clearIsland();
-  }, [user]);
+    dispatch(clearIsland());
+  }, [dispatch, user]);
 
   return (
     <div className="relative flex w-full flex-col items-center overflow-hidden">

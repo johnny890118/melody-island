@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { fetchUser, logout, startGoogleLogin } from '@/store/authSlice';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from './ui/button';
 import { Dancing_Script } from 'next/font/google';
 
@@ -39,7 +40,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-2">
-            <img src="/music-island-logo.png" alt="Melody Island Logo" className="w-8 h-8" />
+            <Image src="/music-island-logo.png" alt="Melody Island Logo" width={32} height={32} />
 
             <Link
               href="/"
@@ -56,14 +57,16 @@ const Navbar = () => {
                 onClick={handleLogin}
                 className="glass-button flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold"
               >
-                <img src="/google.png" alt="Google Logo" className="w-3 h-3" />
+                <Image src="/google.png" alt="Google Logo" width={12} height={12} />
                 登入
               </Button>
             ) : (
               <div className="flex items-center gap-2 sm:gap-4">
-                <img
+                <Image
                   src={user.photoURL}
                   alt="user photo"
+                  width={32}
+                  height={32}
                   className="h-8 w-8 rounded-full border border-white/20"
                 />
                 <Button

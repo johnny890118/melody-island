@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { FaPlay, FaRegTrashAlt } from 'react-icons/fa';
 
 const PlaylistItem = ({
@@ -17,7 +18,13 @@ const PlaylistItem = ({
       key={videoId}
       className="group flex items-center rounded-lg border border-transparent p-2 transition hover:border-white/10 hover:bg-white/[0.07]"
     >
-      <img src={thumbnail} alt={title} className="mr-4 aspect-video w-16 rounded-md md:w-20" />
+      <Image
+        src={thumbnail}
+        alt={title}
+        width={80}
+        height={45}
+        className="mr-4 aspect-video w-16 rounded-md object-cover md:w-20"
+      />
       {videoId === currentVideo && <FaPlay className="mr-2 text-[#f5d77a]" />}
       <div
         className="flex-1 cursor-pointer truncate text-sm font-bold text-[#fff8e1] lg:text-base"

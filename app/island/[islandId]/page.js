@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, runTransaction, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '@/app/config/firebase';
 import Player from '@/components/Player';
 import Playlist from '@/components/Playlist';
@@ -10,6 +10,32 @@ import SearchArea from '@/components/SearchArea';
 import PlayerControls from '@/components/PlayerControls';
 import { LuCopy, LuCopyCheck } from 'react-icons/lu';
 import { setIsLoading } from '@/store/islandSlice';
+
+const DEFAULT_PERMISSIONS = {
+  guestsCanControlPlayback: true,
+  guestsCanEditQueue: true,
+  guestsCanSkip: true,
+};
+
+const timestampToMillis = (value) => {
+  if (!value) return 0;
+  if (typeof value === 'number') return value;
+  if (typeof value.toMillis === 'function') return value.toMillis();
+  if (typeof value.seconds === 'number') return value.seconds * 1000;
+
+  return 0;
+};
+
+const getPlaybackUpdatedAtMs = (data) =>
+  timestampToMillis(data?.playbackUpdatedAt) || Date.now();
+
+const getExpectedPlaybackSeconds = (data) => {
+  const positionMs = typeof data?.positionMs === 'number' ? data.positionMs : 0;
+
+  if (!data?.isPlaying) return positionMs / 1000;
+
+  return Math.max(0, (positionMs + Date.now() - getPlaybackUpdatedAtMs(data)) / 1000);
+};
 
 const IslandPage = () => {
   const { islandId, islandName, islandOwner } = useSelector((state) => state.island);
@@ -23,10 +49,55 @@ const IslandPage = () => {
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isMute, setIsMute] = useState(false);
-  const [isSuffle, setIsSuffle] = useState(false);
+  const [isShuffle, setIsShuffle] = useState(false);
   const searchQuery = useRef('');
   const player = useRef({});
+  const lastLoadedVideo = useRef('');
   const isOwner = islandOwner === authEmail;
+  const permissions = { ...DEFAULT_PERMISSIONS, ...(islandData?.permissions || {}) };
+  const canControlPlayback = isOwner || permissions.guestsCanControlPlayback;
+  const canEditQueue = isOwner || permissions.guestsCanEditQueue;
+  const canSkip = isOwner || permissions.guestsCanSkip || permissions.guestsCanControlPlayback;
+  const currentTrack = useMemo(
+    () => islandData?.playlist?.find(({ videoId }) => videoId === islandData?.currentVideo),
+    [islandData?.currentVideo, islandData?.playlist],
+  );
+
+  const getIslandDocRef = () => doc(db, 'islands', islandId);
+
+  const updatePlaybackState = async (payload) => {
+    await updateDoc(getIslandDocRef(), {
+      ...payload,
+      playbackUpdatedAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      lastChangedBy: authEmail || null,
+    });
+  };
+
+  const syncPlayerToSession = useCallback(
+    ({ forceLoad = false, seekThresholdSeconds = 2 } = {}) => {
+      if (!isPlayerReady || !isIslandDataReady || !islandData.currentVideo) return;
+
+      try {
+        const expectedSeconds = getExpectedPlaybackSeconds(islandData);
+        const playerCurrentTime = player.current.getCurrentTime?.() || 0;
+        const isNewVideo = lastLoadedVideo.current !== islandData.currentVideo;
+
+        if (forceLoad || isNewVideo) {
+          player.current.loadVideoById(islandData.currentVideo, expectedSeconds);
+          lastLoadedVideo.current = islandData.currentVideo;
+          return;
+        }
+
+        if (Math.abs(playerCurrentTime - expectedSeconds) > seekThresholdSeconds) {
+          player.current.seekTo(expectedSeconds, true);
+        }
+      } catch (e) {
+        console.log('Error syncing player:', e);
+      }
+    },
+    [isIslandDataReady, isPlayerReady, islandData],
+  );
 
   const onPlayerReady = (event) => {
     if (typeof event.target !== 'object' || !Object.keys(event.target).length) return;
@@ -40,6 +111,10 @@ const IslandPage = () => {
 
   const handleChangeSong = async (direction) => {
     if (!isIslandDataReady || !islandData?.playlist?.length) return;
+    if (!canSkip) {
+      alert('目前只有島主可以切歌');
+      return;
+    }
 
     const playlist = islandData.playlist;
     const currentVideo = islandData.currentVideo;
@@ -54,9 +129,9 @@ const IslandPage = () => {
 
     const newVideo = playlist[nextIndex];
 
-    await updateDoc(doc(db, 'islands', islandId), {
+    await updatePlaybackState({
       currentVideo: newVideo.videoId,
-      startTime: new Date().getTime(),
+      positionMs: 0,
       isPlaying: true,
     });
   };
@@ -102,82 +177,129 @@ const IslandPage = () => {
 
   const handleAddSong = async (videoId, title, thumbnail) => {
     if (!isIslandDataReady) return;
-
-    const playlist = islandData.playlist || [];
-
-    if (playlist.some((item) => item.videoId === videoId)) {
-      alert('該項目已在播放清單中');
+    if (!canEditQueue) {
+      alert('目前只有島主可以編輯播放清單');
       return;
     }
 
-    const newPlaylist = [...playlist, { videoId, title, thumbnail }];
-    await updateDoc(doc(db, 'islands', islandId), {
-      playlist: newPlaylist,
-    });
+    try {
+      await runTransaction(db, async (transaction) => {
+        const islandDocRef = getIslandDocRef();
+        const islandSnap = await transaction.get(islandDocRef);
+        const playlist = islandSnap.data()?.playlist || [];
+
+        if (playlist.some((item) => item.videoId === videoId)) {
+          throw new Error('DUPLICATE_SONG');
+        }
+
+        transaction.update(islandDocRef, {
+          playlist: [...playlist, { videoId, title, thumbnail, addedBy: authEmail || null }],
+          updatedAt: serverTimestamp(),
+          lastChangedBy: authEmail || null,
+        });
+      });
+    } catch (e) {
+      if (e.message === 'DUPLICATE_SONG') {
+        alert('該項目已在播放清單中');
+        return;
+      }
+
+      console.log('add song error:', e);
+    }
   };
 
   const handleRemoveSong = async (index) => {
     if (!isIslandDataReady) return;
+    if (!canEditQueue) {
+      alert('目前只有島主可以編輯播放清單');
+      return;
+    }
 
-    const playlist = islandData.playlist;
-    const currentVideo = islandData.currentVideo;
+    try {
+      await runTransaction(db, async (transaction) => {
+        const islandDocRef = getIslandDocRef();
+        const islandSnap = await transaction.get(islandDocRef);
+        const data = islandSnap.data();
+        const playlist = data?.playlist || [];
+        const currentVideo = data?.currentVideo || '';
 
-    const isRemoveCurrentVideo = playlist[index].videoId === currentVideo;
-    const newPlaylist = playlist.filter((_, i) => i !== index);
-    const nextVideoId = newPlaylist.length
-      ? newPlaylist[index]?.videoId || newPlaylist[0]?.videoId || ''
-      : '';
+        if (!playlist[index]) return;
 
-    if (isRemoveCurrentVideo) {
-      await updateDoc(doc(db, 'islands', islandId), {
-        currentVideo: nextVideoId,
-        startTime: new Date().getTime(),
-        playlist: newPlaylist,
+        const isRemoveCurrentVideo = playlist[index].videoId === currentVideo;
+        const newPlaylist = playlist.filter((_, i) => i !== index);
+        const nextVideoId = newPlaylist.length
+          ? newPlaylist[index]?.videoId || newPlaylist[0]?.videoId || ''
+          : '';
+        const payload = {
+          playlist: newPlaylist,
+          updatedAt: serverTimestamp(),
+          lastChangedBy: authEmail || null,
+        };
+
+        if (isRemoveCurrentVideo) {
+          payload.currentVideo = nextVideoId;
+          payload.positionMs = 0;
+          payload.isPlaying = Boolean(nextVideoId);
+          payload.playbackUpdatedAt = serverTimestamp();
+        }
+
+        transaction.update(islandDocRef, payload);
       });
-    } else {
-      await updateDoc(doc(db, 'islands', islandId), {
-        playlist: newPlaylist,
-      });
+    } catch (e) {
+      console.log('remove song error:', e);
     }
   };
 
   const playFromPlaylist = async (videoId) => {
     if (!isIslandDataReady || !isPlayerReady) return;
+    if (!canControlPlayback) {
+      alert('目前只有島主可以控制播放');
+      return;
+    }
 
-    await updateDoc(doc(db, 'islands', islandId), {
+    await updatePlaybackState({
       currentVideo: videoId,
-      startTime: new Date().getTime(),
+      positionMs: 0,
       isPlaying: true,
     });
   };
 
   const handlePlayPause = async () => {
     if (!isIslandDataReady || !isPlayerReady) return;
+    if (!canControlPlayback) {
+      alert('目前只有島主可以控制播放');
+      return;
+    }
 
     const isPlaying = !islandData.isPlaying;
+    const positionMs = Math.max(0, Math.round((player.current.getCurrentTime?.() || 0) * 1000));
 
-    if (isPlaying) {
-      const currentTime = player.current.getCurrentTime() || 0;
-      const newStartTime = new Date().getTime() - currentTime * 1000;
-
-      await updateDoc(doc(db, 'islands', islandId), {
-        isPlaying,
-        startTime: newStartTime,
-      });
-    } else {
-      await updateDoc(doc(db, 'islands', islandId), {
-        isPlaying,
-      });
-    }
+    await updatePlaybackState({
+      isPlaying,
+      positionMs,
+    });
   };
 
   const handlePlay = async () => {
     if (!isIslandDataReady || !isPlayerReady) return;
+    if (!canControlPlayback) {
+      alert('目前只有島主可以控制播放');
+      return;
+    }
 
     try {
-      await updateDoc(doc(db, 'islands', islandId), {
+      const currentVideo = islandData.currentVideo || islandData.playlist?.[0]?.videoId || '';
+      if (!currentVideo) return;
+
+      const isSameVideo = currentVideo === islandData.currentVideo;
+      const positionMs = isSameVideo
+        ? Math.max(0, Math.round((player.current.getCurrentTime?.() || 0) * 1000))
+        : 0;
+
+      await updatePlaybackState({
+        currentVideo,
         isPlaying: true,
-        startTime: new Date().getTime(),
+        positionMs,
       });
     } catch (e) {
       console.log('Error updating play:', e);
@@ -219,7 +341,7 @@ const IslandPage = () => {
       doc(db, 'islands', islandId),
       (docSnap) => {
         if (docSnap.exists()) {
-          setIslandData(docSnap.data());
+          setIslandData(docSnap.data({ serverTimestamps: 'estimate' }));
         }
       },
       (e) => {
@@ -242,13 +364,17 @@ const IslandPage = () => {
   useEffect(() => {
     if (!isPlayerReady || !isIslandDataReady || !islandData.currentVideo) return;
 
-    try {
-      const elapsedTime = (new Date().getTime() - islandData.startTime) / 1000;
-      player.current.loadVideoById(islandData.currentVideo, elapsedTime);
-    } catch (e) {
-      console.log('Error loading video:', e);
-    }
-  }, [islandData.currentVideo, islandData.startTime, isPlayerReady, isIslandDataReady]);
+    syncPlayerToSession({
+      forceLoad: lastLoadedVideo.current !== islandData.currentVideo,
+      seekThresholdSeconds: 0.75,
+    });
+  }, [
+    islandData.currentVideo,
+    islandData.playbackUpdatedAt,
+    isPlayerReady,
+    isIslandDataReady,
+    syncPlayerToSession,
+  ]);
 
   useEffect(() => {
     if (!isPlayerReady || !isIslandDataReady) return;
@@ -265,12 +391,29 @@ const IslandPage = () => {
   }, [islandData.isPlaying, isPlayerReady, isIslandDataReady]);
 
   useEffect(() => {
+    if (!isPlayerReady || !isIslandDataReady || !islandData.isPlaying) return;
+
+    const syncInterval = setInterval(() => {
+      syncPlayerToSession({ seekThresholdSeconds: 2.5 });
+    }, 5000);
+
+    return () => clearInterval(syncInterval);
+  }, [
+    islandData.currentVideo,
+    islandData.isPlaying,
+    islandData.playbackUpdatedAt,
+    isPlayerReady,
+    isIslandDataReady,
+    syncPlayerToSession,
+  ]);
+
+  useEffect(() => {
     if (!isPlayerReady) {
       dispatch(setIsLoading(true));
     } else {
       dispatch(setIsLoading(false));
     }
-  }, [isPlayerReady]);
+  }, [dispatch, isPlayerReady]);
 
   useEffect(() => {
     if (window.innerWidth < 1024) {
@@ -298,10 +441,7 @@ const IslandPage = () => {
             <p className="glass-chip islandInfoText rounded-lg px-3 py-2">島嶼名稱：{islandName}</p>
           </div>
         }
-        nowPlayingTitle={
-          islandData?.playlist?.find(({ videoId }) => videoId === islandData?.currentVideo)
-            ?.title || ''
-        }
+        nowPlayingTitle={currentTrack?.title || ''}
         handlePlay={handlePlay}
       />
 
@@ -321,21 +461,15 @@ const IslandPage = () => {
       />
 
       <PlayerControls
-        thumbnail={
-          islandData?.playlist?.find(({ videoId }) => videoId === islandData?.currentVideo)
-            ?.thumbnail || ''
-        }
-        title={
-          islandData?.playlist?.find(({ videoId }) => videoId === islandData?.currentVideo)
-            ?.title || ''
-        }
+        thumbnail={currentTrack?.thumbnail || ''}
+        title={currentTrack?.title || ''}
         handleChangeSong={handleChangeSong}
         handlePlayPause={handlePlayPause}
         isPlaying={islandData?.isPlaying || false}
         isMute={isMute}
         handleMute={() => setIsMute((prev) => !prev)}
-        isSuffle={isSuffle}
-        handleShuffle={() => setIsSuffle((prev) => !prev)}
+        isShuffle={isShuffle}
+        handleShuffle={() => setIsShuffle((prev) => !prev)}
       />
     </div>
   );
