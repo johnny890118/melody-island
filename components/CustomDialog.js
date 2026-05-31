@@ -34,9 +34,9 @@ const CustomDialog = ({
         <DialogTrigger className="heroBtn">{triggerLabel}</DialogTrigger>
       )}
 
-      <DialogContent className="glass-panel mx-auto max-w-lg rounded-lg p-6 text-white">
-        <div className="space-y-6">
-          <DialogTitle className="text-lg font-bold text-[#fff8e1] sm:text-xl">{title}</DialogTitle>
+      <DialogContent className="glass-panel liquid-glass mx-auto max-w-[92vw] rounded-2xl border-white/20 p-6 text-white sm:max-w-lg">
+        <div className="relative z-10 space-y-6">
+          <DialogTitle className="text-xl font-black text-[#fff8e1] sm:text-2xl">{title}</DialogTitle>
           <DialogDescription className="text-sm text-[#dfe7dc] sm:text-base">
             {description}
           </DialogDescription>
@@ -49,14 +49,14 @@ const CustomDialog = ({
                 placeholder={placeholder}
                 value={values[label] || ''}
                 onChange={(e) => handleChange(label, e.target.value)}
-                className="w-full rounded-lg border border-white/10 bg-black/25 px-4 py-2 text-white placeholder:text-white/40 focus:border-[#f5d77a]/60 focus:outline-none focus:ring-2 focus:ring-[#f5d77a]/20"
+                className="w-full rounded-full border border-white/15 bg-white/[0.08] px-4 py-2 text-white placeholder:text-white/45 focus:border-[#8df5ff]/70 focus:outline-none focus:ring-2 focus:ring-[#8df5ff]/20"
               />
             ))}
           </div>
 
           <Button
             onClick={handleConfirm}
-            className="glass-button-primary w-full rounded-lg py-2 font-bold"
+            className="glass-button-primary w-full rounded-full py-2.5 font-bold"
           >
             {confirmLabel}
           </Button>

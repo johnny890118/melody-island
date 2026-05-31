@@ -113,18 +113,20 @@ const HomePage = () => {
     <div className="relative flex w-full flex-col items-center overflow-hidden">
       <Hero />
 
-      <div className="absolute left-1/2 top-24 w-[min(92vw,520px)] -translate-x-1/2 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-4 shadow-xl shadow-black/20 backdrop-blur-md sm:px-5 lg:top-28">
-        <div className="space-y-1.5 text-center">
-          <h1 className="text-xl font-bold tracking-normal text-[#fff8e1] sm:text-2xl">
+      <div className="liquid-glass absolute left-1/2 top-24 z-30 w-[min(92vw,560px)] -translate-x-1/2 rounded-2xl border border-white/20 px-4 py-5 text-center shadow-xl shadow-black/25 backdrop-blur-2xl sm:px-6 sm:py-6 lg:top-28">
+        <div className="relative z-10 space-y-2">
+          <h1 className="text-2xl font-black tracking-normal text-[#8df5ff] drop-shadow-[0_0_18px_rgba(141,245,255,0.35)] sm:text-4xl">
             一起登島，聆聽共鳴
           </h1>
-          <p className="text-xs text-[#dfe7dc] sm:text-sm">在每一座島上，分享你們的音樂</p>
+          <p className="mx-auto max-w-md text-sm leading-6 text-[#dfe7dc] sm:text-base">
+            把音樂放進星空裡，和朋友一起在夜晚的島上同步播放。
+          </p>
         </div>
 
-        <div className="mt-4 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2">
+        <div className="relative z-10 mt-5 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
           {islandId ? (
             <Button
-              className="glass-button min-h-12 w-full rounded-lg border-[#f5d77a]/80 bg-[#f5d77a]/20 px-3 py-2.5 text-xs font-bold leading-tight shadow-[#f5d77a]/20 ring-1 ring-[#f5d77a]/45 hover:border-[#f5d77a] sm:text-sm"
+              className="glass-button min-h-12 w-full rounded-lg border-[#8df5ff]/70 bg-[#8df5ff]/15 px-3 py-2.5 text-xs font-bold leading-tight shadow-[#8df5ff]/20 ring-1 ring-[#8df5ff]/35 hover:border-[#8df5ff] sm:text-sm"
               onClick={() => router.push(`/island/${islandId}`)}
             >
               我的島嶼

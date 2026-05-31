@@ -465,53 +465,65 @@ const IslandPage = () => {
   }, []);
 
   return (
-    <div className="mx-auto mt-24 flex min-h-dvh w-full max-w-7xl flex-col justify-between gap-8 px-4 pb-32 sm:px-6 lg:px-8">
-      <Player
-        videoId={islandData?.currentVideo || ''}
-        onPlayerReady={onPlayerReady}
-        onPlayerStateChange={onPlayerStateChange}
-        isPlaying={islandData?.isPlaying || false}
-        topInfo={
-          <div className="flex justify-between gap-2 md:flex-col md:items-start">
-            <div className="glass-chip flex items-center gap-2 rounded-lg px-3 py-2">
-              <p className="islandInfoText">島嶼ID：{islandId}</p>
-              <button className="text-[#fff8e1] hover:text-[#f5d77a]" onClick={() => handleCopy(islandId)}>
-                {isCopied ? <LuCopyCheck /> : <LuCopy />}
-              </button>
+    <div className="night-sky relative min-h-dvh overflow-hidden">
+      <div className="star-dust pointer-events-none fixed inset-0 opacity-35" />
+      <div className="aurora-ribbon pointer-events-none fixed -left-24 -right-24 top-12 h-96 opacity-70" />
+
+      <main className="relative z-10 mx-auto mt-20 flex min-h-dvh w-full max-w-7xl flex-col justify-between gap-5 px-3 pb-32 pt-4 sm:mt-24 sm:gap-7 sm:px-6 lg:px-8">
+        <Player
+          videoId={islandData?.currentVideo || ''}
+          onPlayerReady={onPlayerReady}
+          onPlayerStateChange={onPlayerStateChange}
+          isPlaying={islandData?.isPlaying || false}
+          topInfo={
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-between md:flex-col md:items-start">
+              <div className="glass-chip flex min-w-0 items-center gap-2 rounded-full px-3 py-2">
+                <p className="islandInfoText truncate">島嶼ID：{islandId}</p>
+                <button
+                  className="shrink-0 text-[#fff8e1] transition hover:text-[#8df5ff]"
+                  onClick={() => handleCopy(islandId)}
+                >
+                  {isCopied ? <LuCopyCheck /> : <LuCopy />}
+                </button>
+              </div>
+              <p className="glass-chip islandInfoText min-w-0 truncate rounded-full px-3 py-2">
+                島嶼名稱：{islandName}
+              </p>
             </div>
-            <p className="glass-chip islandInfoText rounded-lg px-3 py-2">島嶼名稱：{islandName}</p>
-          </div>
-        }
-        nowPlayingTitle={currentTrack?.title || ''}
-        handlePlay={handlePlay}
-      />
+          }
+          nowPlayingTitle={currentTrack?.title || ''}
+          handlePlay={handlePlay}
+        />
 
-      <Playlist
-        playlist={visiblePlaylist}
-        currentVideo={islandData?.currentVideo || ''}
-        playFromPlaylist={playFromPlaylist}
-        handleRemoveSong={handleRemoveSong}
-      />
+        <div className="flex flex-col gap-5">
+          <Playlist
+            playlist={visiblePlaylist}
+            currentVideo={islandData?.currentVideo || ''}
+            playFromPlaylist={playFromPlaylist}
+            handleRemoveSong={handleRemoveSong}
+          />
 
-      <SearchArea
-        searchQueryOnChange={(value) => (searchQuery.current = value)}
-        handleSearchSongs={handleSearchSongs}
-        isSearching={isSearching}
-        searchResults={searchResults}
-        handleAddSong={handleAddSong}
-      />
+          <SearchArea
+            searchQueryOnChange={(value) => (searchQuery.current = value)}
+            handleSearchSongs={handleSearchSongs}
+            isLoading={isSearching}
+            searchResults={searchResults}
+            handleAddSong={handleAddSong}
+          />
+        </div>
 
-      <PlayerControls
-        thumbnail={currentTrack?.thumbnail || ''}
-        title={currentTrack?.title || ''}
-        handleChangeSong={handleChangeSong}
-        handlePlayPause={handlePlayPause}
-        isPlaying={islandData?.isPlaying || false}
-        isMute={isMute}
-        handleMute={() => setIsMute((prev) => !prev)}
-        isShuffle={isShuffle}
-        handleShuffle={() => setIsShuffle((prev) => !prev)}
-      />
+        <PlayerControls
+          thumbnail={currentTrack?.thumbnail || ''}
+          title={currentTrack?.title || ''}
+          handleChangeSong={handleChangeSong}
+          handlePlayPause={handlePlayPause}
+          isPlaying={islandData?.isPlaying || false}
+          isMute={isMute}
+          handleMute={() => setIsMute((prev) => !prev)}
+          isShuffle={isShuffle}
+          handleShuffle={() => setIsShuffle((prev) => !prev)}
+        />
+      </main>
     </div>
   );
 };

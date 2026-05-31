@@ -3,9 +3,10 @@ import React from 'react';
 
 const Loader = () => {
   return (
-    <Html>
-      <div className="flex items-center justify-self-center">
-        <div className="h-20 w-20 animate-spin rounded-full border-2 border-[#f5d77a]/30 border-t-[#f5d77a]"></div>
+    <Html center>
+      <div className="liquid-glass flex items-center gap-3 rounded-full border border-white/20 px-4 py-3 text-[#fff8e1] shadow-2xl backdrop-blur-2xl">
+        <div className="loading-orb h-9 w-9 shadow-[0_0_26px_rgba(141,245,255,0.38)]" />
+        <p className="whitespace-nowrap text-xs font-bold">載入星空島嶼...</p>
       </div>
     </Html>
   );

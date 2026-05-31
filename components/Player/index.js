@@ -15,9 +15,9 @@ const Player = ({
   handlePlay,
 }) => {
   return (
-    <div className="glass-panel flex w-full flex-col gap-4 rounded-lg p-3 md:flex-row lg:p-4">
-      <div className="w-full md:hidden">{topInfo}</div>
-      <div className="pointer-events-none aspect-video w-full overflow-hidden rounded-lg border border-white/10 bg-black/30 md:basis-1/2">
+    <div className="glass-panel liquid-glass flex w-full flex-col gap-4 rounded-2xl p-3 md:flex-row lg:p-4">
+      <div className="relative z-10 w-full md:hidden">{topInfo}</div>
+      <div className="pointer-events-none relative z-10 aspect-video w-full overflow-hidden rounded-xl border border-white/15 bg-black/35 shadow-2xl shadow-black/25 md:basis-1/2">
         <YouTube
           className="w-full h-full player"
           videoId={videoId}
@@ -34,16 +34,16 @@ const Player = ({
           }}
         />
       </div>
-      <div className="flex w-full flex-col justify-between gap-4 md:basis-1/2">
-        <div className="w-full hidden md:block">{topInfo}</div>
+      <div className="relative z-10 flex w-full flex-col justify-between gap-5 md:basis-1/2">
+        <div className="hidden w-full md:block">{topInfo}</div>
         <div className="flex flex-col gap-1 lg:gap-2">
-          <p className="text-sm text-[#dfe7dc] lg:text-2xl">現正播放：</p>
-          <p className="font-bold text-[#fff8e1] lg:text-3xl">
+          <p className="text-sm font-bold text-[#8df5ff] drop-shadow lg:text-xl">現正播放：</p>
+          <p className="line-clamp-3 text-xl font-black text-[#fff8e1] drop-shadow lg:text-3xl">
             {nowPlayingTitle || '等待音樂登島'}
           </p>
         </div>
         <button
-          className="glass-button-primary flex items-center justify-center gap-2 rounded-lg p-2 text-sm font-bold md:w-28 md:p-3 lg:w-32 lg:p-4 lg:text-base"
+          className="glass-button-primary flex items-center justify-center gap-2 rounded-full p-3 text-sm font-bold md:w-32 lg:p-4 lg:text-base"
           onClick={handlePlay}
         >
           <FaPlay />
