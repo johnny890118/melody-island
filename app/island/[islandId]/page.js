@@ -50,6 +50,7 @@ const IslandPage = () => {
   const [isCopied, setIsCopied] = useState(false);
   const [isMute, setIsMute] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
+  const [optimisticSongs, setOptimisticSongs] = useState([]);
   const searchQuery = useRef('');
   const player = useRef({});
   const lastLoadedVideo = useRef('');
@@ -58,9 +59,16 @@ const IslandPage = () => {
   const canControlPlayback = isOwner || permissions.guestsCanControlPlayback;
   const canEditQueue = isOwner || permissions.guestsCanEditQueue;
   const canSkip = isOwner || permissions.guestsCanSkip || permissions.guestsCanControlPlayback;
+  const playlist = useMemo(() => islandData?.playlist || [], [islandData?.playlist]);
+  const visiblePlaylist = useMemo(() => {
+    const savedVideoIds = new Set(playlist.map(({ videoId }) => videoId));
+    const pendingSongs = optimisticSongs.filter(({ videoId }) => !savedVideoIds.has(videoId));
+
+    return [...playlist, ...pendingSongs];
+  }, [optimisticSongs, playlist]);
   const currentTrack = useMemo(
-    () => islandData?.playlist?.find(({ videoId }) => videoId === islandData?.currentVideo),
-    [islandData?.currentVideo, islandData?.playlist],
+    () => visiblePlaylist.find(({ videoId }) => videoId === islandData?.currentVideo),
+    [islandData?.currentVideo, visiblePlaylist],
   );
 
   const getIslandDocRef = () => doc(db, 'islands', islandId);
@@ -182,6 +190,24 @@ const IslandPage = () => {
       return;
     }
 
+    if (
+      playlist.some((item) => item.videoId === videoId) ||
+      optimisticSongs.some((item) => item.videoId === videoId)
+    ) {
+      alert('該項目已在播放清單中');
+      return;
+    }
+
+    const optimisticSong = {
+      videoId,
+      title,
+      thumbnail,
+      addedBy: authEmail || null,
+      isPending: true,
+    };
+
+    setOptimisticSongs((prev) => [...prev, optimisticSong]);
+
     try {
       await runTransaction(db, async (transaction) => {
         const islandDocRef = getIslandDocRef();
@@ -200,11 +226,13 @@ const IslandPage = () => {
       });
     } catch (e) {
       if (e.message === 'DUPLICATE_SONG') {
+        setOptimisticSongs((prev) => prev.filter((item) => item.videoId !== videoId));
         alert('該項目已在播放清單中');
         return;
       }
 
       console.log('add song error:', e);
+      setOptimisticSongs((prev) => prev.filter((item) => item.videoId !== videoId));
     }
   };
 
@@ -212,6 +240,12 @@ const IslandPage = () => {
     if (!isIslandDataReady) return;
     if (!canEditQueue) {
       alert('目前只有島主可以編輯播放清單');
+      return;
+    }
+
+    const song = visiblePlaylist[index];
+    if (song?.isPending) {
+      setOptimisticSongs((prev) => prev.filter((item) => item.videoId !== song.videoId));
       return;
     }
 
@@ -362,6 +396,13 @@ const IslandPage = () => {
   }, [islandData]);
 
   useEffect(() => {
+    if (!playlist.length || !optimisticSongs.length) return;
+
+    const savedVideoIds = new Set(playlist.map(({ videoId }) => videoId));
+    setOptimisticSongs((prev) => prev.filter(({ videoId }) => !savedVideoIds.has(videoId)));
+  }, [optimisticSongs.length, playlist]);
+
+  useEffect(() => {
     if (!isPlayerReady || !isIslandDataReady || !islandData.currentVideo) return;
 
     syncPlayerToSession({
@@ -446,7 +487,7 @@ const IslandPage = () => {
       />
 
       <Playlist
-        playlist={islandData?.playlist || []}
+        playlist={visiblePlaylist}
         currentVideo={islandData?.currentVideo || ''}
         playFromPlaylist={playFromPlaylist}
         handleRemoveSong={handleRemoveSong}

@@ -9,12 +9,13 @@ const Playlist = ({ playlist, currentVideo, playFromPlaylist, handleRemoveSong }
       <p className="section-title"># 播放清單</p>
       <div className="section-divider"></div>
       {playlist.length > 0 ? (
-        playlist.map(({ videoId, title, thumbnail }, index) => (
+        playlist.map(({ videoId, title, thumbnail, isPending }, index) => (
           <PlaylistItem
             key={videoId}
             videoId={videoId}
             title={title}
             thumbnail={thumbnail}
+            isPending={isPending}
             currentVideo={currentVideo}
             playFromPlaylist={playFromPlaylist}
             handleRemoveSong={handleRemoveSong}

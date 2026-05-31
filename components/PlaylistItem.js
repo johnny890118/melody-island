@@ -8,6 +8,7 @@ const PlaylistItem = ({
   videoId,
   thumbnail,
   title,
+  isPending,
   currentVideo,
   playFromPlaylist,
   handleRemoveSong,
@@ -16,7 +17,9 @@ const PlaylistItem = ({
   return (
     <div
       key={videoId}
-      className="group flex items-center rounded-lg border border-transparent p-2 transition hover:border-white/10 hover:bg-white/[0.07]"
+      className={`group flex items-center rounded-lg border border-transparent p-2 transition hover:border-white/10 hover:bg-white/[0.07] ${
+        isPending ? 'opacity-60' : ''
+      }`}
     >
       <Image
         src={thumbnail}
@@ -27,8 +30,12 @@ const PlaylistItem = ({
       />
       {videoId === currentVideo && <FaPlay className="mr-2 text-[#f5d77a]" />}
       <div
-        className="flex-1 cursor-pointer truncate text-sm font-bold text-[#fff8e1] lg:text-base"
-        onClick={() => playFromPlaylist(videoId)}
+        className={`flex-1 truncate text-sm font-bold text-[#fff8e1] lg:text-base ${
+          isPending ? 'cursor-default' : 'cursor-pointer'
+        }`}
+        onClick={() => {
+          if (!isPending) playFromPlaylist(videoId);
+        }}
       >
         {title}
       </div>
