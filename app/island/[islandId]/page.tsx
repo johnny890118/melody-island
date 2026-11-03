@@ -112,7 +112,7 @@ export default function IslandPage() {
               return;
             }
             setGate('ready');
-            setConnection(snapshot.metadata.fromCache ? 'cached' : 'synced');
+            setConnection(!navigator.onLine ? 'offline' : snapshot.metadata.fromCache ? 'cached' : 'synced');
           },
           (error) => {
             setGate(error.code === 'permission-denied' ? 'join' : 'error');
@@ -194,6 +194,7 @@ export default function IslandPage() {
     const leaseTimer = setInterval(heartbeat, 10000);
     const clockTimer = setInterval(calibrate, 60000);
     const online = () => {
+      setConnection('cached');
       calibrate();
       heartbeat();
     };

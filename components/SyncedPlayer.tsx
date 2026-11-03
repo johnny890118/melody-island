@@ -69,7 +69,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
       enableAudio: () => {
         try {
           player.current?.unMute();
-          player.current?.playVideo();
+          if (latest.current.isPlaying) player.current?.playVideo();
           setMuted(false);
         } catch {}
       },
@@ -91,6 +91,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     session.currentVideo,
     session.isPlaying,
     session.playbackUpdatedAt,
+    session.positionMs,
     clockOffset,
     sync,
   ]);

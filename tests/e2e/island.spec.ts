@@ -369,3 +369,43 @@ test('search keeps the latest result when an earlier request is interrupted', as
     await context.close();
   }
 });
+
+test('a disconnected friend catches up with canonical playback after reconnecting', async ({ browser, request }) => {
+  const owner = await identity(request);
+  const guest = await identity(request);
+  const created = await post(request, '/api/islands', owner, {
+    islandName: '重連測試島', islandPassword: 'friends-only-123',
+  });
+  expect(created.status()).toBe(201);
+  const { id } = await created.json();
+  expect((await post(request, `/api/islands/${id}/join`, guest, { islandPassword: 'friends-only-123' })).status()).toBe(200);
+  const context = await browser.newContext();
+  try {
+    const image = readFileSync('public/music-island-logo.png');
+    await context.route('**/_next/image?**', (route) => route.fulfill({ contentType: 'image/png', body: image }));
+    const page = await context.newPage();
+    await login(page, guest);
+    await page.goto(`/island/${id}`);
+    await expect(page.getByTestId('test-player')).toBeVisible();
+    await expect(page.getByText(/已連線 · 2 位成員/)).toBeVisible();
+    await context.setOffline(true);
+    await expect(page.getByText(/離線 · 2 位成員/)).toBeVisible();
+    expect((await post(request, `/api/islands/${id}/commands`, owner, {
+      type: 'add', song: { videoId: 'ddddddddddd', title: '離線期間加入的新歌' }, commandId: crypto.randomUUID(),
+    })).status()).toBe(200);
+    const room = parseRoom((await adminDb().doc(`islands/${id}`).get()).data());
+    expect((await post(request, `/api/islands/${id}/commands`, owner, {
+      type: 'play', expectedVersion: room.version, commandId: crypto.randomUUID(),
+    })).status()).toBe(200);
+    await expect(page.getByTestId('test-player')).toHaveAttribute('data-video', '');
+    await context.setOffline(false);
+    await expect(page.getByTestId('test-player')).toHaveAttribute('data-video', 'ddddddddddd');
+    await expect(page.getByTestId('test-player')).toHaveAttribute('data-playing', 'true');
+    await expect(page.getByText(/已連線 · 2 位成員/)).toBeVisible();
+    await page.reload();
+    await expect(page.getByTestId('test-player')).toHaveAttribute('data-video', 'ddddddddddd');
+    await expect(page.getByTestId('test-player')).toHaveAttribute('data-playing', 'true');
+  } finally {
+    await context.close();
+  }
+});

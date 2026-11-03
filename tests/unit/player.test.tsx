@@ -5,7 +5,8 @@ interface PlayerCallbacks {
   onStateChange(event: PlayerEvent): void;
 }
 // @vitest-environment jsdom
-import React from 'react';
+import React, { createRef } from 'react';
+import type { PlayerHandle } from '../../lib/types';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { act, cleanup, render } from '@testing-library/react';
 const hooks = vi.hoisted(() => ({
@@ -45,6 +46,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 it('cues a newly joined paused track without loading it into playback', () => {
@@ -76,4 +78,58 @@ it('does not advance when a paused player emits ended', () => {
   act(() => hooks.ready({ target }));
   act(() => hooks.state({ data: 0, target }));
   expect(callbacks.onEnded).not.toHaveBeenCalled();
+});
+
+it('enabling audio preserves a paused room and plays only a playing room', () => {
+  const ref = createRef<PlayerHandle>();
+  const view = render(<SyncedPlayer ref={ref} session={base} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  act(() => ref.current?.enableAudio());
+  expect(target.unMute).toHaveBeenCalled();
+  expect(target.playVideo).not.toHaveBeenCalled();
+  view.rerender(<SyncedPlayer ref={ref} session={{ ...base, isPlaying: true }} clockOffset={0} {...callbacks} />);
+  target.playVideo.mockClear();
+  act(() => ref.current?.enableAudio());
+  expect(target.playVideo).toHaveBeenCalledOnce();
+});
+it('applies a corrected canonical position even if the playback timestamp is unchanged', () => {
+  const view = render(<SyncedPlayer session={base} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  view.rerender(<SyncedPlayer session={{ ...base, positionMs: 30000 }} clockOffset={0} {...callbacks} />);
+  expect(target.seekTo).toHaveBeenCalledWith(30, true);
+});
+it('skips hidden-tab polling, resyncs on return and removes reconnect listeners on unmount', () => {
+  vi.useFakeTimers();
+  const hidden = vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
+  const view = render(<SyncedPlayer session={base} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  target.seekTo.mockClear();
+  act(() => vi.advanceTimersByTime(10000));
+  expect(target.seekTo).not.toHaveBeenCalled();
+  hidden.mockReturnValue(false);
+  act(() => document.dispatchEvent(new Event('visibilitychange')));
+  expect(target.seekTo).toHaveBeenCalledWith(12, true);
+  target.seekTo.mockClear();
+  act(() => window.dispatchEvent(new Event('online')));
+  expect(target.seekTo).toHaveBeenCalledOnce();
+  view.unmount();
+  target.seekTo.mockClear();
+  act(() => {
+    window.dispatchEvent(new Event('online'));
+    document.dispatchEvent(new Event('visibilitychange'));
+    vi.advanceTimersByTime(20000);
+  });
+  expect(target.seekTo).not.toHaveBeenCalled();
+});
+it('reports a connection timeout, but cancels it once the player is ready', () => {
+  vi.useFakeTimers();
+  const first = render(<SyncedPlayer session={base} clockOffset={0} {...callbacks} />);
+  act(() => vi.advanceTimersByTime(15000));
+  expect(callbacks.onError).toHaveBeenCalledOnce();
+  first.unmount();
+  callbacks.onError.mockClear();
+  render(<SyncedPlayer session={base} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  act(() => vi.advanceTimersByTime(20000));
+  expect(callbacks.onError).not.toHaveBeenCalled();
 });
