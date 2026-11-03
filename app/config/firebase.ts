@@ -1,4 +1,6 @@
+import { initializeAppCheck, ReCaptchaEnterpriseProvider, type AppCheck } from 'firebase/app-check';
 declare global {
+  var __melodyAppCheck: AppCheck | undefined;
   var __melodyEmulatorsConnected: boolean | undefined;
 }
 import { getApp, getApps, initializeApp } from 'firebase/app';
@@ -16,6 +18,15 @@ const firebaseConfig = {
   appId: emulator ? 'demo-app' : process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY;
+if (!emulator && typeof window !== 'undefined' && siteKey && !globalThis.__melodyAppCheck) {
+  globalThis.__melodyAppCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider(siteKey),
+    isTokenAutoRefreshEnabled: true,
+  });
+}
+export const appCheck =
+  !emulator && typeof window !== 'undefined' ? globalThis.__melodyAppCheck : undefined;
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 if (emulator && typeof window !== 'undefined' && !globalThis.__melodyEmulatorsConnected) {

@@ -1,4 +1,5 @@
-import { auth } from '@/app/config/firebase';
+import { getToken } from 'firebase/app-check';
+import { auth, appCheck } from '@/app/config/firebase';
 import { signInAnonymously, type User, type UserCredential } from 'firebase/auth';
 import { ApiError } from './errors';
 let guestLogin: Promise<UserCredential> | undefined;
@@ -13,10 +14,19 @@ export async function ensureUser(): Promise<User> {
 export async function api<T>(path: string, body?: unknown, options: RequestInit = {}): Promise<T> {
   const user = await ensureUser();
   const token = await user.getIdToken();
+  let attestation: string | undefined;
+  if (appCheck) {
+    try {
+      attestation = (await getToken(appCheck)).token;
+    } catch {
+      throw new ApiError('裝置驗證失敗，請重新整理後再試。', 403);
+    }
+  }
   const response = await fetch(path, {
     method: body === undefined ? 'GET' : 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
+      ...(attestation ? { 'X-Firebase-AppCheck': attestation } : {}),
       ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
     },
     body: body === undefined ? undefined : JSON.stringify(body),

@@ -1,4 +1,5 @@
 import { applicationDefault, cert, getApps, initializeApp } from 'firebase-admin/app';
+import { getAppCheck } from 'firebase-admin/app-check';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
@@ -31,5 +32,5 @@ export function adminServices() {
       },
       'melody-server',
     );
-  return { db: getFirestore(app), auth: getAuth(app) };
+  return { db: getFirestore(app), auth: getAuth(app), appCheck: getAppCheck(app) };
 }

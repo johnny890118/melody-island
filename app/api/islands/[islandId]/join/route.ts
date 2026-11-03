@@ -11,6 +11,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     const { islandId } = await params;
     assertRoomId(islandId);
     await rateLimit(actor.uid, 'join', 10);
+    await rateLimit('room', `join_${islandId}`, 60);
     const { islandPassword } = await readBody(request);
     if (typeof islandPassword !== 'string' || islandPassword.length > 128)
       throw new SessionError('請輸入島嶼密碼。');

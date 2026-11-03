@@ -8,6 +8,15 @@ export async function authenticate(request: Request) {
     process.env.APP_ORIGIN ||
     `${new URL(request.url).protocol}//${request.headers.get('host') || new URL(request.url).host}`;
   if (origin && origin !== expectedOrigin) throw new SessionError('不允許跨站請求。', 403);
+  if (process.env.ENFORCE_APP_CHECK === 'true') {
+    const attestation = request.headers.get('x-firebase-appcheck');
+    if (!attestation) throw new SessionError('無法驗證此裝置，請重新整理後再試。', 403);
+    try {
+      await adminServices().appCheck.verifyToken(attestation);
+    } catch {
+      throw new SessionError('裝置驗證已失效，請重新整理後再試。', 403);
+    }
+  }
   const token = request.headers.get('authorization')?.match(/^Bearer (.+)$/)?.[1];
   if (!token) throw new SessionError('請先登入或重新加入島嶼。', 401);
   try {

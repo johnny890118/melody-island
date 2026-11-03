@@ -175,8 +175,10 @@ input {
   inset: 0 -4vw 2% 25%;
   isolation: isolate;
 }
+.island-stage .island-canvas,
 .island-stage canvas {
-  touch-action: pan-y;
+  /* OrbitControls sets inline touch-action:none; preserve native vertical page scroll. */
+  touch-action: pan-y !important;
   cursor: grab;
 }
 .island-stage canvas:active {
@@ -725,7 +727,8 @@ input {
     font-size: 8px;
   }
   .scene-tools {
-    left: 33%;
+    left: auto;
+    right: 20%;
     bottom: 7%;
     gap: 15px;
   }
@@ -794,11 +797,17 @@ input {
   html {
     scroll-behavior: auto;
   }
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-    transition: none !important;
+  .island-dialog[data-state],
+  .dialog-overlay[data-state],
+  .spin {
+    animation: none;
+  }
+  .action-button,
+  .action-button svg {
+    transition: none;
+  }
+  .action-button:hover svg {
+    transform: none;
   }
 }
 
@@ -877,4 +886,25 @@ input::placeholder {
   justify-content: flex-start;
   border-radius: 0;
   min-height: 44px;
+}
+
+.wordmark,
+.nav-action {
+  min-height: 44px;
+}
+summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 5px;
+}
+.room-heading h1,
+.now-playing-title {
+  overflow-wrap: anywhere;
+}
+
+.skip-link:not(:focus) {
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
 }

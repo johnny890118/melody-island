@@ -27,20 +27,28 @@ npm run lint
 npm run typecheck
 npm test
 npm run test:rules
+npm run test:migration
 npm run build
 npm run test:e2e
+npm run test:e2e:webkit
 ```
 
-Rules and E2E commands start and stop demo emulators themselves, so stop manually started emulators first. Playwright needs `npx playwright install chromium`. Tests include actual homepage WebGL rendering, membership/security rules, two-client operations, 20 isolated browser clients, command deduplication, stale versions, leadership and member management. Playback is mocked in E2E; real YouTube autoplay, buffering, ads, Safari behavior and audio drift require separate manual verification.
+Rules and E2E commands start and stop demo emulators themselves, so stop manually started emulators first. Playwright needs `npx playwright install chromium webkit`. Tests include actual homepage WebGL rendering, membership/security rules, two-client operations, 20 isolated browser clients, command deduplication, stale versions, leadership and member management. Playback is mocked in E2E; real YouTube autoplay, buffering, ads, Safari behavior and audio drift require separate manual verification.
 
 CI runs the same checks and preserves failure traces. A Java runtime installed only under `/tmp` during development is not a project dependency; install Java 21 on your own machine or use CI.
+
+## App attestation and quota protection
+
+Set `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` after registering the app with Firebase App Check. Verify real staging tokens before enabling server-only `ENFORCE_APP_CHECK=true`; missing/invalid tokens then fail closed. The demo tests explicitly leave enforcement off; there is no automatic bypass when it is on. Search requires room membership and has a shared 24-hour search-call budget (`YOUTUBE_SEARCH_DAILY_LIMIT`, default 80), in addition to per-UID limits. Deployment-specific edge controls and Firebase service enforcement still require setup. See [production runbook](docs/production-runbook.md).
+
+To repeat synthetic cold-cache performance checks against a local production server, run `npm run measure:home:throttled`. It uses 4× CPU slowdown, 1.6 Mbps download/0.75 Mbps upload and 150ms latency, three runs at each viewport. It is not a real-device performance certificate.
 
 ## Release boundary
 
 This is a schema-v2 implementation, not a live deployment. Before deployment:
 
 - Configure and verify Admin identity, auth providers, production origin and YouTube quota controls.
-- Add an edge/IP abuse limit and Firebase App Check before opening anonymous join/search publicly. Per-UID Firestore limits are included but do not stop anonymous identity rotation.
+- Configure the edge/IP abuse limit and enable/verify the included App Check integration before opening anonymous join/search publicly. Per-UID and shared budgets do not replace deployment-specific controls.
 - Review `firestore.rules` together with server endpoints: client writes are denied, while Admin operations independently enforce membership and permissions.
 - Back up legacy rooms. They cannot be opened with the former plaintext-password flow; follow `docs/architecture/sync.md` for migration boundaries.
 - Run real-device and real-YouTube playback checks, measure production performance and inspect remaining dependency advisories.

@@ -112,7 +112,9 @@ export default function IslandPage() {
               return;
             }
             setGate('ready');
-            setConnection(!navigator.onLine ? 'offline' : snapshot.metadata.fromCache ? 'cached' : 'synced');
+            setConnection(
+              !navigator.onLine ? 'offline' : snapshot.metadata.fromCache ? 'cached' : 'synced',
+            );
           },
           (error) => {
             setGate(error.code === 'permission-denied' ? 'join' : 'error');
@@ -222,7 +224,7 @@ export default function IslandPage() {
     setMessage('');
     try {
       const data = await api<SearchResponse>(
-        `/api/search?q=${encodeURIComponent(query.trim())}`,
+        `/api/search?q=${encodeURIComponent(query.trim())}&islandId=${encodeURIComponent(islandId)}`,
         undefined,
         {
           signal: controller.signal,
@@ -369,11 +371,15 @@ export default function IslandPage() {
                 );
             }}
           />
-          <h2 className="now-playing-title">{current?.title || '讓第一首歌登島。'}</h2>
+          <h2 className="now-playing-title">
+            {current?.title || (session.playlist.length ? '歌單準備好了。' : '讓第一首歌登島。')}
+          </h2>
           <p className="quiet-notice">
             {current
               ? 'YouTube 共聽 · 各裝置的音量可獨立調整'
-              : '從右側搜尋喜歡的歌，加入大家的播放佇列。'}
+              : session.playlist.length
+                ? '按下播放，一起開始聽。'
+                : '搜尋喜歡的歌，加入大家的播放佇列。'}
           </p>
           {blocked && (
             <Button

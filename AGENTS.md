@@ -10,4 +10,6 @@
 - Do not deploy rules or migrate existing rooms without a verified backup, migration plan and deployment review.
 - Application, tests and project scripts use strict TypeScript/TSX (`allowJs: false`). Do not use `any`, `@ts-ignore` or disable checking to hide migration errors. Validate external Firestore/YouTube data at runtime.
 - Shared interactive UI is based on local shadcn/ui components in `components/ui`; Radix primitives are imported only there. Use Lucide for all interface icons. Impeccable owns visual direction; do not import another UI/icon kit.
-- Run `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:rules`, `npm run build` and `npm run test:e2e` for substantial changes. Push verified milestones to the task branch as requested; do not imply that local commits have been pushed.
+- Run `npm run typecheck`, `npm run lint`, `npm test`, `npm run test:rules`, `npm run test:migration`, `npm run build`, `npm run test:e2e` and `npm run test:e2e:webkit` for substantial changes. Push verified milestones to the task branch as requested; do not imply that local commits have been pushed.
+
+- Keep App Check attestation separate from user authentication/room authorization. Do not add an implicit emulator bypass to an enabled enforcement policy or trust arbitrary forwarded IP headers.

@@ -5,7 +5,7 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import React, { Component, Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Bounds, Center, OrbitControls, useProgress } from '@react-three/drei';
-import { RotateCcw, MoveHorizontal } from 'lucide-react';
+import { RotateCcw, MoveHorizontal, Pause, Play } from 'lucide-react';
 import Island from './models/Island';
 
 class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -35,6 +35,7 @@ export default function Hero() {
   const controls = useRef<OrbitControlsImpl | null>(null);
   const [progress, setProgress] = useState(0);
   const [sceneKey, setSceneKey] = useState(0);
+  const [rotating, setRotating] = useState(true);
   const [active, setActive] = useState(true);
   const [reduced, setReduced] = useState(true);
   useEffect(() => {
@@ -74,9 +75,10 @@ export default function Hero() {
       </div>
       <SceneBoundary key={sceneKey}>
         <Canvas
+          className="island-canvas"
           dpr={[1, 1.5]}
           camera={{ position: [0, 8, 45], fov: 38 }}
-          frameloop={active ? 'always' : 'never'}
+          frameloop={!active ? 'never' : reduced || !rotating ? 'demand' : 'always'}
           gl={{ antialias: true, alpha: true }}
           fallback={<div className="scene-fallback">此裝置不支援 WebGL；你仍可以加入共聽。</div>}
           onCreated={({ gl }) => {
@@ -100,7 +102,8 @@ export default function Hero() {
             makeDefault
             enableZoom={false}
             enablePan={false}
-            autoRotate={!reduced}
+            autoRotate={!reduced && rotating}
+            enableDamping={!reduced}
             autoRotateSpeed={0.35}
             minPolarAngle={0.9}
             maxPolarAngle={1.65}
@@ -116,6 +119,16 @@ export default function Hero() {
         <span>
           <MoveHorizontal size={15} /> 拖曳，換個角度聽
         </span>
+        {!reduced && (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={rotating ? '暫停島嶼旋轉' : '開始島嶼旋轉'}
+            onClick={() => setRotating((value) => !value)}
+          >
+            {rotating ? <Pause size={16} /> : <Play size={16} />}
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"
