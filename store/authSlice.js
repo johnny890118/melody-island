@@ -12,11 +12,12 @@ const initialState = {
   user: null,
   status: 'idle',
   error: null,
+  ready: false,
 };
 
 const getUserPayload = (user) => {
-  const { uid, email, displayName, photoURL } = user;
-  return { uid, email, displayName, photoURL };
+  const { uid, email, displayName, photoURL, isAnonymous } = user;
+  return { uid, email, displayName, photoURL, isAnonymous };
 };
 
 // 登入
@@ -76,6 +77,7 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchUser.fulfilled, (state, action) => {
+        state.ready = true;
         state.user = action.payload;
         state.status = 'idle';
         state.error = null;
@@ -92,6 +94,7 @@ const authSlice = createSlice({
         state.status = 'loading';
       })
       .addCase(fetchUser.rejected, (state, action) => {
+        state.ready = true;
         state.status = 'idle';
         state.error = action.payload || {
           code: action.error.code,

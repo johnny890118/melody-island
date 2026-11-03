@@ -3,6 +3,23 @@ const firebaseProjectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'melody
 const firebaseAuthHost = firebaseProjectId ? `${firebaseProjectId}.firebaseapp.com` : null;
 
 const nextConfig = {
+  devIndicators: false,
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Content-Security-Policy',
+            value: "base-uri 'self'; object-src 'none'; frame-ancestors 'none'",
+          },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

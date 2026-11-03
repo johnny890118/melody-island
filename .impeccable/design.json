@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T16:39:32.558Z",
+  "title": "Design System: Melody Island",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Deep sea green"
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Warm ivory"
+      },
+      "accent": {
+        "role": "accent",
+        "displayName": "Vermilion"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Editorial display",
+        "purpose": "Homepage title and short room titles."
+      }
+    },
+    "motion": [
+      {
+        "name": "control-transition",
+        "value": "0.2s ease",
+        "purpose": "Control state changes; reduced motion disables transitions."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "900px"
+      },
+      {
+        "name": "mobile",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary room entry or submission.",
+      "html": "<button class=\"ds-primary\">一起登島</button>",
+      "css": ".ds-primary{background:#183c35;color:#f4f0e8;border:1px solid #183c35;border-radius:4px;padding:15px 20px;min-height:52px;font:13px Manrope,sans-serif}.ds-primary:hover{background:#dfe5d6;color:#183c35}.ds-primary:focus-visible{outline:2px solid #c34b30;outline-offset:5px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A place between songs",
+    "overview": "An open listening postcard centered on an actual interactive miniature island. Operational rooms prioritize playback, queue and search.",
+    "keyCharacteristics": [
+      "Real 3D centerpiece",
+      "Warm ivory ground",
+      "Editorial serif with precise controls"
+    ],
+    "rules": [
+      {
+        "name": "Keep the island",
+        "body": "The full miniature silhouette remains a major element; fallback is for unavailable WebGL or load failure.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "Preserve focused-control clearance above the transport."
+    ],
+    "donts": [
+      "Invent perfect synchronization or activity counts."
+    ]
+  }
+}

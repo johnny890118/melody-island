@@ -1,19 +1,16 @@
 'use client';
-
 import './globals.css';
 import { Provider } from 'react-redux';
 import store from '@/store/store';
 import Navbar from '@/components/Navbar';
-import Loading from '@/components/Loading';
-
-const StoreProvider = ({ children }) => {
+export default function StoreProvider({ children }) {
   return (
     <Provider store={store}>
-      <Loading />
+      <a href="#main-content" className="skip-link">
+        跳至主要內容
+      </a>
       <Navbar />
       {children}
     </Provider>
   );
-};
-
-export default StoreProvider;
+}

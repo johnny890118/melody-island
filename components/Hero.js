@@ -1,94 +1,122 @@
 'use client';
-
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Component, Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import Loader from '@/components/Loader';
-import Island from '@/components/models/Island';
-import Bird from './models/Bird';
-import Plane from './models/Plane';
+import { Bounds, Center, OrbitControls, useProgress } from '@react-three/drei';
+import { RotateCcw, MoveHorizontal } from 'lucide-react';
+import Island from './models/Island';
 
-const Hero = () => {
-  const [isRotating, setIsRotating] = useState(false);
-  const [screenSize, setScreenSize] = useState({
-    islandScale: [1, 1, 1],
-    islandPosition: [0, -10, -43],
-    islandRotation: [-0.001, 4.7, 0],
-    planeScale: [3, 3, 3],
-    planePosition: [0, -3.5, -4],
-  });
-
+class SceneBoundary extends Component {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    return this.state.failed ? (
+      <div className="scene-fallback" role="status">
+        <p>島嶼暫時無法顯示</p>
+        <span>你仍可以建立或加入共聽房間。</span>
+      </div>
+    ) : (
+      this.props.children
+    );
+  }
+}
+function Progress({ onProgress }) {
+  const { progress } = useProgress();
   useEffect(() => {
-    const adjustIslandForScreenSize = () => {
-      let screenScale = null;
-      let screenPosition = [0, -10, -43];
-      let rotation = [-0.001, 4.7, 0];
-
-      if (window.innerHeight < 768) {
-        screenScale = [0.9, 0.9, 0.9];
-      } else {
-        screenScale = [1, 1, 1];
-      }
-
-      return { screenScale, screenPosition, rotation };
+    onProgress(progress);
+  }, [progress, onProgress]);
+  return null;
+}
+export default function Hero() {
+  const controls = useRef(null);
+  const [progress, setProgress] = useState(0);
+  const [sceneKey, setSceneKey] = useState(0);
+  const [active, setActive] = useState(true);
+  const [reduced, setReduced] = useState(true);
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const motion = () => setReduced(media.matches);
+    const visibility = () => setActive(!document.hidden);
+    motion();
+    visibility();
+    media.addEventListener('change', motion);
+    document.addEventListener('visibilitychange', visibility);
+    return () => {
+      media.removeEventListener('change', motion);
+      document.removeEventListener('visibilitychange', visibility);
     };
-
-    const adjustPlaneForScreenSize = () => {
-      let screenScale, screenPosition;
-
-      if (window.innerHeight < 768) {
-        screenScale = [1.5, 1.5, 1.5];
-        screenPosition = [0, -1.5, 0];
-      } else {
-        screenScale = [3, 3, 3];
-        screenPosition = [0, -3.5, -4];
-      }
-
-      return { screenScale, screenPosition };
-    };
-
-    setScreenSize({
-      islandScale: adjustIslandForScreenSize().screenScale,
-      islandPosition: adjustIslandForScreenSize().screenPosition,
-      islandRotation: adjustIslandForScreenSize().rotation,
-      planeScale: adjustPlaneForScreenSize().screenScale,
-      planePosition: adjustPlaneForScreenSize().screenPosition,
-    });
   }, []);
-
   return (
-    <section className="night-sky relative h-dvh w-full overflow-hidden">
-      <div className="star-dust pointer-events-none absolute inset-0 opacity-55" />
-      <div className="aurora-ribbon pointer-events-none absolute -left-16 -right-16 top-0 h-72 opacity-80 sm:h-96" />
-      <div className="pointer-events-none absolute left-[8%] top-[18%] h-3 w-3 rounded-full bg-[#fff8e1]/80 shadow-[0_0_26px_rgba(255,248,225,0.9)] sm:h-4 sm:w-4" />
-      <div className="floaty pointer-events-none absolute right-[12%] top-[26%] h-16 w-16 rounded-full border border-white/20 bg-white/[0.04] shadow-[inset_0_1px_20px_rgba(255,255,255,0.18),0_0_36px_rgba(141,245,255,0.2)] backdrop-blur-md sm:h-24 sm:w-24" />
-      <Canvas
-        className={`relative z-10 h-dvh w-full bg-transparent ${isRotating ? 'cursor-grabbing' : 'cursor-grab'}`}
-        camera={{ near: 0.1, far: 1000 }}
-      >
-        <Suspense fallback={<Loader />}>
-          <directionalLight position={[1, 1.5, 1]} intensity={2.2} color="#fff8e1" />
-          <ambientLight intensity={0.65} />
-          <hemisphereLight skyColor="#8df5ff" groundColor="#05080d" intensity={1.15} />
-
-          <Bird />
-          <Island
-            scale={screenSize.islandScale}
-            position={screenSize.islandPosition}
-            rotation={screenSize.islandRotation}
-            isRotating={isRotating}
-            setIsRotating={setIsRotating}
+    <section
+      className="island-stage"
+      aria-label="互動 3D 島嶼"
+      onKeyDown={(event) => {
+        if (
+          event.target.tagName === 'CANVAS' &&
+          ['ArrowLeft', 'ArrowRight'].includes(event.key) &&
+          controls.current
+        ) {
+          event.preventDefault();
+          controls.current.setAzimuthalAngle(
+            controls.current.getAzimuthalAngle() + (event.key === 'ArrowLeft' ? -0.12 : 0.12),
+          );
+          controls.current.update();
+        }
+      }}
+    >
+      <div className="island-orbit" aria-hidden="true" />
+      <div className="scene-coordinate" aria-hidden="true">
+        A PLACE BETWEEN SONGS
+      </div>
+      <SceneBoundary key={sceneKey}>
+        <Canvas
+          dpr={[1, 1.5]}
+          camera={{ position: [0, 8, 45], fov: 38 }}
+          frameloop={active ? 'always' : 'never'}
+          gl={{ antialias: true, alpha: true }}
+          fallback={<div className="scene-fallback">此裝置不支援 WebGL；你仍可以加入共聽。</div>}
+          onCreated={({ gl }) => {
+            gl.domElement.setAttribute('aria-label', '拖曳旋轉島嶼，方向鍵旋轉');
+            gl.domElement.setAttribute('tabindex', '0');
+          }}
+        >
+          <ambientLight intensity={1.5} />
+          <directionalLight position={[15, 25, 12]} intensity={2.8} color="#fff1d5" />
+          <hemisphereLight args={['#f9f3df', '#578b7a', 1.2]} />
+          <Suspense fallback={null}>
+            <Bounds fit clip observe margin={1.4} maxDuration={0}>
+              <Center>
+                <Island rotation={[0.08, 4.7, 0]} />
+              </Center>
+            </Bounds>
+          </Suspense>
+          <Progress onProgress={setProgress} />
+          <OrbitControls
+            ref={controls}
+            makeDefault
+            enableZoom={false}
+            enablePan={false}
+            autoRotate={!reduced}
+            autoRotateSpeed={0.35}
+            minPolarAngle={0.9}
+            maxPolarAngle={1.65}
           />
-          <Plane
-            isRotating={isRotating}
-            scale={screenSize.planeScale}
-            position={screenSize.planePosition}
-            rotation={[0, 20, 0]}
-          />
-        </Suspense>
-      </Canvas>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-40 bg-gradient-to-t from-[#02080a] to-transparent" />
+        </Canvas>
+      </SceneBoundary>
+      {progress < 100 && (
+        <div className="scene-progress" role="status">
+          正在準備島嶼 <span>{Math.round(progress)}%</span>
+        </div>
+      )}
+      <div className="scene-tools">
+        <span>
+          <MoveHorizontal size={15} /> 拖曳，換個角度聽
+        </span>
+        <button aria-label="重設島嶼視角" onClick={() => setSceneKey((key) => key + 1)}>
+          <RotateCcw size={16} />
+        </button>
+      </div>
     </section>
   );
-};
-
-export default Hero;
+}

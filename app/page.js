@@ -1,174 +1,154 @@
 'use client';
-
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
-import {
-  doc,
-  getDoc,
-  setDoc,
-  query,
-  where,
-  getDocs,
-  collection,
-  serverTimestamp,
-} from 'firebase/firestore';
+import { collection, getDocs, limit, query, where } from 'firebase/firestore';
+import { ArrowDown, ArrowUpRight, Headphones } from 'lucide-react';
 import { db } from './config/firebase';
-import { nanoid } from 'nanoid';
+import { api } from '@/lib/api';
+import { startGoogleLogin } from '@/store/authSlice';
 import CustomDialog from '@/components/CustomDialog';
-import {
-  setIslandOwner,
-  setIslandId,
-  setIslandName,
-  clearIsland,
-  setIsLoading,
-} from '@/store/islandSlice';
-import Hero from '@/components/Hero';
-import { Button } from '@/components/ui/button';
+const Hero = dynamic(() => import('@/components/Hero'), {
+  ssr: false,
+  loading: () => <div className="island-stage scene-fallback">正在準備島嶼…</div>,
+});
 
-const HomePage = () => {
-  const { user } = useSelector((state) => state.auth);
-  const { islandId } = useSelector((state) => state.island);
-  const dispatch = useDispatch();
+export default function HomePage() {
+  const { user, ready } = useSelector((state) => state.auth);
+  const [ownIsland, setOwnIsland] = useState('');
+  const [notice, setNotice] = useState('');
+  const [loggingIn, setLoggingIn] = useState(false);
+  const loginToCreate = async () => {
+    if (loggingIn) return;
+    setLoggingIn(true);
+    setNotice('');
+    try {
+      await startGoogleLogin();
+    } catch {
+      setNotice('登入暫時無法使用，請稍後再試。');
+      setLoggingIn(false);
+    }
+  };
   const router = useRouter();
-
-  const handleCreateIsland = async ({ islandName, islandPassword }) => {
-    const newIslandId = nanoid(10);
-    const islandData = {
-      name: islandName,
-      password: islandPassword,
-      createdBy: user.email,
-      id: newIslandId,
-      playlist: [],
-      currentVideo: '',
-      positionMs: 0,
-      isPlaying: false,
-      playbackUpdatedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      lastChangedBy: user.email,
-      permissions: {
-        guestsCanControlPlayback: true,
-        guestsCanEditQueue: true,
-        guestsCanSkip: true,
-      },
-    };
-
-    await setDoc(doc(db, 'islands', newIslandId), islandData);
-    dispatch(setIslandOwner(user.email));
-    dispatch(setIslandId(newIslandId));
-    dispatch(setIslandName(islandName));
-    router.push(`/island/${newIslandId}`);
-  };
-
-  const handleJoinIsland = async ({ islandId, islandPassword }) => {
-    const islandDoc = await getDoc(doc(db, 'islands', islandId));
-    if (!islandDoc.exists()) return alert('此島嶼不存在這世界上呢 😢');
-
-    const islandData = islandDoc.data();
-    if (islandData.password !== islandPassword) return alert('密碼錯誤');
-
-    dispatch(setIslandOwner(islandData.createdBy));
-    dispatch(setIslandId(islandData.id));
-    dispatch(setIslandName(islandData.name));
-    router.push(`/island/${islandId}`);
-  };
-
   useEffect(() => {
-    const checkUserIsland = async () => {
-      dispatch(setIsLoading(true));
-      if (user && user.email) {
-        const islandsRef = collection(db, 'islands');
-        const q = query(islandsRef, where('createdBy', '==', user.email));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-          const userIslandDoc = querySnapshot.docs[0];
-          const userIslandId = userIslandDoc.id;
-          const userIslandData = userIslandDoc.data();
-          const userIslandName = userIslandData.name;
-          const userIslandOwner = userIslandData.createdBy;
-
-          dispatch(setIslandOwner(userIslandOwner));
-          dispatch(setIslandId(userIslandId));
-          dispatch(setIslandName(userIslandName));
-        }
-      } else {
-        dispatch(setIslandOwner(''));
-        dispatch(setIslandId(''));
-        dispatch(setIslandName(''));
-      }
-      dispatch(setIsLoading(false));
+    let cancelled = false;
+    setOwnIsland('');
+    if (ready && user?.uid && !user.isAnonymous) {
+      getDocs(query(collection(db, 'islands'), where('ownerUid', '==', user.uid), limit(1)))
+        .then((snapshot) => {
+          if (!cancelled && !snapshot.empty) setOwnIsland(snapshot.docs[0].id);
+        })
+        .catch(() => {
+          if (!cancelled) setNotice('目前無法查詢你的島嶼，仍可使用 ID 加入。');
+        });
+    }
+    return () => {
+      cancelled = true;
     };
-
-    checkUserIsland();
-  }, [dispatch, user, router]);
-
-  useEffect(() => {
-    if (user) return;
-
-    dispatch(clearIsland());
-  }, [dispatch, user]);
-
+  }, [ready, user?.uid, user?.isAnonymous]);
+  const create = async (values) => {
+    const result = await api('/api/islands', values);
+    router.push(`/island/${result.id}`);
+  };
+  const join = async (values) => {
+    const id = values.islandId?.trim();
+    if (!/^[A-Za-z0-9_-]{10}$/.test(id || '')) throw new Error('請輸入完整的 10 碼島嶼 ID。');
+    const result = await api(`/api/islands/${id}/join`, { islandPassword: values.islandPassword });
+    router.push(`/island/${result.id}`);
+  };
   return (
-    <div className="relative flex w-full flex-col items-center overflow-hidden">
-      <Hero />
-
-      <div className="liquid-glass absolute left-1/2 top-24 z-30 w-[min(92vw,560px)] -translate-x-1/2 rounded-2xl border border-white/20 px-4 py-5 text-center shadow-xl shadow-black/25 backdrop-blur-2xl sm:px-6 sm:py-6 lg:top-28">
-        <div className="relative z-10 space-y-2">
-          <h1 className="text-2xl font-black tracking-normal text-[#8df5ff] drop-shadow-[0_0_18px_rgba(141,245,255,0.35)] sm:text-4xl">
-            一起登島，聆聽共鳴
+    <main className="home-page" id="main-content">
+      <div className="home-composition">
+        <div className="hero-title">
+          <h1>
+            A little
+            <br />
+            <em>closer.</em>
           </h1>
-          <p className="mx-auto max-w-md text-sm leading-6 text-[#dfe7dc] sm:text-base">
-            把音樂放進星空裡，和朋友一起在夜晚的島上同步播放。
-          </p>
+          <p>一起登島，聆聽共鳴。</p>
         </div>
-
-        <div className="relative z-10 mt-5 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
-          {islandId ? (
-            <Button
-              className="glass-button min-h-12 w-full rounded-lg border-[#8df5ff]/70 bg-[#8df5ff]/15 px-3 py-2.5 text-xs font-bold leading-tight shadow-[#8df5ff]/20 ring-1 ring-[#8df5ff]/35 hover:border-[#8df5ff] sm:text-sm"
-              onClick={() => router.push(`/island/${islandId}`)}
-            >
-              我的島嶼
-            </Button>
-          ) : (
+        <Hero />
+        <div className="home-actions">
+          <p className="home-description">
+            把喜歡的歌，
+            <br />
+            放進我們的小小島嶼。
+            <br />
+            <span>和朋友分享一段旋律，也分享此刻。</span>
+          </p>
+          <div className="home-action-list">
+            {!user || user.isAnonymous ? (
+              <button
+                className="action-button primary"
+                disabled={!ready || loggingIn}
+                onClick={loginToCreate}
+              >
+                {loggingIn ? '正在登入…' : '登入並建立島嶼'}
+                <ArrowUpRight size={18} />
+              </button>
+            ) : ownIsland ? (
+              <button
+                className="action-button primary"
+                onClick={() => router.push(`/island/${ownIsland}`)}
+              >
+                回到我的島嶼
+                <ArrowUpRight size={18} />
+              </button>
+            ) : (
+              <CustomDialog
+                title="建立你的島嶼"
+                description="取個名字，設定密碼，再邀請朋友一起聽。"
+                inputs={[
+                  { label: 'islandName', placeholder: '島嶼名稱', maxLength: 40 },
+                  {
+                    label: 'islandPassword',
+                    placeholder: '島嶼密碼（至少 8 字）',
+                    type: 'password',
+                    minLength: 8,
+                  },
+                ]}
+                onConfirm={create}
+                triggerLabel={user && !user.isAnonymous ? '建立島嶼' : '登入後建立島嶼'}
+                confirmLabel="建立島嶼"
+                disabled={!ready || !user || user.isAnonymous}
+              />
+            )}
             <CustomDialog
-              title="創建島嶼"
-              description="輸入屬於您的島嶼名稱及密碼"
+              title="朋友在島上等你"
+              description="輸入朋友分享的島嶼 ID 與密碼。無須 Google 帳號也能加入。"
               inputs={[
-                { label: 'islandName', placeholder: '島嶼名稱' },
-                {
-                  label: 'islandPassword',
-                  placeholder: '密碼',
-                  type: 'password',
-                },
+                { label: 'islandId', placeholder: '島嶼 ID', maxLength: 10 },
+                { label: 'islandPassword', placeholder: '島嶼密碼', type: 'password' },
               ]}
-              onConfirm={handleCreateIsland}
-              triggerLabel={user && user.email ? '創建島嶼' : '創建島嶼 (需先登入)'}
-              confirmLabel="創建"
-              disabled={!(user && user.email)}
+              onConfirm={join}
+              triggerLabel="加入朋友的島嶼"
+              confirmLabel="一起登島"
             />
+          </div>
+          {notice && (
+            <p className="quiet-notice" role="status">
+              {notice}
+            </p>
           )}
-
-          <CustomDialog
-            title="加入島嶼"
-            description="輸入島嶼 ID及密碼"
-            inputs={[
-              { label: 'islandId', placeholder: '島嶼 ID' },
-              {
-                label: 'islandPassword',
-                placeholder: '密碼',
-                type: 'password',
-              },
-            ]}
-            onConfirm={handleJoinIsland}
-            triggerLabel="加入島嶼"
-            confirmLabel="加入"
-          />
+        </div>
+        <div className="home-caption">
+          <Headphones size={16} />
+          <span>不同的地方，同一首歌。</span>
+          <ArrowDown size={16} />
         </div>
       </div>
-    </div>
+      <footer className="home-footer">
+        <span>Melody Island</span>
+        <span>給旋律一個相遇的地方。</span>
+        <a
+          href="https://sketchfab.com/3d-models/foxs-islands-163b68e09fcc47618450150be7785907"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Island by nimzu · CC BY 4.0 <ArrowUpRight size={12} />
+        </a>
+      </footer>
+    </main>
   );
-};
-
-export default HomePage;
+}
