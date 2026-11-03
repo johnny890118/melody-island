@@ -69,6 +69,8 @@ Controls use 4px corners, video 8px, dialogs 12px. Circular icon controls have a
 
 ## Components
 
+Use local shadcn/ui primitives in `components/ui` for controls and dialogs, with Lucide icons only. Radix is the internal accessibility foundation of these wrappers; application code imports the local wrappers. The visual tokens below override stock styling. Native semantic elements and the Three.js scene remain appropriate.
+
 Primary actions are sea-green with ivory text; secondary actions use the paper ground and an ink rule. Focus is a 2px vermilion outline with 5px offset. Every asynchronous action has disabled/loading/error feedback. Forms have actual labels, not only placeholders.
 
 The real Canvas uses bounded DPR and stops rendering while the tab is hidden. Idle orbit respects reduced motion. Drag and canvas-scoped arrow keys change the view, and reset restores the full island. WebGL/load failure has a clear fallback without removing room access.

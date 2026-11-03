@@ -1,6 +1,6 @@
 # Melody Island
 
-A private music island for 2–20 friends. Next.js 15, React 19, Firebase, Three.js and YouTube.
+A private music island for 2–20 friends. Next.js 15, React 19, strict TypeScript, Firebase, Three.js and YouTube. UI primitives use local shadcn/ui components; icons use Lucide. Impeccable defines the visual direction.
 
 ## Local development
 
@@ -24,6 +24,7 @@ The homepage uses the real WebGL island. Firebase's auth emulator supports a sim
 
 ```sh
 npm run lint
+npm run typecheck
 npm test
 npm run test:rules
 npm run build

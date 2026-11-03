@@ -21,3 +21,6 @@ Existing island, bird and plane GLBs in public/models. No awards, customer count
 
 ## Open Decisions
 Production credentials, existing deployed Firebase rules and legacy-room migration require environment-specific verification.
+
+## Implementation Commitments
+The owner requests TypeScript/TSX throughout application code, tests and scripts. Shared UI uses shadcn/ui, Lucide is the only interface icon library, and Impeccable determines the visual design. Verified milestones are committed and pushed to the task branch.

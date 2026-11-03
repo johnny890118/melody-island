@@ -2,13 +2,14 @@
 
 First implementation candidate; no production deployment or legacy data migration.
 
-- Unit/component: 35 passed across six suites, including actual player-adapter cue/load/clear behavior with a fake YouTube target.
+- Unit/component: 38 passed across seven suites, including actual player-adapter cue/load/clear behavior with a fake YouTube target.
 - Firestore Rules Emulator: 5 passed. Client writes, secret reads, self-membership and non-member reads are rejected.
-- Playwright: 6 end-to-end scenarios passed in 33.6 seconds. Includes real homepage WebGL, two-client playback state, refresh, concurrency, roles, ownership transfer, interrupted search and short-viewport keyboard focus.
+- Playwright: 6 end-to-end scenarios passed in 40.7 seconds after the TypeScript/shadcn migration. Includes real homepage WebGL, two-client playback state, refresh, concurrency, roles, ownership transfer, interrupted search and short-viewport keyboard focus.
 - After the full suite, the 20-client scenario passed twice more consecutively (22.5 and 22.4 seconds) following the lease/counter compare-and-set change. The 21st member is refused. These are emulator state tests with mock playback, not audio-drift measurements.
-- ESLint and git diff whitespace check passed.
+- Strict TypeScript checking, ESLint and git diff whitespace check passed. Application, API, Redux, tests and scripts use TS/TSX. PostCSS retains its build-tool MJS entry; vendored skill tooling is unchanged.
+- Local shadcn/ui Button, Input, Dialog and Checkbox replace the former primitives; Lucide is the sole icon library. ESLint enforces wrapper/import boundaries. Runtime parsers reject malformed commands and external room/provider data.
 - Production build passed with demo/emulator client configuration, avoiding production Firebase access during verification.
-- Dependency audit: production 7 moderate, 0 high/critical; entire tree 30 moderate, 0 high/critical. Remaining findings are not represented as fixed or automatically exploitable. Next remains on the patched 15.5 line; PostCSS and gRPC have explicit patched resolutions.
+- Dependency audit: production 7 moderate, 0 high/critical; entire-tree findings were 30 moderate, 0 high/critical at the prior milestone. Remaining findings are not represented as fixed or automatically exploitable. Next remains on the patched 15.5 line; PostCSS and gRPC have explicit patched resolutions.
 
 Earlier repeated load tests exposed transaction-lock timeouts even after one successful run. The final layout uses a bounded roster in the room and optimistic updateTime preconditions for leases/counters; canonical playback plus command receipts remain atomic transactions. See sync.md for the resulting tradeoffs.
 

@@ -5,6 +5,8 @@
 
 ## 實作進度（2026-11-04）
 
+應用程式、API、Redux、測試與腳本已統一 strict TypeScript／TSX。元件基底統一 local shadcn/ui，圖示僅 Lucide；由 impeccable 決定視覺，不套用預設主題。CI 加入 typecheck，ESLint 限制其他元件庫與 icon 匯入。
+
 已實作第一版暖白／深海綠視覺與真實 3D 首頁、房間頁、表單與錯誤回饋；目標為 Awwwards 級完成度，但尚未宣稱達到或獲得獎項。Impeccable 已安裝；獨立視覺檢查列出的五項修正已有桌面、手機與短螢幕焦點證據。
 
 新版房間採 server-only 密碼雜湊、ID token、UID 名冊授權、版本與命令去重、身分穩定的刪歌、主持租約、重連與單一播放器 adapter。加入分享連結、隨機播放、權限設定、移出成員、交接島主與離開房間。20 人重複測試發現 lease/counter 的交易鎖競爭，已改以 updateTime compare-and-set；名冊收斂到有上限的房間文件。
