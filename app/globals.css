@@ -45,23 +45,27 @@
     U+FFF9-FFFB;
 }
 :root {
-  --paper: #f4f0e8;
-  --ink: #183c35;
-  --muted: #56665c;
-  --accent: #c34b30;
-  --rule: #cecfc1;
-  --background: 40 35% 93%;
-  --foreground: 168 43% 16%;
-  --border: 65 12% 78%;
-  --input: 65 12% 78%;
-  --ring: 12 60% 48%;
+  --paper: #171321;
+  --ink: #f5ecdc;
+  --muted: #d6c1ce;
+  --accent: #ffc991;
+  --rule: #a78d9c;
+  --background: 257 27% 10%;
+  --foreground: 38 56% 91%;
+  --border: 325 13% 61%;
+  --input: 325 13% 61%;
+  --ring: 31 100% 78%;
+  --primary: 31 100% 78%;
+  --primary-foreground: 257 27% 10%;
+  --secondary: 260 22% 21%;
+  --muted-foreground: 323 20% 80%;
+  --accent-foreground: 38 56% 91%;
   --radius: 0.75rem;
-  --primary: 168 43% 16%;
-  --primary-foreground: 40 35% 93%;
-  --secondary: 60 12% 86%;
-  --secondary-foreground: 168 43% 16%;
-  --muted-foreground: 140 9% 36%;
-  --accent-foreground: 168 43% 16%;
+  --secondary-foreground: 38 56% 91%;
+  --surface: #211a2e;
+  --hover: #372b42;
+  --error: #ffad9e;
+  color-scheme: dark;
 }
 * {
   box-sizing: border-box;
@@ -77,8 +81,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 ::selection {
-  background: #d3dfcc;
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--paper);
 }
 button,
 input,
@@ -118,7 +122,7 @@ input {
 }
 * {
   scrollbar-width: thin;
-  scrollbar-color: #8d9d8a var(--paper);
+  scrollbar-color: var(--rule) var(--paper);
 }
 .site-header {
   position: relative;
@@ -166,49 +170,57 @@ input {
   font-size: 12px;
   color: var(--accent);
 }
-body:has(.home-page) {
-  --paper: #edf8fb;
-  --ink: #163b61;
-  --muted: #274f6e;
-  --accent: #185379;
-  --rule: #7195ad;
-  --background: 194 64% 96%;
-  --foreground: 210 63% 23%;
-  --border: 205 29% 56%;
-  --input: 205 29% 56%;
-  --ring: 203 67% 28%;
-  --primary: 210 63% 23%;
-  --primary-foreground: 194 64% 96%;
-  --secondary: 199 48% 89%;
-  --muted-foreground: 206 48% 29%;
-  --accent-foreground: 210 63% 23%;
-  background: radial-gradient(ellipse at 72% 10%, #fff5d7, #c5e5f2 30%, #8fc1e0 68%, #dbeef4);
+body {
+  background: radial-gradient(ellipse at 75% 0%, #231b32, var(--paper) 65%);
 }
-body:has(.home-page) ::selection {
-  background: #d6eaff;
-  color: var(--ink);
+body:has(.home-page) {
+  background: radial-gradient(ellipse at 70% 43%, #262039, #12101f 51%, #080912 85%);
 }
 body:has(.home-page) .site-header {
   height: 82px;
-  border-color: #214f7252;
+  border-color: #a78d9c60;
 }
 .home-page {
   position: relative;
   isolation: isolate;
 }
-.cloud-atmosphere {
+.moon-atmosphere {
   position: absolute;
   z-index: -1;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 59% 24% at 7% 72%, #f7fcff 16%, transparent 95%),
-    radial-gradient(ellipse 74% 26% at 73% 87%, #fffdf4 22%, transparent 94%),
-    radial-gradient(ellipse 41% 24% at 89% 61%, #edf8ff 19%, transparent 95%),
-    linear-gradient(0deg, #edf8fb 0%, transparent 30%);
+    radial-gradient(circle at 9% 15%, #f5ecdc99 1px, transparent 1.6px),
+    radial-gradient(circle at 22% 38%, #f5ecdc88 1px, transparent 1.6px),
+    radial-gradient(circle at 42% 10%, #f5ecdc77 1px, transparent 1.6px),
+    radial-gradient(circle at 76% 65%, #f5ecdc77 1px, transparent 1.6px),
+    radial-gradient(circle at 92% 19%, #f5ecdc99 1px, transparent 1.6px),
+    radial-gradient(circle at 88% 63%, #f5ecdc66 1px, transparent 1.6px),
+    radial-gradient(circle at 12% 67%, #f5ecdc66 1px, transparent 1.6px);
 }
-.cloud-atmosphere svg {
+.moon-disc {
+  position: absolute;
+  top: 1%;
+  left: 68%;
+  width: clamp(420px, 48vw, 710px);
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 33% 21%, #f4d2a8, #b57177 48%, #35263d 88%);
+  border: 1px solid #efb7a462;
+}
+.moon-disc::after {
+  position: absolute;
+  content: '';
+  inset: 34% -26%;
+  border: 1px solid #e9b8a05e;
+  border-radius: 50%;
+  transform: rotate(-18deg);
+}
+.moon-atmosphere svg {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
 }
@@ -341,6 +353,13 @@ body:has(.home-page) .site-header {
   background: var(--paper);
   color: var(--ink);
 }
+.home-action-list > .action-button:last-child:not(:disabled) {
+  background: var(--accent);
+}
+.home-action-list > .action-button:hover:not(:disabled) {
+  background: var(--hover);
+  color: var(--ink);
+}
 .action-button svg {
   transition: transform 0.2s;
 }
@@ -415,7 +434,7 @@ body:has(.home-page) .site-header {
 .island-form input {
   width: 100%;
   background: transparent;
-  border: 1px solid #a8b4a5;
+  border: 1px solid var(--rule);
   padding: 13px;
   border-radius: 4px;
   font: inherit;
@@ -424,7 +443,7 @@ body:has(.home-page) .site-header {
 }
 .island-form .form-error,
 .form-error {
-  color: #a03222 !important;
+  color: var(--error) !important;
   font-size: 12px;
   line-height: 1.7;
 }
@@ -489,7 +508,7 @@ body:has(.home-page) .site-header {
 }
 .video-frame {
   aspect-ratio: 16/9;
-  background: #183c35;
+  background: #100d19;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -547,7 +566,7 @@ body:has(.home-page) .site-header {
   flex-shrink: 0;
 }
 .icon-button:hover {
-  background: #e0e4d8;
+  background: var(--hover);
 }
 .queue-count {
   font-size: 11px;
@@ -581,7 +600,7 @@ body:has(.home-page) .site-header {
   align-items: center;
   gap: 20px;
   padding: 16px 4.5vw max(16px, env(safe-area-inset-bottom));
-  background: var(--paper);
+  background: var(--surface);
   border-top: 1px solid var(--rule);
 }
 .transport-title {
@@ -596,14 +615,14 @@ body:has(.home-page) .site-header {
   align-items: center;
   gap: 8px;
 }
-.transport-play {
-  background: var(--ink);
+.transport .transport-play {
+  background: var(--accent);
   color: var(--paper);
   width: 52px;
   height: 52px;
 }
-.transport-play:hover {
-  background: #305b4c;
+.transport .transport-play:hover:not(:disabled) {
+  background: #ffe0bd;
 }
 .transport-status {
   font-size: 11px;
@@ -722,8 +741,13 @@ body:has(.home-page) .site-header {
   body:has(.home-page) .site-header {
     height: 64px;
   }
-  .cloud-atmosphere svg {
-    height: 72%;
+  .moon-disc {
+    top: 14px;
+    left: 56%;
+    width: min(92vw, 390px);
+  }
+  .moon-atmosphere svg {
+    height: 62%;
   }
   .home-composition {
     display: grid;
@@ -839,7 +863,7 @@ body:has(.home-page) .site-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #f4f0e8;
+  color: var(--ink);
   font-size: 12px;
 }
 html {

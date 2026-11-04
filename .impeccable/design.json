@@ -6,43 +6,43 @@
     "colorMeta": {
       "ink": {
         "role": "primary",
-        "displayName": "Deep sea green"
+        "displayName": "Lunar ivory"
       },
       "paper": {
         "role": "neutral",
-        "displayName": "Warm ivory"
+        "displayName": "Midnight plum"
       },
       "accent": {
         "role": "accent",
-        "displayName": "Vermilion"
+        "displayName": "Warm moonlight"
       },
       "home-paper": {
         "role": "neutral",
-        "displayName": "Cloud paper"
+        "displayName": "Midnight plum"
       },
       "home-ink": {
         "role": "primary",
-        "displayName": "Aviation blue"
+        "displayName": "Lunar ivory"
       },
       "home-muted": {
         "role": "neutral",
-        "displayName": "Muted aviation blue"
+        "displayName": "Muted mauve"
       },
       "home-accent": {
         "role": "accent",
-        "displayName": "Deep sky blue"
+        "displayName": "Warm moonlight"
       },
       "home-rule": {
         "role": "neutral",
-        "displayName": "Blue-gray rule"
+        "displayName": "Mauve rule"
       },
-      "home-sunlight": {
+      "home-moonlight": {
         "role": "accent",
-        "displayName": "Ivory sunlight"
+        "displayName": "Lunar highlight"
       },
       "home-sky": {
         "role": "neutral",
-        "displayName": "Open sky blue"
+        "displayName": "Twilight violet"
       }
     },
     "typographyMeta": {
@@ -51,11 +51,11 @@
         "purpose": "Short room titles."
       },
       "home-display": {
-        "displayName": "Cloud Current display",
+        "displayName": "Moon Pass display",
         "purpose": "Stacked homepage title with an italic second line."
       },
       "home-display-mobile": {
-        "displayName": "Cloud Current mobile display",
+        "displayName": "Moon Pass mobile display",
         "purpose": "Stacked homepage title at 560px and below."
       }
     },
@@ -84,15 +84,15 @@
       "refersTo": "button-primary",
       "description": "Primary room entry or submission.",
       "html": "<button class=\"ds-primary\">一起登島</button>",
-      "css": ".ds-primary{background:#183c35;color:#f4f0e8;border:1px solid #183c35;border-radius:4px;padding:15px 20px;min-height:52px;font:13px Manrope,sans-serif}.ds-primary:hover{background:#dfe5d6;color:#183c35}.ds-primary:focus-visible{outline:2px solid #c34b30;outline-offset:5px}"
+      "css": ".ds-primary{background:#f5ecdc;color:#171321;border:1px solid #f5ecdc;border-radius:4px;padding:15px 20px;min-height:52px;font:13px Manrope,sans-serif}.ds-primary:hover{background:#372b42;color:#f5ecdc}.ds-primary:focus-visible{outline:2px solid #ffc991;outline-offset:5px}"
     }
   ],
   "narrative": {
     "northStar": "A place between songs",
-    "overview": "An open listening postcard centered on an actual interactive miniature island. Operational rooms prioritize playback, queue and search.",
+    "overview": "A lunar flyby centered on an actual interactive miniature island. Operational rooms prioritize playback, queue and search.",
     "keyCharacteristics": [
       "Real 3D centerpiece",
-      "Warm ivory ground",
+      "Midnight plum ground",
       "Editorial serif with precise controls"
     ],
     "rules": [

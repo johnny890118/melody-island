@@ -1,4 +1,6 @@
-# Homepage direction contract
+# Historical homepage direction contract
+
+Superseded by the [Moon Pass direction](surfaces/app-page-tsx.md).
 
 THESIS: A private place between songs. Friends arrive at an actual miniature island, then create or join a shared listening room.
 OWN-WORLD: A warm, open listening postcard: #f4f0e8 ground, #183c35 ink and #c34b30 accent. Local Cormorant Garamond lettering, Manrope UI, real GLB material. No glass decoration or simulated activity.

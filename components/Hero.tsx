@@ -119,9 +119,9 @@ export default function Hero() {
           }}
         >
           <FitPortrait />
-          <ambientLight intensity={0.73} color="#fff5e6" />
-          <directionalLight position={[-3, 5, 4]} intensity={3.1} color="#ffe9b5" />
-          <directionalLight position={[4, 1, -4]} intensity={2.4} color="#ffffff" />
+          <ambientLight intensity={0.73} color="#f3d9ff" />
+          <directionalLight position={[-3, 5, 4]} intensity={3.1} color="#ffcea5" />
+          <directionalLight position={[4, 1, -4]} intensity={2.4} color="#c4b7ff" />
           <Suspense
             fallback={
               <Html center>

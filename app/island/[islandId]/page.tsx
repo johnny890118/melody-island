@@ -594,7 +594,7 @@ export default function IslandPage() {
             disabled={!canControl || busy}
             onClick={() => command({ type: 'mode', shuffle: !session.shuffle })}
           >
-            <Shuffle size={17} color={session.shuffle ? '#c34b30' : 'currentColor'} />
+            <Shuffle size={17} color={session.shuffle ? 'var(--accent)' : 'currentColor'} />
           </Button>
           <Button
             variant="ghost"

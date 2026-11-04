@@ -68,37 +68,21 @@ export default function HomePage() {
   };
   return (
     <main className="home-page" id="main-content">
-      <div className="cloud-atmosphere" aria-hidden="true">
-        <svg viewBox="0 0 1440 850" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="cloud-bank" x2="0" y2="1">
-              <stop stopColor="#fffdf5" />
-              <stop offset="1" stopColor="#f7fcff" stopOpacity=".12" />
-            </linearGradient>
-            <filter id="cloud-haze">
-              <feGaussianBlur stdDeviation="14" />
-            </filter>
-          </defs>
-          <path
-            d="M-80 502C88 508 99 427 243 451S428 581 573 565S732 516 830 550S1021 563 1112 504S1306 434 1520 466V900H-80Z"
-            fill="url(#cloud-bank)"
-            filter="url(#cloud-haze)"
-          />
-          <g className="cloud-traces" fill="none" stroke="#fff">
-            <path d="M-50 303Q325 231 621 320T1510 241" opacity=".85" />
-            <path d="M-50 319Q325 247 621 336T1510 257" opacity=".43" />
-          </g>
+      <div className="moon-atmosphere" aria-hidden="true">
+        <div className="moon-disc" />
+        <svg viewBox="0 0 1440 850" preserveAspectRatio="none" fill="none">
+          <path d="M440 680 1280 380" stroke="#ffc991" strokeDasharray="2 9" opacity=".35" />
         </svg>
       </div>
       <div className="home-composition">
         <Hero />
         <div className="hero-title">
           <h1 lang="en">
-            Cloud
+            Moon
             <br />
-            <em>Current.</em>
+            <em>Pass.</em>
           </h1>
-          <p>雲上航道。飛越雲海，去朋友的島上聽歌。</p>
+          <p>掠月航線。讓遠方的人，在月影下共聽。</p>
         </div>
         <div className="home-actions">
           <div className="home-action-list">
