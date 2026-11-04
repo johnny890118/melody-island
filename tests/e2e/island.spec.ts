@@ -244,7 +244,11 @@ test('20 isolated browser clients converge and the 21st member is refused', asyn
         post(request, `/api/islands/${id}/join`, user, { islandPassword: 'load-test-only-123' }),
       ),
   );
-  expect(joinResults.every((result) => result.status() === 200)).toBe(true);
+  const joinSummaries = await Promise.all(joinResults.map(async (result) => ({
+    status: result.status(),
+    ...(result.ok() ? {} : { error: await result.json() }),
+  })));
+  expect(joinSummaries).toEqual(Array.from({ length: 19 }, () => ({ status: 200 })));
   const overflow = await post(request, `/api/islands/${id}/join`, users[20], {
     islandPassword: 'load-test-only-123',
   });

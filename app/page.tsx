@@ -1,6 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import React, { useEffect, useState } from 'react';
+import { preload } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { useAppSelector } from '@/store/hooks';
 import { useRouter } from 'next/navigation';
@@ -17,6 +18,7 @@ const Hero = dynamic(() => import('@/components/Hero'), {
 });
 
 export default function HomePage() {
+  preload('/models/island.glb', { as: 'fetch', crossOrigin: 'anonymous' });
   const { user, ready } = useAppSelector((state) => state.auth);
   const [ownIsland, setOwnIsland] = useState('');
   const [notice, setNotice] = useState('');

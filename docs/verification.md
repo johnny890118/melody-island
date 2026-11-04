@@ -2,7 +2,7 @@
 
 First implementation candidate; no production deployment or legacy data migration.
 
-- Unit/component: 53 passed across ten suites, including actual player-adapter cue/load/clear behavior with a fake YouTube target.
+- Unit/component: 54 passed across ten suites, including actual player-adapter cue/load/clear behavior with a fake YouTube target.
 - Firestore Rules Emulator: 5 passed. Client writes, secret reads, self-membership and non-member reads are rejected.
 - Playwright: 11 Chromium end-to-end scenarios passed in 50.2 seconds after the accessibility/security follow-up. Includes real homepage WebGL, two-client playback state, refresh, concurrency, roles, ownership transfer, interrupted search and short-viewport keyboard focus.
 - After the full suite, the 20-client scenario passed twice more consecutively (22.5 and 22.4 seconds) following the lease/counter compare-and-set change. The 21st member is refused. These are emulator state tests with mock playback, not audio-drift measurements.
@@ -17,7 +17,7 @@ Earlier repeated load tests exposed transaction-lock timeouts even after one suc
 
 Visual finish review: disposition **ship**, limited to the five scored fixes (framing, login/create entry, mobile task order, placeholder contrast, focused transport clearance). It does not establish award quality. Captures are local under `.impeccable/review/`; management and search focus were checked at 390×600.
 
-Local production baseline is in `measurements/home-local.json`. Unthrottled localhost and software WebGL are not real-device/field performance evidence. Desktop observed scene/fonts readiness was about 1.29 seconds, phone-size viewport about 0.60 seconds. Canvas readiness is separate from LCP. Homepage font files total about 257 KB, and only the main island model loads (bird/plane assets are preserved but not requested).
+Local production baseline is in `measurements/home-local.json`. Unthrottled localhost and software WebGL are not real-device/field performance evidence. Desktop observed scene/fonts readiness was about 1.29 seconds, phone-size viewport about 0.60 seconds. Canvas readiness is separate from LCP. At that baseline, homepage fonts totaled about 257 KB, and only the main island model loads (bird/plane assets are preserved but not requested).
 
 Still required for a production release: Admin identity/origin/auth-provider configuration, edge abuse protection/App Check, remaining-advisory review, coordinated rules rollout, backed-up legacy migration, real YouTube/Safari checks, actual audio-drift and device/network performance tests.
 
@@ -27,6 +27,10 @@ App Check integration and missing/invalid attestation tests are included, with n
 
 The covered axe scans pass for home, dialog, room, expanded permissions, invalid-ID gate and model failure. Real Chromium CDP touch reproduced and verified the scroll/rotation fix. Source detector: 0 primary findings and 55 token-ramp advisories, left visible; see ui-audit.md.
 
-Cold-cache synthetic performance (`measurements/home-throttled.json`): three runs each, 4× CPU slowdown, 1.6Mbps down/0.75Mbps up and 150ms latency. Median observed scene/fonts readiness was 6.19s desktop and 6.20s mobile viewport, with about 925 KB transferred. Text LCP was about 0.53s and does not measure Canvas readiness. These diagnostic results justify further asset/waterfall optimization; they are not described as a fast real-device experience.
+Cold-cache synthetic performance: three runs per viewport, 4× CPU slowdown, 1.6Mbps down/0.75Mbps up and 150ms latency. After splitting fonts by Unicode range and preloading the homepage island, median observed scene/fonts readiness fell from 6.19s to 5.92s on desktop and 6.20s to 5.90s on mobile. Transfer fell from about 925 KB to 807 KB; each run transferred one island model. Text LCP was 0.56s and does not measure Canvas readiness. See `measurements/home-throttled-before-font-split.json` and `measurements/home-throttled.json`.
+
+The opt-in `npm run smoke:youtube` loaded the real iframe and cued the official sample in Chromium and WebKit using demo room data. It verifies readiness only; it does not verify audible playback, autoplay recovery, ads, or inter-device drift. See `measurements/youtube-smoke.json`.
+
+Linux CI for `0b5992c` failed the concurrent 19-guest join stage. A local delayed-counter regression separately reproduced premature retry exhaustion: 11 of 20 operations passed with the old retry budget. The counter now uses bounded exponential jitter and up to 32 attempts; the test requires all 20 operations to pass and the 21st to be rejected without exceeding the budget. The E2E reports individual response statuses and errors if joins fail again.
 
 Remote CI for the prior pushed milestone d0b3144 passed: https://github.com/johnny890118/melody-island/actions/runs/41681329765. This does not establish the result for any newer commit.

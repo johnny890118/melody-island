@@ -17,7 +17,8 @@
     "measure:home": "tsx scripts/measure-home.ts",
     "test:e2e:webkit": "firebase emulators:exec --project demo-melody-island --only auth,firestore \"playwright test --browser=webkit\"",
     "test:migration": "firebase emulators:exec --project demo-melody-island --only auth,firestore \"tsx scripts/rehearse-migration.ts\"",
-    "measure:home:throttled": "MELODY_THROTTLED=true tsx scripts/measure-home.ts"
+    "measure:home:throttled": "MELODY_THROTTLED=true tsx scripts/measure-home.ts",
+    "smoke:youtube": "firebase emulators:exec --project demo-melody-island --only auth,firestore \"tsx scripts/smoke-youtube.ts\""
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.4.1",

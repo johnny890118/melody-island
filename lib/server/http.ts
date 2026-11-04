@@ -71,7 +71,7 @@ export async function rateLimit(uid: string, bucket: string, max: number, window
   const ref = db.doc(`rateLimits/${uid}_${bucket}`);
   // Optimistic compare-and-set avoids a read-lock upgrade during overlapping
   // heartbeats and interactive commands. The precondition still makes the count atomic.
-  for (let attempt = 0; attempt < 8; attempt++) {
+  for (let attempt = 0; attempt < 32; attempt++) {
     const snap = await ref.get();
     const data = snap.data();
     const now = Date.now();
@@ -87,7 +87,10 @@ export async function rateLimit(uid: string, bucket: string, max: number, window
       return;
     } catch (error) {
       if (![6, 9, 10].some((code) => code === errorCode(error))) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 15 + Math.random() * 40));
+      // Spread a legitimate 20-member join burst instead of exhausting a small
+      // synchronized retry budget on slower CI/deployment networks.
+      const jitter = 15 + Math.random() * Math.min(250, 20 * 2 ** attempt);
+      await new Promise((resolve) => setTimeout(resolve, jitter));
     }
   }
   throw new SessionError('操作正在排隊，請稍後再試。', 429);

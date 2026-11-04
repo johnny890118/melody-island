@@ -35,6 +35,15 @@ npm run test:e2e:webkit
 
 Rules and E2E commands start and stop demo emulators themselves, so stop manually started emulators first. Playwright needs `npx playwright install chromium webkit`. Tests include actual homepage WebGL rendering, membership/security rules, two-client operations, 20 isolated browser clients, command deduplication, stale versions, leadership and member management. Playback is mocked in E2E; real YouTube autoplay, buffering, ads, Safari behavior and audio drift require separate manual verification.
 
+To reproduce the optional real YouTube iframe check, build and start a demo preview on `127.0.0.1:3100` with the mock player disabled:
+
+```sh
+NEXT_PUBLIC_USE_EMULATORS=true NEXT_PUBLIC_TEST_PLAYER=false npm run build
+NEXT_PUBLIC_USE_EMULATORS=true ALLOW_TEST_EMULATORS=true FIREBASE_PROJECT_ID=demo-melody-island FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 npm run start -- --hostname 127.0.0.1 --port 3100
+```
+
+In another terminal run `npm run smoke:youtube`. It starts demo emulators, seeds a synthetic room, and checks iframe readiness in both browser engines. It requires internet access to YouTube and does not measure audio synchronization.
+
 CI runs the same checks and preserves failure traces. A Java runtime installed only under `/tmp` during development is not a project dependency; install Java 21 on your own machine or use CI.
 
 ## App attestation and quota protection

@@ -16,7 +16,7 @@ A pushed milestone is not completion of the entire modernization request.
 
 Player lifecycle/reconnect coverage, dependency notes, covered UI/keyboard/touch checks, abuse-control integration and a concrete migration/rollback runbook plus demo rehearsal are completed locally.
 
-1. Optimize the measured cold-load scene/font waterfall (currently about 6.2s in the synthetic slow profile), then compare the same profile.
+1. Continue profiling on actual devices. The same synthetic slow profile improved from about 6.2s to 5.9s after font subsetting and model preload; real YouTube iframe readiness also passed in Chromium and WebKit.
 2. Align outstanding design token documentation deliberately; verify assistive technology and text scaling.
 3. Configure and verify real App Check/edge controls in staging; do not call the integration production-enforced merely because its unit tests pass.
 4. Real-device/YouTube acceptance, then deployment review with verified backups. No production deployment or data mutation is authorized by this ledger.

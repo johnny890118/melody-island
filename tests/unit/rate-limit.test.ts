@@ -3,13 +3,14 @@ interface Counter {
   until: number;
 }
 import { beforeEach, expect, it, vi } from 'vitest';
-const store = vi.hoisted(() => ({ data: undefined as Counter | undefined, revision: 0 }));
+const store = vi.hoisted(() => ({ data: undefined as Counter | undefined, revision: 0, latency: 0 }));
 vi.mock('../../lib/server/firebase', () => ({
   adminServices: () => ({
     db: {
       doc: () => ({
         async get() {
           const snapshot = { data: store.data && { ...store.data }, revision: store.revision };
+          if (store.latency) await new Promise((resolve) => setTimeout(resolve, store.latency));
           return {
             exists: Boolean(snapshot.data),
             data: () => snapshot.data,
@@ -17,12 +18,14 @@ vi.mock('../../lib/server/firebase', () => ({
           };
         },
         async update(data: Counter, condition: { lastUpdateTime: number }) {
+          if (store.latency) await new Promise((resolve) => setTimeout(resolve, store.latency));
           if (condition.lastUpdateTime !== store.revision)
             throw Object.assign(new Error('Conflict'), { code: 9 });
           store.data = data;
           store.revision++;
         },
         async create(data: Counter) {
+          if (store.latency) await new Promise((resolve) => setTimeout(resolve, store.latency));
           if (store.data) throw Object.assign(new Error('Exists'), { code: 6 });
           store.data = data;
           store.revision++;
@@ -35,6 +38,7 @@ import { rateLimit } from '../../lib/server/http';
 beforeEach(() => {
   store.data = undefined;
   store.revision = 0;
+  store.latency = 0;
   vi.restoreAllMocks();
 });
 it('never exceeds the budget when initial requests race', async () => {
@@ -56,4 +60,12 @@ it('resets an expired window', async () => {
   clock.mockReturnValue(1101);
   await expect(rateLimit('user', 'test', 1, 100)).resolves.toBeUndefined();
   expect(store.data?.count).toBe(1);
+});
+
+it('admits a full room-sized burst despite delayed overlapping counter snapshots', async () => {
+  store.latency = 20;
+  const results = await Promise.allSettled(Array.from({ length: 20 }, () => rateLimit('room', 'join_room', 20)));
+  expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(20);
+  expect(store.data?.count).toBe(20);
+  await expect(rateLimit('room', 'join_room', 20)).rejects.toHaveProperty('status', 429);
 });
