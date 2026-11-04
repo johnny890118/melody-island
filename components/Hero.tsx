@@ -52,14 +52,18 @@ function FitPortrait() {
   return null;
 }
 export default function Hero() {
+  const stage = useRef<HTMLElement>(null);
   const controls = useRef<OrbitControlsImpl | null>(null);
   const [readyKey, setReadyKey] = useState(-1);
   const [birdKey, setBirdKey] = useState(-1);
   const [birdReadyKey, setBirdReadyKey] = useState(-1);
   const [sceneKey, setSceneKey] = useState(0);
   const [rotating, setRotating] = useState(true);
-  const [active, setActive] = useState(true);
+  const [documentVisible, setDocumentVisible] = useState(true);
+  const [inViewport, setInViewport] = useState(true);
+  const active = documentVisible && inViewport;
   const [reduced, setReduced] = useState(true);
+  const renderMode = !active ? 'never' : reduced || !rotating ? 'demand' : 'always';
   const markIslandReady = useCallback(() => setReadyKey(sceneKey), [sceneKey]);
   const markBirdReady = useCallback(() => setBirdReadyKey(sceneKey), [sceneKey]);
   useEffect(() => {
@@ -70,19 +74,24 @@ export default function Hero() {
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const motion = () => setReduced(media.matches);
-    const visibility = () => setActive(!document.hidden);
+    const visibility = () => setDocumentVisible(!document.hidden);
+    const observer = new IntersectionObserver(([entry]) => setInViewport(entry.isIntersecting));
+    if (stage.current) observer.observe(stage.current);
     motion();
     visibility();
     media.addEventListener('change', motion);
     document.addEventListener('visibilitychange', visibility);
     return () => {
+      observer.disconnect();
       media.removeEventListener('change', motion);
       document.removeEventListener('visibilitychange', visibility);
     };
   }, []);
   return (
     <section
+      ref={stage}
       className="island-stage"
+      data-render-mode={renderMode}
       aria-label="互動 3D 島嶼"
       data-island-ready={readyKey === sceneKey}
       data-bird-ready={birdReadyKey === sceneKey}
@@ -105,7 +114,7 @@ export default function Hero() {
           className="island-canvas"
           dpr={[1, 1.5]}
           camera={{ position: [2, 0.95, 5.55], fov: 35 }}
-          frameloop={!active ? 'never' : reduced || !rotating ? 'demand' : 'always'}
+          frameloop={renderMode}
           gl={{
             antialias: true,
             alpha: true,

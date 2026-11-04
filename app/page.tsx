@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import React, { useEffect, useState } from 'react';
 import { preload } from 'react-dom';
 import dynamic from 'next/dynamic';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useRouter } from 'next/navigation';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { ArrowUpRight, Headphones } from 'lucide-react';
@@ -19,18 +19,20 @@ const Hero = dynamic(() => import('@/components/Hero'), {
 
 export default function HomePage() {
   preload('/models/island.glb', { as: 'fetch', crossOrigin: 'anonymous' });
-  const { user, ready } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
+  const { user, ready, status } = useAppSelector((state) => state.auth);
   const [ownIsland, setOwnIsland] = useState('');
   const [notice, setNotice] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
   const loginToCreate = async () => {
-    if (loggingIn) return;
+    if (loggingIn || status === 'loading') return;
     setLoggingIn(true);
     setNotice('');
     try {
-      await startGoogleLogin();
-    } catch {
-      setNotice('登入暫時無法使用，請稍後再試。');
+      const result = await dispatch(startGoogleLogin());
+      if (startGoogleLogin.rejected.match(result) && !result.meta.condition)
+        setNotice(result.payload ?? '登入暫時無法使用，請稍後再試。');
+    } finally {
       setLoggingIn(false);
     }
   };
@@ -90,7 +92,7 @@ export default function HomePage() {
               <Button
                 variant="ghost"
                 className="action-button"
-                disabled={!ready || loggingIn}
+                disabled={!ready || loggingIn || status === 'loading'}
                 onClick={loginToCreate}
               >
                 {loggingIn ? '正在登入…' : '登入並建立島嶼'}

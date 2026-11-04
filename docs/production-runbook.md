@@ -12,6 +12,10 @@ Search requires a room ID and verified membership. It has a per-UID limit plus a
 
 Join has per-UID and per-room limits before password derivation. Configure an edge rate limit for auth/join/create/search on the actual hosting platform; do not trust arbitrary `X-Forwarded-For` as a client identity. No generic IP limiter is presented as safe without a trusted proxy configuration. Set `APP_ORIGIN` to the public HTTPS origin and restrict the YouTube key to its API/server environment. Verify only intended Firebase auth providers are enabled.
 
+## Google sign-in acceptance
+
+The app opens the Firebase Google provider in a popup from the user's click. Register the exact staging origin's hostname in the staging project's Firebase Auth authorized domains, enable its Google provider, and use a test account. Verify sign-in, reload persistence, sign-out, popup cancellation and retry on Chromium and native Safari/iPhone. A successful run against the Auth Emulator verifies the SDK flow and the app's session state. Only a run using the staging provider verifies its domain and OAuth configuration.
+
 ## Staging evidence to collect
 
 Use a dedicated Firebase project and hosting origin. Record the deployed commit, project ID, browser/device versions, configuration state, and response statuses. Keep passwords, ID tokens, App Check tokens, and request authorization headers out of the evidence.

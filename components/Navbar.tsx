@@ -15,12 +15,14 @@ export default function Navbar() {
     dispatch(fetchUser());
   }, [dispatch]);
   const login = async () => {
+    if (status === 'loading') return;
     setPending(true);
     setError('');
     try {
-      await startGoogleLogin();
-    } catch {
-      setError('登入暫時無法使用，請稍後再試。');
+      const result = await dispatch(startGoogleLogin());
+      if (startGoogleLogin.rejected.match(result) && !result.meta.condition)
+        setError(result.payload ?? '登入暫時無法使用，請稍後再試。');
+    } finally {
       setPending(false);
     }
   };

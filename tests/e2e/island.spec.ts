@@ -41,6 +41,12 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
+  await page.setViewportSize({ width: 390, height: 360 });
+  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+  await expect(stage).toHaveAttribute('data-render-mode', 'never');
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+  await expect(stage).toHaveAttribute('data-render-mode', 'demand');
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: '加入朋友的島嶼' }).click();
   await expect(page.getByLabel('島嶼 ID', { exact: true })).toBeVisible();
   await expect(page.getByLabel('島嶼密碼', { exact: true })).toBeVisible();

@@ -3,6 +3,7 @@
 import { chromium, webkit, request as playwrightRequest, expect } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { adminDb, identity, login, post } from '../tests/e2e/helpers';
+import { DEFAULT_PERMISSIONS } from '../lib/session';
 import { measureTimeline, sample, waitForPlayback } from './youtube-timeline';
 const timeline = process.env.MELODY_REAL_TIMELINE === 'true';
 const transition = timeline && process.env.MELODY_REAL_TRANSITION === 'true';
@@ -61,6 +62,13 @@ try {
         commandId: crypto.randomUUID(),
       });
       if (!next.ok()) throw new Error('Could not add the transition fixture.');
+      // Keep the intentionally stalled client out of the advance-leader role.
+      const permissions = await post(api, `/api/islands/${id}/commands`, owner, {
+        type: 'permissions',
+        permissions: { ...DEFAULT_PERMISSIONS, guestsCanSkip: false },
+        commandId: crypto.randomUUID(),
+      });
+      if (!permissions.ok()) throw new Error('Could not configure owner-only advance.');
     }
     for (const [name, engine] of [
       ['chromium', chromium],
@@ -113,6 +121,7 @@ try {
         let timelineResult: {
           samples?: Awaited<ReturnType<typeof measureTimeline>>;
           error?: string;
+          stage?: string;
           autoAdvance?: {
             duration: number;
             positionMs: number;
@@ -122,6 +131,7 @@ try {
           };
         } | null = null;
         if (guest) {
+          let stage = 'iframe readiness';
           try {
             if (!ready) throw new Error('Owner iframe did not become ready.');
             const guestPage = await browser.newPage();
@@ -130,12 +140,24 @@ try {
             await expect(
               guestPage.getByRole('heading', { name: 'Real iframe smoke — synthetic room' }),
             ).toBeVisible();
+            stage = 'both clients play and pause';
             timelineResult = { samples: await measureTimeline(page, guestPage) };
             if (transition) {
               const { duration } = await sample(page);
               if (!Number.isFinite(duration) || duration < 15)
                 throw new Error('Invalid fixture duration.');
               const roomRef = db.doc(`islands/${id}`);
+              stage = 'host leadership';
+              await expect
+                .poll(
+                  async () => {
+                    const room = (await roomRef.get()).data();
+                    return room?.leaderUid === owner.localId;
+                  },
+                  { timeout: 15000 },
+                )
+                .toBe(true);
+              stage = 'near-end fixture';
               const snapshot = await roomRef.get();
               const before = snapshot.data();
               if (
@@ -169,6 +191,7 @@ try {
                 );
               }
               try {
+                stage = 'natural advance';
                 await page.getByRole('button', { name: '播放', exact: true }).click();
                 await Promise.all(
                   [page, guestPage].map((client) =>
@@ -178,6 +201,7 @@ try {
                   ),
                 );
                 if (bufferProbe) {
+                  stage = 'media hold';
                   await expect.poll(() => delayedRequests, { timeout: 8000 }).toBeGreaterThan(0);
                   readyStateDuringHold =
                     (await sample(guestPage).catch(() => null))?.readyState ?? null;
@@ -185,6 +209,7 @@ try {
               } finally {
                 releaseMedia();
               }
+              stage = 'next track playback';
               await Promise.all([waitForPlayback(page), waitForPlayback(guestPage)]);
               const after = (await roomRef.get()).data();
               const versionDelta =
@@ -203,6 +228,7 @@ try {
             // Keep provider failures and incomplete timelines separate from measured drift.
             timelineResult = {
               ...timelineResult,
+              stage,
               error: (error instanceof Error ? error.message : String(error)).split('\n')[0],
             };
           } finally {
