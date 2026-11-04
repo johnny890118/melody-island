@@ -26,6 +26,9 @@ const target = {
   cueVideoById: vi.fn(),
   stopVideo: vi.fn(),
   getCurrentTime: vi.fn<() => number>(),
+  getPlayerState: vi.fn<() => number>(),
+  getVideoUrl: vi.fn<() => string>(),
+  getDuration: vi.fn<() => number>(),
   seekTo: vi.fn(),
   playVideo: vi.fn(),
   pauseVideo: vi.fn(),
@@ -43,6 +46,9 @@ const callbacks = { onReady: vi.fn(), onError: vi.fn(), onEnded: vi.fn(), onBloc
 beforeEach(() => {
   vi.clearAllMocks();
   target.getCurrentTime.mockReturnValue(12);
+  target.getPlayerState.mockReturnValue(1);
+  target.getVideoUrl.mockReturnValue('https://www.youtube.com/watch?v=aaaaaaaaaaa');
+  target.getDuration.mockReturnValue(60);
 });
 afterEach(() => {
   cleanup();
@@ -87,7 +93,14 @@ it('enabling audio preserves a paused room and plays only a playing room', () =>
   act(() => ref.current?.enableAudio());
   expect(target.unMute).toHaveBeenCalled();
   expect(target.playVideo).not.toHaveBeenCalled();
-  view.rerender(<SyncedPlayer ref={ref} session={{ ...base, isPlaying: true }} clockOffset={0} {...callbacks} />);
+  view.rerender(
+    <SyncedPlayer
+      ref={ref}
+      session={{ ...base, isPlaying: true }}
+      clockOffset={0}
+      {...callbacks}
+    />,
+  );
   target.playVideo.mockClear();
   act(() => ref.current?.enableAudio());
   expect(target.playVideo).toHaveBeenCalledOnce();
@@ -95,7 +108,9 @@ it('enabling audio preserves a paused room and plays only a playing room', () =>
 it('applies a corrected canonical position even if the playback timestamp is unchanged', () => {
   const view = render(<SyncedPlayer session={base} clockOffset={0} {...callbacks} />);
   act(() => hooks.ready({ target }));
-  view.rerender(<SyncedPlayer session={{ ...base, positionMs: 30000 }} clockOffset={0} {...callbacks} />);
+  view.rerender(
+    <SyncedPlayer session={{ ...base, positionMs: 30000 }} clockOffset={0} {...callbacks} />,
+  );
   expect(target.seekTo).toHaveBeenCalledWith(30, true);
 });
 it('skips hidden-tab polling, resyncs on return and removes reconnect listeners on unmount', () => {
@@ -132,4 +147,29 @@ it('reports a connection timeout, but cancels it once the player is ready', () =
   act(() => hooks.ready({ target }));
   act(() => vi.advanceTimersByTime(20000));
   expect(callbacks.onError).not.toHaveBeenCalled();
+});
+
+it('rejects a delayed ended callback after a track switch and advances the actual current track', () => {
+  vi.spyOn(Date, 'now').mockReturnValue(61000);
+  const playing = { ...base, isPlaying: true, positionMs: 0 };
+  const view = render(<SyncedPlayer session={playing} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  const next = { ...playing, currentVideo: 'bbbbbbbbbbb' };
+  view.rerender(<SyncedPlayer session={next} clockOffset={0} {...callbacks} />);
+  target.getPlayerState.mockReturnValue(0);
+  act(() => hooks.state({ data: 0, target }));
+  expect(callbacks.onEnded).not.toHaveBeenCalled();
+  target.getVideoUrl.mockReturnValue('https://www.youtube.com/watch?v=bbbbbbbbbbb');
+  act(() => hooks.state({ data: 0, target }));
+  expect(callbacks.onEnded).toHaveBeenCalledWith(next);
+});
+
+it('ignores a stale ended event after replaying the same video from the start', () => {
+  vi.spyOn(Date, 'now').mockReturnValue(61000);
+  const replay = { ...base, positionMs: 0, isPlaying: true, playbackUpdatedAt: 61000 };
+  render(<SyncedPlayer session={replay} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  target.getPlayerState.mockReturnValue(0);
+  act(() => hooks.state({ data: 0, target }));
+  expect(callbacks.onEnded).not.toHaveBeenCalled();
 });

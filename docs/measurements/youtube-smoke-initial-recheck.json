@@ -1,0 +1,30 @@
+[
+  {
+    "engine": "chromium",
+    "realIframeReady": false,
+    "alerts": [],
+    "failedResources": [
+      {
+        "host": "www.youtube.com",
+        "error": "net::ERR_ABORTED"
+      },
+      {
+        "host": "www.youtube.com",
+        "error": "net::ERR_ABORTED"
+      }
+    ],
+    "scope": "External iframe/API readiness only; no audible playback or drift certification."
+  },
+  {
+    "engine": "webkit",
+    "realIframeReady": false,
+    "alerts": [],
+    "failedResources": [
+      {
+        "host": "www.youtube.com",
+        "error": "cancelled"
+      }
+    ],
+    "scope": "External iframe/API readiness only; no audible playback or drift certification."
+  }
+]

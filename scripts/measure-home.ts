@@ -9,15 +9,21 @@ import { mkdir, writeFile } from 'node:fs/promises';
 const origin = process.env.MELODY_PREVIEW_ORIGIN || 'http://127.0.0.1:3100';
 if (new URL(origin).hostname !== '127.0.0.1')
   throw new Error('Only a local preview may be measured');
-const browser = await chromium.launch({
-  args: [
-    '--enable-webgl',
-    '--use-gl=angle',
-    '--use-angle=swiftshader',
-    '--enable-unsafe-swiftshader',
-  ],
-});
+const nativeChrome = process.env.MELODY_NATIVE_CHROME === 'true';
 const throttled = process.env.MELODY_THROTTLED === 'true';
+if (nativeChrome && throttled) throw new Error('Run the host GPU and synthetic profiles separately');
+const browser = await chromium.launch(
+  nativeChrome
+    ? { channel: 'chrome' }
+    : {
+        args: [
+          '--enable-webgl',
+          '--use-gl=angle',
+          '--use-angle=swiftshader',
+          '--enable-unsafe-swiftshader',
+        ],
+      },
+);
 const repetitions = throttled ? 3 : 1;
 const records = [];
 try {
@@ -73,16 +79,25 @@ try {
       });
       records.push(
         await page.evaluate(
-          ({ viewport, throttled, run, islandAndFontsReadyMs, fullSceneReadyMs }) => {
+          ({ viewport, throttled, run, islandAndFontsReadyMs, fullSceneReadyMs, nativeChrome }) => {
             const resources = performance
               .getEntriesByType('resource')
               .filter((entry): entry is PerformanceResourceTiming => 'transferSize' in entry);
+            const context = document.querySelector('canvas')?.getContext('webgl2');
+            const rendererInfo = context?.getExtension('WEBGL_debug_renderer_info');
+            const renderer =
+              context && rendererInfo
+                ? String(context.getParameter(rendererInfo.UNMASKED_RENDERER_WEBGL))
+                : null;
             return {
               viewport,
+              renderer,
               run,
-              scope: throttled
-                ? 'localhost production, cold HTTP cache, 4x CPU slowdown, 1.6Mbps down/0.75Mbps up, 150ms latency, software WebGL; synthetic, not a real device; LCP excludes Canvas readiness'
-                : 'local production build, no CPU/network throttling, software WebGL; LCP excludes Canvas readiness',
+              scope: nativeChrome
+                ? 'Installed Chrome on the host, localhost production, reduced motion; viewport dimensions do not emulate hardware'
+                : throttled
+                  ? 'localhost production, cold HTTP cache, 4x CPU slowdown, 1.6Mbps down/0.75Mbps up, 150ms latency, software WebGL; synthetic, not a real device; LCP excludes Canvas readiness'
+                  : 'local production build, no CPU/network throttling, software WebGL; LCP excludes Canvas readiness',
               longTaskTotalMs: window.__baseline.longTasks.reduce(
                 (sum, duration) => sum + duration,
                 0,
@@ -105,7 +120,7 @@ try {
                 })),
             };
           },
-          { viewport, throttled, run, islandAndFontsReadyMs, fullSceneReadyMs },
+          { viewport, throttled, run, islandAndFontsReadyMs, fullSceneReadyMs, nativeChrome },
         ),
       );
       await context.close();
@@ -116,7 +131,7 @@ try {
 }
 await mkdir('docs/measurements', { recursive: true });
 await writeFile(
-  `docs/measurements/home-moon-pass-${throttled ? 'throttled' : 'local'}.json`,
+  `docs/measurements/home-moon-pass-${nativeChrome ? 'host-chrome' : throttled ? 'throttled' : 'local'}.json`,
   JSON.stringify(records, null, 2) + '\n',
 );
 console.log(JSON.stringify(records, null, 2));

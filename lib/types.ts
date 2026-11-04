@@ -93,6 +93,8 @@ export interface PlayerTarget {
   stopVideo(): void;
   getCurrentTime(): number;
   getPlayerState?(): number;
+  getVideoUrl?(): string;
+  getDuration?(): number;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   playVideo(): void;
   pauseVideo(): void;

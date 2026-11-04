@@ -12,6 +12,19 @@ Search requires a room ID and verified membership. It has a per-UID limit plus a
 
 Join has per-UID and per-room limits before password derivation. Configure an edge rate limit for auth/join/create/search on the actual hosting platform; do not trust arbitrary `X-Forwarded-For` as a client identity. No generic IP limiter is presented as safe without a trusted proxy configuration. Set `APP_ORIGIN` to the public HTTPS origin and restrict the YouTube key to its API/server environment. Verify only intended Firebase auth providers are enabled.
 
+## Staging evidence to collect
+
+Use a dedicated Firebase project and hosting origin. Record the deployed commit, project ID, browser/device versions, configuration state, and response statuses. Keep passwords, ID tokens, App Check tokens, and request authorization headers out of the evidence.
+
+| Check | Expected evidence |
+| --- | --- |
+| App Check enabled on the custom API | A browser with a real attestation and signed-in room member can issue an authorized command. Repeating it without attestation or with an invalid token returns 403. |
+| Independent authorization | Valid attestation without an ID token returns 401. Valid attestation plus a valid non-member ID token cannot perform member-only operations. |
+| Firebase service enforcement | An allowed member with valid attestation reads the room. A request without attestation is rejected by the enforced Firebase service. Members still cannot write room documents directly. |
+| Hosting edge rate limit | A bounded test on staging gets a throttling response at the configured limit. Record the threshold, window and recovery. Forging a forwarded IP header must not create a new bucket. |
+| Real playback | A phone on Safari and a second client use a dedicated staging room. Capture play, pause, audio activation, track change, and reconnect. Report decoded media position separately from any measurement of audible output. |
+| Real device performance | Record separate island and full-scene readiness, network conditions and a browser trace on each device. Document browser version, GPU/device and whether reduced motion is enabled. |
+
 ## Migration gate
 
 1. Schedule maintenance and deny all legacy client writes. Do not allow old and new writers simultaneously.
@@ -33,3 +46,5 @@ Keep maintenance and deny-client-write rules in place. Capture a post-migration 
 - Real YouTube on Safari/iOS and Chromium: user-gesture autoplay, blocked audio, unavailable videos, ads/buffering, reconnect and measured inter-device audio drift.
 - Actual phone/GPU/network performance. Synthetic CPU/network measurements and software WebGL are diagnostic evidence only.
 - App Check provider/domain/metrics verification, edge controls, Admin identity, quota configuration, remote CI, backup restore and coordinated deployment review.
+
+For a provider check with synthetic rooms, run an isolated local preview on port 3100 with both project ID variables set to `demo-melody-island`, `NEXT_PUBLIC_USE_EMULATORS=true` and `NEXT_PUBLIC_TEST_PLAYER=false`. Apply these public flags at build time for `next start`, and set `ALLOW_TEST_EMULATORS=true` only at runtime inside the local emulator session. In a second shell run `MELODY_REAL_TIMELINE=true npm run smoke:youtube`. It measures two browser contexts' media clocks only if both play and then pause through the room controls. A failed measurement is an error, and the JSON records the missing evidence. Keep this run separate from a dev server sharing the same Next build directory.

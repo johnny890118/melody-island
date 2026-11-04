@@ -36,6 +36,34 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
   const testPlayer =
     process.env.NEXT_PUBLIC_USE_EMULATORS === 'true' &&
     process.env.NEXT_PUBLIC_TEST_PLAYER === 'true';
+  const reportEnded = useCallback((target: PlayerTarget) => {
+    const data = latest.current;
+    if (
+      target !== player.current ||
+      !data.isPlaying ||
+      !data.currentVideo ||
+      loaded.current !== data.currentVideo
+    )
+      return;
+
+    try {
+      if (target.getPlayerState?.() !== 0) return;
+      // The event identifies the iframe, not which load produced it.
+      const url = new URL(target.getVideoUrl?.() ?? '');
+      const duration = target.getDuration?.() ?? 0;
+      const expected = expectedSeconds(data, Date.now() + offset.current);
+      if (
+        url.searchParams.get('v') !== data.currentVideo ||
+        !Number.isFinite(duration) ||
+        duration <= 0 ||
+        expected < duration - 3
+      )
+        return;
+    } catch {
+      return;
+    }
+    callbacks.current.onEnded(data);
+  }, []);
   const sync = useCallback((force = false) => {
     const target = player.current;
     const data = latest.current;
@@ -96,9 +124,8 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     sync,
   ]);
   useEffect(() => {
-    if (ready && session.isPlaying && player.current?.getPlayerState?.() === 0)
-      callbacks.current.onEnded(session);
-  }, [ready, session]);
+    if (ready && player.current) reportEnded(player.current);
+  }, [ready, session, reportEnded]);
   useEffect(() => {
     if (!ready) return;
     const timer = setInterval(() => {
@@ -171,8 +198,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
         onError={() => callbacks.current.onError('這首影片無法播放，請選擇其他歌曲。')}
         onStateChange={(event) => {
           const data = latest.current;
-          if (event.data === 0 && loaded.current === data.currentVideo && data.isPlaying)
-            callbacks.current.onEnded(data);
+          if (event.data === 0) reportEnded(event.target as unknown as PlayerTarget);
           // Loading a paused track must never turn it into a playing session.
           if (event.data === 1 && !data.isPlaying) event.target.pauseVideo();
         }}
