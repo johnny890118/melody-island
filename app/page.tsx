@@ -1,13 +1,12 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import React, { useEffect, useState } from 'react';
 import { preload } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useRouter } from 'next/navigation';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
-import { ArrowUpRight, Info } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { db } from './config/firebase';
 import { api } from '@/lib/api';
 import { startGoogleLogin } from '@/store/authSlice';
@@ -79,30 +78,6 @@ export default function HomePage() {
       </div>
       <div className="home-composition">
         <Hero />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" className="scene-credits" aria-label="3D 模型來源">
-              <Info size={16} />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="island-dialog" aria-describedby={undefined}>
-            <DialogTitle>3D 模型來源</DialogTitle>
-            <a
-              href="https://sketchfab.com/3d-models/foxs-islands-163b68e09fcc47618450150be7785907"
-              target="_blank"
-              rel="noreferrer"
-            >
-              島嶼：nimzu · CC BY 4.0
-            </a>
-            <a
-              href="https://sketchfab.com/3d-models/phoenix-bird-844ba0cf144a413ea92c779f18912042"
-              target="_blank"
-              rel="noreferrer"
-            >
-              鳳凰：NORBERTO-3D · CC BY 4.0
-            </a>
-          </DialogContent>
-        </Dialog>
         <div className="hero-title">
           <h1 lang="en">
             Melody

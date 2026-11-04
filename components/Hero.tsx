@@ -1,5 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { ReactNode } from 'react';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import React, {
@@ -13,7 +14,7 @@ import React, {
 } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Html, OrbitControls } from '@react-three/drei';
-import { RotateCcw, MoveHorizontal, Pause, Play } from 'lucide-react';
+import { RotateCcw, MoveHorizontal, Pause, Play, Info } from 'lucide-react';
 import Island from './models/Island';
 import Bird from './models/Bird';
 import { ACESFilmicToneMapping, MathUtils, PerspectiveCamera } from 'three';
@@ -187,6 +188,30 @@ export default function Hero() {
         >
           <RotateCcw size={16} />
         </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="3D 模型來源">
+              <Info size={16} />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="island-dialog" aria-describedby={undefined}>
+            <DialogTitle>3D 模型來源</DialogTitle>
+            <a
+              href="https://sketchfab.com/3d-models/foxs-islands-163b68e09fcc47618450150be7785907"
+              target="_blank"
+              rel="noreferrer"
+            >
+              島嶼：nimzu · CC BY 4.0
+            </a>
+            <a
+              href="https://sketchfab.com/3d-models/phoenix-bird-844ba0cf144a413ea92c779f18912042"
+              target="_blank"
+              rel="noreferrer"
+            >
+              鳳凰：NORBERTO-3D · CC BY 4.0
+            </a>
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );

@@ -399,15 +399,6 @@ body:has(.home-page) .site-header {
   left: 0;
   margin: 0;
 }
-.scene-credits {
-  position: absolute;
-  top: 12px;
-  left: 0;
-  z-index: 4;
-  width: 44px;
-  height: 44px;
-  color: var(--muted);
-}
 .quiet-notice {
   font-size: 11px;
   color: var(--muted);
