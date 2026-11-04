@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useRouter } from 'next/navigation';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
-import { ArrowUpRight, Headphones } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { db } from './config/firebase';
 import { api } from '@/lib/api';
 import { startGoogleLogin } from '@/store/authSlice';
@@ -84,7 +84,7 @@ export default function HomePage() {
             <br />
             <em>Island</em>
           </h1>
-          <p>邀朋友登島，一起聽喜歡的歌。</p>
+          <p>不同的地方，同一首歌。</p>
         </div>
         <div className="home-actions">
           <div className="home-action-list">
@@ -139,18 +139,11 @@ export default function HomePage() {
             />
           </div>
         </div>
-        <div className="home-caption">
-          {notice ? (
-            <p className="quiet-notice" role="status">
-              {notice}
-            </p>
-          ) : (
-            <>
-              <Headphones size={16} />
-              <span>不同的地方，同一首歌。</span>
-            </>
-          )}
-        </div>
+        {notice && (
+          <p className="home-caption quiet-notice" role="status">
+            {notice}
+          </p>
+        )}
       </div>
       <footer className="home-footer">
         <span>Melody Island</span>

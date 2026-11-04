@@ -187,13 +187,20 @@ body {
   background: radial-gradient(ellipse at 75% 0%, #231b32, var(--paper) 65%);
 }
 body:has(.home-page) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
   background: radial-gradient(ellipse at 70% 43%, #262039, #12101f 51%, #080912 85%);
 }
 body:has(.home-page) .site-header {
+  flex: none;
   height: 82px;
   border-color: #a78d9c60;
 }
 .home-page {
+  flex: 1;
+  display: grid;
+  grid-template-rows: 1fr auto;
   position: relative;
   isolation: isolate;
 }
@@ -239,9 +246,7 @@ body:has(.home-page) .site-header {
 }
 .home-composition {
   position: relative;
-  min-height: 650px;
-  height: calc(100svh - 82px);
-  max-height: 900px;
+  min-height: 580px;
   margin: 0 4.5vw;
 }
 .hero-title {
@@ -392,11 +397,7 @@ body:has(.home-page) .site-header {
   position: absolute;
   bottom: 24px;
   left: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 11px;
-  color: var(--muted);
+  margin: 0;
 }
 .home-footer {
   display: flex;
@@ -731,7 +732,7 @@ body:has(.home-page) .site-header {
 }
 @media (max-width: 900px) {
   .home-composition {
-    min-height: 690px;
+    min-height: 620px;
   }
   .island-stage {
     inset: 1% -2vw 29% 7%;
@@ -793,7 +794,7 @@ body:has(.home-page) .site-header {
     margin-top: 16px;
   }
   .island-stage {
-    height: clamp(294px, 46svh, 410px);
+    height: clamp(260px, 40svh, 410px);
   }
   .scene-tools {
     bottom: 0;
