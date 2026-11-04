@@ -1,12 +1,12 @@
 # Isolated staging setup
 
-Keep the production Firebase project, production Vercel variables and production branch unchanged. GitHub deployment metadata proves the branch has a protected Vercel Preview. It does not identify the Firebase project that Preview uses. Treat existing previews as unverified and avoid signing in or creating rooms there until the configuration is checked.
+The independent Vercel and Firebase projects are both named `melody-island-stage-20261105`. Use the protected [Staging Preview](https://melody-island-stage-20261105-preview.vercel.app/) for acceptance. The existing production Vercel project's Preview variables are shared with other environments. Avoid signing in or creating rooms on its older previews.
 
 ## Account access and project creation
 
 1. Sign in to Firebase with an account allowed to create a project. In this workspace run `npx --no-install firebase login` and finish the browser prompt. Run `npx --no-install firebase login:list` to confirm the session. Do not send tokens or key files in chat.
 2. In the Firebase console, create a dedicated project with a globally unique ID, for example `melody-island-stage-<suffix>`. If a separate project already exists, confirm it is reserved for staging and has no production data or shared service account. Record the actual ID and intended Firestore region before setup.
-3. Open the existing Melody Island Vercel project as a team member with Preview settings access. Use protected, branch-specific Preview variables for `codex/modernize-island`. Choose a stable HTTPS staging hostname on that branch for OAuth and origin checks. Keep protection enabled.
+3. Deploy `codex/modernize-island` to the dedicated Vercel project's Preview environment. Assign the stable Staging alias to the resulting deployment and verify that an unauthenticated request redirects to Vercel authentication. The dedicated project's Production deployment is a static bootstrap page.
 
 ## Bind the dedicated Firebase project
 

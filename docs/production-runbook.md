@@ -2,6 +2,13 @@
 
 No production deployment or data migration has been performed. This runbook is a release procedure, not evidence that a deployment is safe.
 
+## Release configuration
+
+- Scope production Vercel variables to Production. Verify the browser Firebase project, Auth domain, web app ID and API key together. Set the server Firebase project to the same project and provide a production-only service account through sensitive variables. Give it Firestore data access and Auth lookup permissions for revoked-session checks. Keep emulator and staging variables unset.
+- Enable Google and anonymous Auth, authorize the canonical production hostname and set `APP_ORIGIN` to that HTTPS origin. Register the production web app and hostname for App Check separately from staging. Keep the YouTube Data API key in `YOUTUBE_API_KEY` on the server, restricted to that API, and size the search budget to the project's quota.
+- For the current Firebase Admin dependency tree on Vercel Node.js 22, set `NODE_OPTIONS=--experimental-require-module`. Staging functions returned 500 with `ERR_REQUIRE_ESM` from `jwks-rsa` loading `jose` before this setting was applied. Verify an actual function response after deployment. [Vercel runtime documentation](https://vercel.com/docs/functions/runtimes/node-js/advanced-node-configuration)
+- Legacy room documents need an explicit compatibility review before rollout. The new room reader expects UID-based membership and the new commands expect versioned playback state. Legacy owner emails and plaintext room passwords need the conversion described below. Existing guests rejoin after conversion, and playback resumes only when the owner starts it.
+
 ## Abuse controls
 
 The API supports Firebase App Check attestation in addition to ID tokens. Register the web app with reCAPTCHA Enterprise, allow staging/production domains and configure `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` at build time. Confirm real browser token delivery in staging before setting server-only `ENFORCE_APP_CHECK=true`. Missing/invalid tokens then fail closed; there is no automatic emulator bypass. Disable enforcement explicitly for isolated demo tests. The client never sends a request without attestation if its configured provider fails.
