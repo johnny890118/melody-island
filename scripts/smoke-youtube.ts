@@ -6,6 +6,7 @@ import { adminDb, identity, login, post } from '../tests/e2e/helpers';
 import { measureTimeline, sample, waitForPlayback } from './youtube-timeline';
 const timeline = process.env.MELODY_REAL_TIMELINE === 'true';
 const transition = timeline && process.env.MELODY_REAL_TRANSITION === 'true';
+const bufferProbe = transition && process.env.MELODY_REAL_BUFFER === 'true';
 const sampleId = 'M7lc1UVf-VE';
 const nextId = 'aqz-KE-bpKQ';
 const nextTitle = 'Big Buck Bunny — transition fixture';
@@ -115,6 +116,7 @@ try {
           autoAdvance?: {
             duration: number;
             positionMs: number;
+            mediaHold?: { delayedRequests: number; readyStateDuringHold: number | null };
             nextVideo: string;
             versionDelta: number;
           };
@@ -150,14 +152,39 @@ try {
               await expect
                 .poll(async () => (await sample(page)).seconds, { timeout: 12000 })
                 .toBeGreaterThan(positionMs / 1000 - 1);
-              await page.getByRole('button', { name: '播放', exact: true }).click();
-              await Promise.all(
-                [page, guestPage].map((client) =>
-                  expect(client.getByRole('heading', { name: nextTitle })).toBeVisible({
-                    timeout: 30000,
-                  }),
-                ),
-              );
+              let delayedRequests = 0;
+              let readyStateDuringHold: number | null = null;
+              let releaseMedia = () => {};
+              const mediaGate = new Promise<void>((resolve) => {
+                releaseMedia = resolve;
+              });
+              if (bufferProbe) {
+                await guestPage.route(
+                  /^https:\/\/[^/]+\.googlevideo\.com\/videoplayback/,
+                  async (route) => {
+                    delayedRequests++;
+                    await mediaGate;
+                    await route.continue();
+                  },
+                );
+              }
+              try {
+                await page.getByRole('button', { name: '播放', exact: true }).click();
+                await Promise.all(
+                  [page, guestPage].map((client) =>
+                    expect(client.getByRole('heading', { name: nextTitle })).toBeVisible({
+                      timeout: 30000,
+                    }),
+                  ),
+                );
+                if (bufferProbe) {
+                  await expect.poll(() => delayedRequests, { timeout: 8000 }).toBeGreaterThan(0);
+                  readyStateDuringHold =
+                    (await sample(guestPage).catch(() => null))?.readyState ?? null;
+                }
+              } finally {
+                releaseMedia();
+              }
               await Promise.all([waitForPlayback(page), waitForPlayback(guestPage)]);
               const after = (await roomRef.get()).data();
               const versionDelta =
@@ -169,6 +196,7 @@ try {
                 positionMs,
                 nextVideo: nextId,
                 versionDelta,
+                ...(bufferProbe ? { mediaHold: { delayedRequests, readyStateDuringHold } } : {}),
               };
             }
           } catch (error) {
@@ -219,11 +247,13 @@ try {
 }
 await mkdir('docs/measurements', { recursive: true });
 await writeFile(
-  transition
-    ? 'docs/measurements/youtube-transition.json'
-    : timeline
-      ? 'docs/measurements/youtube-timeline.json'
-      : 'docs/measurements/youtube-smoke.json',
+  bufferProbe
+    ? 'docs/measurements/youtube-media-hold.json'
+    : transition
+      ? 'docs/measurements/youtube-transition.json'
+      : timeline
+        ? 'docs/measurements/youtube-timeline.json'
+        : 'docs/measurements/youtube-smoke.json',
   JSON.stringify(records, null, 2) + '\n',
 );
 console.log(JSON.stringify(records, null, 2));
