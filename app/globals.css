@@ -200,7 +200,6 @@ body:has(.home-page) .site-header {
 .home-page {
   flex: 1;
   display: grid;
-  grid-template-rows: 1fr auto;
   position: relative;
   isolation: isolate;
 }
@@ -400,21 +399,14 @@ body:has(.home-page) .site-header {
   left: 0;
   margin: 0;
 }
-.home-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  border-top: 1px solid var(--rule);
-  padding: 20px 4.5vw;
-  font-size: 10px;
+.scene-credits {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  z-index: 4;
+  width: 44px;
+  height: 44px;
   color: var(--muted);
-}
-.home-footer a {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  text-decoration: none;
 }
 .quiet-notice {
   font-size: 11px;
@@ -803,14 +795,6 @@ body:has(.home-page) .site-header {
   }
   .home-action-list {
     gap: 8px;
-  }
-  .home-footer {
-    padding: 20px 6vw;
-    flex-wrap: wrap;
-    gap: 14px;
-  }
-  .home-footer > span:nth-child(2) {
-    display: none;
   }
   .room-page {
     padding: 28px 6vw 135px;
