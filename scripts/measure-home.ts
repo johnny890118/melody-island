@@ -60,17 +60,20 @@ try {
         }).observe({ type: 'layout-shift', buffered: true });
       });
       await page.goto(origin, { timeout: 90000 });
-      await page.locator('canvas').waitFor({ state: 'visible' });
-      await page
-        .getByText('正在準備島嶼', { exact: false })
-        .waitFor({ state: 'hidden', timeout: 90000 });
-      await page.evaluate(async () => {
+      await page.locator('[data-island-ready="true"] canvas').waitFor({ timeout: 90000 });
+      const islandAndFontsReadyMs = await page.evaluate(async () => {
         await document.fonts.ready;
         await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        return performance.now();
+      });
+      await page.locator('[data-bird-ready="true"]').waitFor({ timeout: 90000 });
+      const fullSceneReadyMs = await page.evaluate(async () => {
+        await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        return performance.now();
       });
       records.push(
         await page.evaluate(
-          ({ viewport, throttled, run }) => {
+          ({ viewport, throttled, run, islandAndFontsReadyMs, fullSceneReadyMs }) => {
             const resources = performance
               .getEntriesByType('resource')
               .filter((entry): entry is PerformanceResourceTiming => 'transferSize' in entry);
@@ -88,18 +91,21 @@ try {
               fcpMs: performance.getEntriesByName('first-contentful-paint')[0]?.startTime,
               lcpMs: window.__baseline.lcp,
               cls: window.__baseline.cls,
-              observedSceneAndFontsReadyMs: performance.now(),
+              islandAndFontsReadyMs,
+              fullSceneReadyMs,
               transferBytes: resources.reduce((sum, resource) => sum + resource.transferSize, 0),
               model: resources
                 .filter((resource) => resource.name.includes('/models/'))
                 .map((resource) => ({
                   url: new URL(resource.name).pathname,
+                  startMs: resource.startTime,
+                  endMs: resource.responseEnd,
                   durationMs: resource.duration,
                   transferBytes: resource.transferSize,
                 })),
             };
           },
-          { viewport, throttled, run },
+          { viewport, throttled, run, islandAndFontsReadyMs, fullSceneReadyMs },
         ),
       );
       await context.close();
@@ -110,7 +116,7 @@ try {
 }
 await mkdir('docs/measurements', { recursive: true });
 await writeFile(
-  `docs/measurements/home-${throttled ? 'throttled' : 'local'}.json`,
+  `docs/measurements/home-moon-pass-${throttled ? 'throttled' : 'local'}.json`,
   JSON.stringify(records, null, 2) + '\n',
 );
 console.log(JSON.stringify(records, null, 2));

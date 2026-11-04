@@ -1,0 +1,194 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 960
+    },
+    "run": 1,
+    "scope": "localhost production, cold HTTP cache, 4x CPU slowdown, 1.6Mbps down/0.75Mbps up, 150ms latency, software WebGL; synthetic, not a real device; LCP excludes Canvas readiness",
+    "longTaskTotalMs": 124,
+    "longestTaskMs": 69,
+    "fcpMs": 1916,
+    "lcpMs": 1916,
+    "cls": 0.00011104546064212,
+    "islandAndFontsReadyMs": 5918.200000000186,
+    "fullSceneReadyMs": 11735.200000000186,
+    "transferBytes": 1853105,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "startMs": 173,
+        "endMs": 3656,
+        "durationMs": 3483,
+        "transferBytes": 140384
+      },
+      {
+        "url": "/models/bird.glb",
+        "startMs": 5838.4000000003725,
+        "endMs": 11207.600000000093,
+        "durationMs": 5369.199999999721,
+        "transferBytes": 1042944
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "run": 1,
+    "scope": "localhost production, cold HTTP cache, 4x CPU slowdown, 1.6Mbps down/0.75Mbps up, 150ms latency, software WebGL; synthetic, not a real device; LCP excludes Canvas readiness",
+    "longTaskTotalMs": 124,
+    "longestTaskMs": 70,
+    "fcpMs": 764,
+    "lcpMs": 764,
+    "cls": 0,
+    "islandAndFontsReadyMs": 5895.5,
+    "fullSceneReadyMs": 11694.600000000093,
+    "transferBytes": 1853105,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "startMs": 166,
+        "endMs": 3678.600000000093,
+        "durationMs": 3512.600000000093,
+        "transferBytes": 140384
+      },
+      {
+        "url": "/models/bird.glb",
+        "startMs": 5825.200000000186,
+        "endMs": 11195.399999999907,
+        "durationMs": 5370.199999999721,
+        "transferBytes": 1042944
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 960
+    },
+    "run": 2,
+    "scope": "localhost production, cold HTTP cache, 4x CPU slowdown, 1.6Mbps down/0.75Mbps up, 150ms latency, software WebGL; synthetic, not a real device; LCP excludes Canvas readiness",
+    "longTaskTotalMs": 126,
+    "longestTaskMs": 69,
+    "fcpMs": 728,
+    "lcpMs": 728,
+    "cls": 0.00011104546064212,
+    "islandAndFontsReadyMs": 5920.299999999814,
+    "fullSceneReadyMs": 11719.899999999907,
+    "transferBytes": 1853105,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "startMs": 174.10000000009313,
+        "endMs": 3657.7000000001863,
+        "durationMs": 3483.600000000093,
+        "transferBytes": 140384
+      },
+      {
+        "url": "/models/bird.glb",
+        "startMs": 5837.100000000093,
+        "endMs": 11208.899999999907,
+        "durationMs": 5371.799999999814,
+        "transferBytes": 1042944
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "run": 2,
+    "scope": "localhost production, cold HTTP cache, 4x CPU slowdown, 1.6Mbps down/0.75Mbps up, 150ms latency, software WebGL; synthetic, not a real device; LCP excludes Canvas readiness",
+    "longTaskTotalMs": 123,
+    "longestTaskMs": 69,
+    "fcpMs": 600,
+    "lcpMs": 600,
+    "cls": 0,
+    "islandAndFontsReadyMs": 5919.700000000186,
+    "fullSceneReadyMs": 11737.30000000028,
+    "transferBytes": 1853105,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "startMs": 174,
+        "endMs": 3656.7000000001863,
+        "durationMs": 3482.7000000001863,
+        "transferBytes": 140384
+      },
+      {
+        "url": "/models/bird.glb",
+        "startMs": 5841.200000000186,
+        "endMs": 11208.700000000186,
+        "durationMs": 5367.5,
+        "transferBytes": 1042944
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 960
+    },
+    "run": 3,
+    "scope": "localhost production, cold HTTP cache, 4x CPU slowdown, 1.6Mbps down/0.75Mbps up, 150ms latency, software WebGL; synthetic, not a real device; LCP excludes Canvas readiness",
+    "longTaskTotalMs": 121,
+    "longestTaskMs": 68,
+    "fcpMs": 688,
+    "lcpMs": 688,
+    "cls": 0.00011104546064212,
+    "islandAndFontsReadyMs": 5903.799999999814,
+    "fullSceneReadyMs": 11720,
+    "transferBytes": 1853105,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "startMs": 174.39999999990687,
+        "endMs": 3656.899999999907,
+        "durationMs": 3482.5,
+        "transferBytes": 140384
+      },
+      {
+        "url": "/models/bird.glb",
+        "startMs": 5826.199999999721,
+        "endMs": 11195.299999999814,
+        "durationMs": 5369.100000000093,
+        "transferBytes": 1042944
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "run": 3,
+    "scope": "localhost production, cold HTTP cache, 4x CPU slowdown, 1.6Mbps down/0.75Mbps up, 150ms latency, software WebGL; synthetic, not a real device; LCP excludes Canvas readiness",
+    "longTaskTotalMs": 125,
+    "longestTaskMs": 69,
+    "fcpMs": 596,
+    "lcpMs": 596,
+    "cls": 0,
+    "islandAndFontsReadyMs": 5910.799999999814,
+    "fullSceneReadyMs": 11727.600000000093,
+    "transferBytes": 1853105,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "startMs": 165.10000000009313,
+        "endMs": 3656.899999999907,
+        "durationMs": 3491.7999999998137,
+        "transferBytes": 140384
+      },
+      {
+        "url": "/models/bird.glb",
+        "startMs": 5839.600000000093,
+        "endMs": 11209.899999999907,
+        "durationMs": 5370.299999999814,
+        "transferBytes": 1042944
+      }
+    ]
+  }
+]
