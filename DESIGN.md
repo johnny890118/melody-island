@@ -79,7 +79,7 @@ components:
 
 An independent finish review of the first implemented design candidate scored five concrete corrections resolved, including framing, entry flow, mobile hierarchy, placeholder contrast and focused transport clearance. That review is narrower than overall award quality.
 
-**Moon Pass** is the homepage expression of A place between songs. The original miniature island passes in front of a rose-gold moon, with the original phoenix and an orbital ellipse giving the scene scale and direction. The listening room shares the palette and uses a restrained night gradient so playback, queue and search stay easy to scan.
+**Moon Pass** is the internal name of visual direction 06. Melody Island is the public brand and homepage title. The original miniature island passes in front of a rose-gold moon, with the original phoenix and an orbital ellipse giving the scene scale and direction. The listening room shares the palette and uses a restrained night gradient so playback, queue and search stay easy to scan.
 
 ## Colors
 
@@ -91,7 +91,7 @@ Moon Pass uses a midnight plum sky and lunar ivory text. Warm moonlight highligh
 
 Self-hosted Cormorant Garamond and Manrope use WOFF2 under OFL. Traditional Chinese uses the system's Chinese face. Display text is fluid and capped at 96px; operational text remains compact and legible. Do not use the display serif for long instructions or force English where Chinese makes an action clearer.
 
-Moon Pass stacks the two English title words in Cormorant, with an italic second line. The introduction, scene instructions and entry actions use Traditional Chinese.
+The homepage stacks the Melody Island wordmark in Cormorant, with an italic second line. The global navigation pairs the brand with the account action and leaves the center open. The introduction, scene instructions and entry actions use Traditional Chinese.
 
 ## Layout
 

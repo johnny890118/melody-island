@@ -37,17 +37,26 @@ export default function Bird({ moving, onReady }: { moving: boolean; onReady(): 
       mixer.update(step);
     }
     const t = phase.current;
-    bird.position.set(1.65 * Math.cos(t), 0.68 + 0.16 * Math.sin(t * 2), 1.2 * Math.sin(t));
+    const radiusX = 1.65;
+    const radiusZ = 1.2;
+    const rise = 0.16;
+    const dx = -radiusX * Math.sin(t);
+    const dz = radiusZ * Math.cos(t);
+    const dy = 2 * rise * Math.cos(2 * t);
+    bird.position.set(radiusX * Math.cos(t), 0.68 + rise * Math.sin(2 * t), radiusZ * Math.sin(t));
+    // Yaw follows the orbit tangent. Pitch and inward bank are in the bird's local frame.
     bird.rotation.set(
-      0,
-      Math.atan2(-1.65 * Math.sin(t), 1.2 * Math.cos(t)),
-      MathUtils.degToRad(12),
+      -Math.atan2(dy, Math.hypot(dx, dz)),
+      Math.atan2(dx, dz),
+      MathUtils.degToRad(10 + 5 * Math.cos(t) ** 2),
+      'YXZ',
     );
   });
 
   return (
     <group ref={flight}>
-      <group scale={0.00125} rotation={[0, Math.PI / 2, 0]}>
+      {/* The animated rig faces +X (tail to head). Map it to the flight group's +Z. */}
+      <group scale={0.00125} rotation={[0, -Math.PI / 2, 0]}>
         <primitive object={model} />
       </group>
     </group>

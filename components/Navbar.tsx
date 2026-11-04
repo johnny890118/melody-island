@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { fetchUser, logout, startGoogleLogin } from '@/store/authSlice';
 import Link from 'next/link';
-import { AudioLines, ArrowUpRight } from 'lucide-react';
+import { AudioLines, ArrowUpRight, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { user, status } = useAppSelector((state) => state.auth);
@@ -28,11 +28,10 @@ export default function Navbar() {
     <header className="site-header">
       <Link href="/" className="wordmark" aria-label="Melody Island 首頁">
         <AudioLines size={25} strokeWidth={1.6} />
-        <span>
-          melody<span className="wordmark-island">island</span>
+        <span lang="en">
+          Melody <span className="wordmark-island">Island</span>
         </span>
       </Link>
-      <span className="nav-note">音樂，讓我們靠近一點。</span>
       <nav aria-label="主要導覽">
         {user && !user.isAnonymous ? (
           <Button
@@ -41,7 +40,7 @@ export default function Navbar() {
             disabled={status === 'loading'}
             onClick={() => dispatch(logout())}
           >
-            登出
+            登出 <LogOut size={15} aria-hidden="true" />
           </Button>
         ) : (
           <Button
@@ -51,7 +50,7 @@ export default function Navbar() {
             onClick={login}
           >
             {pending ? '正在登入…' : 'Google 登入'}
-            <ArrowUpRight size={16} />
+            <ArrowUpRight size={16} aria-hidden="true" />
           </Button>
         )}
       </nav>

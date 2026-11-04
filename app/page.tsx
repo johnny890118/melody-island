@@ -78,11 +78,11 @@ export default function HomePage() {
         <Hero />
         <div className="hero-title">
           <h1 lang="en">
-            Moon
+            Melody
             <br />
-            <em>Pass.</em>
+            <em>Island</em>
           </h1>
-          <p>掠月航線。讓遠方的人，在月影下共聽。</p>
+          <p>邀朋友登島，一起聽喜歡的歌。</p>
         </div>
         <div className="home-actions">
           <div className="home-action-list">
