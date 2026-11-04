@@ -283,6 +283,9 @@ body:has(.home-page) .site-header {
   display: flex;
   gap: 9px;
   align-items: center;
+  padding: 6px 9px;
+  border-radius: 4px;
+  background: var(--paper);
 }
 .scene-tools button {
   min-width: 44px;
@@ -291,6 +294,11 @@ body:has(.home-page) .site-header {
   place-items: center;
   border: 1px solid var(--rule);
   border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+}
+.scene-tools button:hover {
+  background: var(--hover);
 }
 .scene-progress {
   white-space: nowrap;
@@ -350,15 +358,16 @@ body:has(.home-page) .site-header {
   color: var(--paper);
 }
 .action-button:hover:not(:disabled) {
-  background: var(--paper);
+  background: var(--hover);
   color: var(--ink);
 }
 .home-action-list > .action-button:last-child:not(:disabled) {
   background: var(--accent);
 }
-.home-action-list > .action-button:hover:not(:disabled) {
-  background: var(--hover);
-  color: var(--ink);
+.action-button.primary:hover:not(:disabled),
+.home-action-list > .action-button:last-child:hover:not(:disabled) {
+  background: #ffe0bd;
+  color: var(--paper);
 }
 .action-button svg {
   transition: transform 0.2s;

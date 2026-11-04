@@ -3,8 +3,12 @@
 import { chromium, webkit, request as playwrightRequest, expect } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { adminDb, identity, login, post } from '../tests/e2e/helpers';
-import { measureTimeline } from './youtube-timeline';
+import { measureTimeline, sample, waitForPlayback } from './youtube-timeline';
 const timeline = process.env.MELODY_REAL_TIMELINE === 'true';
+const transition = timeline && process.env.MELODY_REAL_TRANSITION === 'true';
+const sampleId = 'M7lc1UVf-VE';
+const nextId = 'aqz-KE-bpKQ';
+const nextTitle = 'Big Buck Bunny — transition fixture';
 const api = await playwrightRequest.newContext();
 const records = [];
 try {
@@ -35,12 +39,12 @@ try {
     }
     const added = await post(api, `/api/islands/${id}/commands`, owner, {
       type: 'add',
-      song: { videoId: 'M7lc1UVf-VE', title: 'YouTube IFrame API official sample' },
+      song: { videoId: sampleId, title: 'YouTube IFrame API official sample' },
       commandId: crypto.randomUUID(),
     });
     if (added.status() !== 200) throw new Error('Could not seed the official iframe sample.');
     for (const command of [
-      { type: 'select', videoId: 'M7lc1UVf-VE', expectedVersion: 1 },
+      { type: 'select', videoId: sampleId, expectedVersion: 1 },
       { type: 'pause', expectedVersion: 2 },
     ]) {
       const result = await post(api, `/api/islands/${id}/commands`, owner, {
@@ -49,10 +53,36 @@ try {
       });
       if (result.status() !== 200) throw new Error('Could not cue the official iframe sample.');
     }
+    if (transition) {
+      const next = await post(api, `/api/islands/${id}/commands`, owner, {
+        type: 'add',
+        song: { videoId: nextId, title: nextTitle },
+        commandId: crypto.randomUUID(),
+      });
+      if (!next.ok()) throw new Error('Could not add the transition fixture.');
+    }
     for (const [name, engine] of [
       ['chromium', chromium],
       ['webkit', webkit],
     ] as const) {
+      if (transition) {
+        const roomRef = db.doc(`islands/${id}`);
+        const room = (await roomRef.get()).data();
+        if (!room || typeof room.version !== 'number') throw new Error('Missing fixture version.');
+        const reset = await post(api, `/api/islands/${id}/commands`, owner, {
+          type: 'select',
+          videoId: sampleId,
+          expectedVersion: room.version,
+          commandId: crypto.randomUUID(),
+        });
+        if (!reset.ok()) throw new Error('Could not reset fixture for the next engine.');
+        const paused = await post(api, `/api/islands/${id}/commands`, owner, {
+          type: 'pause',
+          expectedVersion: room.version + 1,
+          commandId: crypto.randomUUID(),
+        });
+        if (!paused.ok()) throw new Error('Could not pause the reset fixture.');
+      }
       const browser = await engine.launch();
       const pageErrors: string[] = [];
       const failedResources: { host: string; error: string | null }[] = [];
@@ -82,6 +112,12 @@ try {
         let timelineResult: {
           samples?: Awaited<ReturnType<typeof measureTimeline>>;
           error?: string;
+          autoAdvance?: {
+            duration: number;
+            positionMs: number;
+            nextVideo: string;
+            versionDelta: number;
+          };
         } | null = null;
         if (guest) {
           try {
@@ -93,9 +129,52 @@ try {
               guestPage.getByRole('heading', { name: 'Real iframe smoke — synthetic room' }),
             ).toBeVisible();
             timelineResult = { samples: await measureTimeline(page, guestPage) };
+            if (transition) {
+              const { duration } = await sample(page);
+              if (!Number.isFinite(duration) || duration < 15)
+                throw new Error('Invalid fixture duration.');
+              const roomRef = db.doc(`islands/${id}`);
+              const snapshot = await roomRef.get();
+              const before = snapshot.data();
+              if (
+                !before ||
+                before.isPlaying ||
+                before.currentVideo !== sampleId ||
+                typeof before.version !== 'number' ||
+                !snapshot.updateTime
+              )
+                throw new Error('Unexpected fixture state before the ending test.');
+              // Demo-only setup skips the wait for a whole video. Play and advance still use normal commands.
+              const positionMs = Math.floor((duration - 9) * 1000);
+              await roomRef.update({ positionMs }, { lastUpdateTime: snapshot.updateTime });
+              await expect
+                .poll(async () => (await sample(page)).seconds, { timeout: 12000 })
+                .toBeGreaterThan(positionMs / 1000 - 1);
+              await page.getByRole('button', { name: '播放', exact: true }).click();
+              await Promise.all(
+                [page, guestPage].map((client) =>
+                  expect(client.getByRole('heading', { name: nextTitle })).toBeVisible({
+                    timeout: 30000,
+                  }),
+                ),
+              );
+              await Promise.all([waitForPlayback(page), waitForPlayback(guestPage)]);
+              const after = (await roomRef.get()).data();
+              const versionDelta =
+                typeof after?.version === 'number' ? after.version - before.version : -1;
+              if (after?.currentVideo !== nextId || versionDelta !== 2)
+                throw new Error('Expected exactly one play and one automatic advance.');
+              timelineResult.autoAdvance = {
+                duration,
+                positionMs,
+                nextVideo: nextId,
+                versionDelta,
+              };
+            }
           } catch (error) {
             // Keep provider failures and incomplete timelines separate from measured drift.
             timelineResult = {
+              ...timelineResult,
               error: (error instanceof Error ? error.message : String(error)).split('\n')[0],
             };
           } finally {
@@ -140,9 +219,20 @@ try {
 }
 await mkdir('docs/measurements', { recursive: true });
 await writeFile(
-  timeline ? 'docs/measurements/youtube-timeline.json' : 'docs/measurements/youtube-smoke.json',
+  transition
+    ? 'docs/measurements/youtube-transition.json'
+    : timeline
+      ? 'docs/measurements/youtube-timeline.json'
+      : 'docs/measurements/youtube-smoke.json',
   JSON.stringify(records, null, 2) + '\n',
 );
 console.log(JSON.stringify(records, null, 2));
-if (records.some((record) => !record.realIframeReady || (timeline && !record.timeline?.samples)))
+if (
+  records.some(
+    (record) =>
+      !record.realIframeReady ||
+      (timeline && !record.timeline?.samples) ||
+      (transition && !record.timeline?.autoAdvance),
+  )
+)
   process.exitCode = 1;

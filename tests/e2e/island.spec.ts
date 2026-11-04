@@ -17,7 +17,10 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
   await expect(stage).toHaveAttribute('data-bird-ready', 'true');
   await page.getByRole('button', { name: '暫停場景動畫' }).click();
   await expect(page.getByRole('button', { name: '播放場景動畫' })).toBeVisible();
+  const mountedCanvas = await page.locator('canvas').elementHandle();
   await page.getByRole('button', { name: '重設島嶼視角' }).click();
+  expect(await mountedCanvas?.evaluate((element) => element === document.querySelector('canvas'))).toBe(true);
+
   await expect(stage).toHaveAttribute('data-bird-ready', 'true');
   await page.screenshot({ path: '.impeccable/review/desktop.png', fullPage: true });
   const canvas = page.locator('canvas');

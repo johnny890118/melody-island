@@ -171,7 +171,10 @@ export default function Hero() {
           variant="ghost"
           size="icon"
           aria-label="重設島嶼視角"
-          onClick={() => setSceneKey((key) => key + 1)}
+          onClick={() => {
+            if (controls.current) controls.current.reset();
+            else setSceneKey((key) => key + 1);
+          }}
         >
           <RotateCcw size={16} />
         </Button>

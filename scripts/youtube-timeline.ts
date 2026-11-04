@@ -5,12 +5,13 @@ function playerVideo(page: Page) {
   return page.frameLocator('.video-frame iframe').locator('video');
 }
 
-async function sample(page: Page) {
+export async function sample(page: Page) {
   return playerVideo(page).evaluate(
     (element) => {
       if (!(element instanceof HTMLVideoElement)) throw new Error('Missing media element');
       return {
         seconds: element.currentTime,
+        duration: element.duration,
         paused: element.paused,
         readyState: element.readyState,
         observedAtMs: performance.timeOrigin + performance.now(),
@@ -21,7 +22,7 @@ async function sample(page: Page) {
   );
 }
 
-async function waitForPlayback(page: Page) {
+export async function waitForPlayback(page: Page) {
   await expect
     .poll(
       async () => {

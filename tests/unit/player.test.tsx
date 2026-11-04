@@ -13,7 +13,7 @@ const hooks = vi.hoisted(() => ({
   ready: (_event: PlayerEvent) => {},
   state: (_event: PlayerEvent) => {},
 }));
-vi.mock('react-youtube', () => ({
+vi.mock('../../components/YouTubeFrame', () => ({
   default: (props: PlayerCallbacks) => {
     hooks.ready = props.onReady;
     hooks.state = props.onStateChange;

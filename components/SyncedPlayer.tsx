@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import YouTube from 'react-youtube';
+import YouTubeFrame from './YouTubeFrame';
 import type { Playback, PlayerHandle, PlayerTarget, Room } from '@/lib/types';
 interface SyncedPlayerProps {
   session: Playback & Partial<Room>;
@@ -187,20 +187,17 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     );
   return (
     <div className="video-frame">
-      <YouTube
-        opts={{ width: '100%', height: '100%', playerVars: { playsinline: 1, rel: 0 } }}
-        onReady={(event) => {
-          player.current = event.target as unknown as PlayerTarget;
-          event.target.addEventListener?.('onAutoplayBlocked', () => callbacks.current.onBlocked());
+      <YouTubeFrame
+        onReady={({ target }) => {
+          player.current = target;
           setReady(true);
           callbacks.current.onReady();
         }}
-        onError={() => callbacks.current.onError('這首影片無法播放，請選擇其他歌曲。')}
-        onStateChange={(event) => {
-          const data = latest.current;
-          if (event.data === 0) reportEnded(event.target as unknown as PlayerTarget);
-          // Loading a paused track must never turn it into a playing session.
-          if (event.data === 1 && !data.isPlaying) event.target.pauseVideo();
+        onAutoplayBlocked={() => callbacks.current.onBlocked()}
+        onError={() => callbacks.current.onError('YouTube 播放器無法使用，請重試或選擇其他歌曲。')}
+        onStateChange={({ data: state, target }) => {
+          if (state === 0) reportEnded(target);
+          if (state === 1 && !latest.current.isPlaying) target.pauseVideo();
         }}
       />
     </div>
