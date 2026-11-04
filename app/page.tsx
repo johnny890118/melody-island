@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { useAppSelector } from '@/store/hooks';
 import { useRouter } from 'next/navigation';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
-import { ArrowDown, ArrowUpRight, Headphones } from 'lucide-react';
+import { ArrowUpRight, Headphones } from 'lucide-react';
 import { db } from './config/firebase';
 import { api } from '@/lib/api';
 import { startGoogleLogin } from '@/store/authSlice';
@@ -68,29 +68,44 @@ export default function HomePage() {
   };
   return (
     <main className="home-page" id="main-content">
+      <div className="cloud-atmosphere" aria-hidden="true">
+        <svg viewBox="0 0 1440 850" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="cloud-bank" x2="0" y2="1">
+              <stop stopColor="#fffdf5" />
+              <stop offset="1" stopColor="#f7fcff" stopOpacity=".12" />
+            </linearGradient>
+            <filter id="cloud-haze">
+              <feGaussianBlur stdDeviation="14" />
+            </filter>
+          </defs>
+          <path
+            d="M-80 502C88 508 99 427 243 451S428 581 573 565S732 516 830 550S1021 563 1112 504S1306 434 1520 466V900H-80Z"
+            fill="url(#cloud-bank)"
+            filter="url(#cloud-haze)"
+          />
+          <g className="cloud-traces" fill="none" stroke="#fff">
+            <path d="M-50 303Q325 231 621 320T1510 241" opacity=".85" />
+            <path d="M-50 319Q325 247 621 336T1510 257" opacity=".43" />
+          </g>
+        </svg>
+      </div>
       <div className="home-composition">
-        <div className="hero-title">
-          <h1>
-            A little
-            <br />
-            <em>closer.</em>
-          </h1>
-          <p>一起登島，聆聽共鳴。</p>
-        </div>
         <Hero />
+        <div className="hero-title">
+          <h1 lang="en">
+            Cloud
+            <br />
+            <em>Current.</em>
+          </h1>
+          <p>雲上航道。飛越雲海，去朋友的島上聽歌。</p>
+        </div>
         <div className="home-actions">
-          <p className="home-description">
-            把喜歡的歌，
-            <br />
-            放進我們的小小島嶼。
-            <br />
-            <span>和朋友分享一段旋律，也分享此刻。</span>
-          </p>
           <div className="home-action-list">
             {!user || user.isAnonymous ? (
               <Button
                 variant="ghost"
-                className="action-button primary"
+                className="action-button"
                 disabled={!ready || loggingIn}
                 onClick={loginToCreate}
               >
@@ -100,7 +115,7 @@ export default function HomePage() {
             ) : ownIsland ? (
               <Button
                 variant="ghost"
-                className="action-button primary"
+                className="action-button"
                 onClick={() => router.push(`/island/${ownIsland}`)}
               >
                 回到我的島嶼
@@ -137,16 +152,18 @@ export default function HomePage() {
               confirmLabel="一起登島"
             />
           </div>
-          {notice && (
+        </div>
+        <div className="home-caption">
+          {notice ? (
             <p className="quiet-notice" role="status">
               {notice}
             </p>
+          ) : (
+            <>
+              <Headphones size={16} />
+              <span>不同的地方，同一首歌。</span>
+            </>
           )}
-        </div>
-        <div className="home-caption">
-          <Headphones size={16} />
-          <span>不同的地方，同一首歌。</span>
-          <ArrowDown size={16} />
         </div>
       </div>
       <footer className="home-footer">
@@ -157,7 +174,14 @@ export default function HomePage() {
           target="_blank"
           rel="noreferrer"
         >
-          Island by nimzu · CC BY 4.0 <ArrowUpRight size={12} />
+          島嶼：nimzu · CC BY 4.0 <ArrowUpRight size={12} />
+        </a>
+        <a
+          href="https://sketchfab.com/3d-models/phoenix-bird-844ba0cf144a413ea92c779f18912042"
+          target="_blank"
+          rel="noreferrer"
+        >
+          鳳凰：NORBERTO-3D · CC BY 4.0 <ArrowUpRight size={12} />
         </a>
       </footer>
     </main>

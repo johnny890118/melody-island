@@ -6,28 +6,43 @@
   src: url('/fonts/manrope.woff2') format('woff2');
   font-weight: 200 800;
   font-display: swap;
-  unicode-range: U+0000-024F,U+0300-036F,U+2000-206F,U+20A0-20CF,U+2113,U+FEFF,U+FFFD;
+  unicode-range: U+0000-024F, U+0300-036F, U+2000-206F, U+20A0-20CF, U+2113, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: Manrope;
   src: url('/fonts/manrope-extended.woff2') format('woff2');
   font-weight: 200 800;
   font-display: swap;
-  unicode-range: U+259,U+2C6-2C7,U+2D8-2DD,U+374-375,U+37E,U+384-38A,U+38C,U+38E-3A1,U+3A3-3CE,U+400-45F,U+490-491,U+4AE-4AF,U+4BA-4BB,U+4E8-4E9,U+1E80-1E85,U+1E9E,U+1EA0-1EF9,U+2070,U+2074-2079,U+2080-2089,U+2116,U+2122,U+2190-2193,U+21B5,U+2202,U+2205,U+220F,U+2211-2212,U+2215,U+221A,U+221E,U+222B,U+2248,U+2260,U+2264-2265,U+25CA,U+E001-E003,U+E007-E009,U+FB01-FB02;
+  unicode-range:
+    U+259, U+2C6-2C7, U+2D8-2DD, U+374-375, U+37E, U+384-38A, U+38C, U+38E-3A1, U+3A3-3CE,
+    U+400-45F, U+490-491, U+4AE-4AF, U+4BA-4BB, U+4E8-4E9, U+1E80-1E85, U+1E9E, U+1EA0-1EF9, U+2070,
+    U+2074-2079, U+2080-2089, U+2116, U+2122, U+2190-2193, U+21B5, U+2202, U+2205, U+220F,
+    U+2211-2212, U+2215, U+221A, U+221E, U+222B, U+2248, U+2260, U+2264-2265, U+25CA, U+E001-E003,
+    U+E007-E009, U+FB01-FB02;
 }
 @font-face {
   font-family: Cormorant;
   src: url('/fonts/cormorant-garamond.woff2') format('woff2');
   font-weight: 300 700;
   font-display: swap;
-  unicode-range: U+0000-024F,U+0300-036F,U+2000-206F,U+20A0-20CF,U+2113,U+FEFF,U+FFFD;
+  unicode-range: U+0000-024F, U+0300-036F, U+2000-206F, U+20A0-20CF, U+2113, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: Cormorant;
   src: url('/fonts/cormorant-garamond-extended.woff2') format('woff2');
   font-weight: 300 700;
   font-display: swap;
-  unicode-range: U+251,U+259,U+261,U+268,U+289,U+2BB-2BC,U+2BE-2BF,U+2C6-2C8,U+2CA-2CC,U+2D8-2DD,U+394,U+3A9,U+3BC,U+3C0,U+400-45F,U+462-463,U+46A-46B,U+472-475,U+48A-4A5,U+4A8-4FF,U+510-513,U+51A-51D,U+524-529,U+52E-52F,U+E3F,U+1DB0,U+1E0C-1E0F,U+1E20-1E21,U+1E24-1E25,U+1E2A-1E2B,U+1E30-1E31,U+1E36-1E3B,U+1E3E-1E4B,U+1E5A-1E63,U+1E6C-1E6F,U+1E80-1E85,U+1E8E-1E8F,U+1E92-1E93,U+1E97,U+1E9E,U+1EA0-1EF9,U+2070,U+2074-207A,U+207D-2089,U+208D-208E,U+2116-2117,U+2120,U+2122,U+212E,U+215B-215E,U+2190-2199,U+2202,U+2205,U+220F,U+2211-2212,U+221A,U+221E,U+222B,U+2248,U+2260,U+2264-2265,U+25A0-25A1,U+25B2-25B3,U+25B6-25B7,U+25BC-25BD,U+25C0-25C1,U+25C6-25C7,U+25CA-25CB,U+25CF,U+25E6,U+25FB-25FC,U+261C,U+261E,U+263A,U+2766,U+2B1B-2B1C,U+3000,U+A729,U+A78B-A78C,U+FFF9-FFFB;
+  unicode-range:
+    U+251, U+259, U+261, U+268, U+289, U+2BB-2BC, U+2BE-2BF, U+2C6-2C8, U+2CA-2CC, U+2D8-2DD, U+394,
+    U+3A9, U+3BC, U+3C0, U+400-45F, U+462-463, U+46A-46B, U+472-475, U+48A-4A5, U+4A8-4FF,
+    U+510-513, U+51A-51D, U+524-529, U+52E-52F, U+E3F, U+1DB0, U+1E0C-1E0F, U+1E20-1E21,
+    U+1E24-1E25, U+1E2A-1E2B, U+1E30-1E31, U+1E36-1E3B, U+1E3E-1E4B, U+1E5A-1E63, U+1E6C-1E6F,
+    U+1E80-1E85, U+1E8E-1E8F, U+1E92-1E93, U+1E97, U+1E9E, U+1EA0-1EF9, U+2070, U+2074-207A,
+    U+207D-2089, U+208D-208E, U+2116-2117, U+2120, U+2122, U+212E, U+215B-215E, U+2190-2199, U+2202,
+    U+2205, U+220F, U+2211-2212, U+221A, U+221E, U+222B, U+2248, U+2260, U+2264-2265, U+25A0-25A1,
+    U+25B2-25B3, U+25B6-25B7, U+25BC-25BD, U+25C0-25C1, U+25C6-25C7, U+25CA-25CB, U+25CF, U+25E6,
+    U+25FB-25FC, U+261C, U+261E, U+263A, U+2766, U+2B1B-2B1C, U+3000, U+A729, U+A78B-A78C,
+    U+FFF9-FFFB;
 }
 :root {
   --paper: #f4f0e8;
@@ -151,44 +166,86 @@ input {
   font-size: 12px;
   color: var(--accent);
 }
+body:has(.home-page) {
+  --paper: #edf8fb;
+  --ink: #163b61;
+  --muted: #274f6e;
+  --accent: #185379;
+  --rule: #7195ad;
+  --background: 194 64% 96%;
+  --foreground: 210 63% 23%;
+  --border: 205 29% 56%;
+  --input: 205 29% 56%;
+  --ring: 203 67% 28%;
+  --primary: 210 63% 23%;
+  --primary-foreground: 194 64% 96%;
+  --secondary: 199 48% 89%;
+  --muted-foreground: 206 48% 29%;
+  --accent-foreground: 210 63% 23%;
+  background: radial-gradient(ellipse at 72% 10%, #fff5d7, #c5e5f2 30%, #8fc1e0 68%, #dbeef4);
+}
+body:has(.home-page) ::selection {
+  background: #d6eaff;
+  color: var(--ink);
+}
+body:has(.home-page) .site-header {
+  height: 82px;
+  border-color: #214f7252;
+}
 .home-page {
+  position: relative;
+  isolation: isolate;
+}
+.cloud-atmosphere {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
   overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 59% 24% at 7% 72%, #f7fcff 16%, transparent 95%),
+    radial-gradient(ellipse 74% 26% at 73% 87%, #fffdf4 22%, transparent 94%),
+    radial-gradient(ellipse 41% 24% at 89% 61%, #edf8ff 19%, transparent 95%),
+    linear-gradient(0deg, #edf8fb 0%, transparent 30%);
+}
+.cloud-atmosphere svg {
+  width: 100%;
+  height: 100%;
 }
 .home-composition {
   position: relative;
-  min-height: 720px;
-  height: calc(100svh - 158px);
-  max-height: 1050px;
+  min-height: 650px;
+  height: calc(100svh - 82px);
+  max-height: 900px;
   margin: 0 4.5vw;
 }
 .hero-title {
   position: absolute;
   left: 0;
-  top: 7%;
+  bottom: 19%;
   z-index: 3;
   pointer-events: none;
 }
 .hero-title h1 {
-  font-family: Cormorant, serif;
-  font-weight: 400;
-  font-size: clamp(68px, 8vw, 96px);
-  letter-spacing: -0.035em;
-  line-height: 0.87;
+  font-family: Cormorant, Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(72px, 8.2vw, 96px);
+  letter-spacing: -0.039em;
+  line-height: 0.83;
   margin: 0;
 }
 .hero-title h1 em {
   color: var(--accent);
-  font-style: normal;
-  margin-left: 0.5em;
+  font-weight: 500;
 }
 .hero-title > p {
-  margin: 26px 0 0 5px;
+  margin: 26px 0 0;
   font-size: 14px;
-  letter-spacing: 0.12em;
+  line-height: 1.65;
 }
 .island-stage {
   position: absolute;
-  inset: 0 -4vw 2% 25%;
+  inset: 1% -2vw 18% 22%;
   isolation: isolate;
 }
 .island-stage .island-canvas,
@@ -200,30 +257,10 @@ input {
 .island-stage canvas:active {
   cursor: grabbing;
 }
-.island-orbit {
-  position: absolute;
-  width: 76%;
-  height: 32%;
-  border: 1px solid #c8cebe;
-  border-radius: 50%;
-  top: 42%;
-  left: 11%;
-  transform: rotate(-15deg);
-  pointer-events: none;
-  z-index: -1;
-}
-.scene-coordinate {
-  position: absolute;
-  right: 12%;
-  top: 12%;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  color: var(--muted);
-}
 .scene-tools {
   position: absolute;
-  bottom: 11%;
-  left: 45%;
+  bottom: 7%;
+  right: 5%;
   display: flex;
   align-items: center;
   gap: 28px;
@@ -244,17 +281,15 @@ input {
   border-radius: 50%;
 }
 .scene-progress {
-  position: absolute;
-  top: 47%;
-  left: 42%;
+  white-space: nowrap;
   font-size: 12px;
   color: var(--muted);
   background: var(--paper);
   padding: 12px;
 }
-.scene-progress span {
-  margin-left: 18px;
-  font-variant-numeric: tabular-nums;
+.island-stage.scene-fallback {
+  display: grid;
+  place-content: center;
 }
 .scene-fallback {
   height: 100%;
@@ -271,21 +306,10 @@ input {
 }
 .home-actions {
   position: absolute;
-  left: 0;
-  bottom: 14%;
+  right: 0;
+  bottom: 5%;
   z-index: 4;
-  width: 300px;
-}
-.home-description {
-  font-size: 18px;
-  line-height: 1.75;
-  margin: 0 0 26px;
-}
-.home-description > span {
-  display: block;
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 10px;
+  width: min(38%, 300px);
 }
 .home-action-list {
   display: flex;
@@ -309,12 +333,12 @@ input {
     color 0.2s;
 }
 .action-button.primary,
-.home-action-list > .action-button:first-child:not(:disabled) {
+.home-action-list > .action-button:last-child:not(:disabled) {
   background: var(--ink);
   color: var(--paper);
 }
 .action-button:hover:not(:disabled) {
-  background: #dfe5d6;
+  background: var(--paper);
   color: var(--ink);
 }
 .action-button svg {
@@ -332,9 +356,6 @@ input {
   gap: 12px;
   font-size: 11px;
   color: var(--muted);
-}
-.home-caption > svg:last-child {
-  margin-left: 20px;
 }
 .home-footer {
   display: flex;
@@ -672,29 +693,10 @@ input {
     display: none;
   }
   .home-composition {
-    height: auto;
-    min-height: 1000px;
-  }
-  .hero-title {
-    top: 42px;
-  }
-  .hero-title h1 {
-    font-size: 84px;
+    min-height: 690px;
   }
   .island-stage {
-    inset: 150px -10vw auto 4%;
-    height: 550px;
-  }
-  .scene-coordinate {
-    top: 10%;
-  }
-  .home-actions {
-    bottom: 90px;
-    width: 320px;
-  }
-  .scene-tools {
-    bottom: 10%;
-    left: 43%;
+    inset: 1% -2vw 29% 7%;
   }
   .room-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -717,59 +719,51 @@ input {
     font-size: 11px;
     gap: 10px;
   }
-  .home-composition {
-    margin: 0 6vw;
-    min-height: 940px;
+  body:has(.home-page) .site-header {
+    height: 64px;
   }
-  .hero-title {
-    top: 36px;
+  .cloud-atmosphere svg {
+    height: 72%;
+  }
+  .home-composition {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 22px;
+    margin: 0 6vw;
+    padding-bottom: 24px;
+    height: auto;
+    min-height: 0;
+  }
+  .hero-title,
+  .island-stage,
+  .home-actions,
+  .home-caption {
+    position: relative;
+    inset: auto;
   }
   .hero-title h1 {
-    font-size: 76px;
+    font-size: clamp(60px, 19vw, 83px);
   }
   .hero-title > p {
-    font-size: 12px;
-    margin-top: 18px;
+    font-size: 13px;
+    margin-top: 16px;
   }
   .island-stage {
-    left: -13vw;
-    right: -13vw;
-    top: 170px;
-    height: 440px;
-  }
-  .scene-coordinate {
-    right: 10%;
-    top: 10%;
-    font-size: 8px;
+    height: clamp(294px, 46svh, 410px);
   }
   .scene-tools {
-    left: auto;
-    right: 20%;
-    bottom: 7%;
-    gap: 15px;
+    bottom: 0;
+    right: 0;
+    gap: 12px;
   }
   .scene-tools > span {
     font-size: 10px;
   }
   .home-actions {
-    bottom: 78px;
     width: 100%;
-  }
-  .home-description {
-    font-size: 16px;
-    margin-bottom: 20px;
-  }
-  .home-description br {
-    display: none;
-  }
-  .home-description > span {
-    font-size: 11px;
   }
   .home-action-list {
     gap: 8px;
-  }
-  .home-caption {
-    bottom: 24px;
   }
   .home-footer {
     padding: 20px 6vw;
@@ -778,9 +772,6 @@ input {
   }
   .home-footer > span:nth-child(2) {
     display: none;
-  }
-  .home-footer a {
-    font-size: 9px;
   }
   .room-page {
     padding: 28px 6vw 135px;

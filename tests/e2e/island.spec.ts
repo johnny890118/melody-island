@@ -9,9 +9,16 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
 }) => {
   await page.setViewportSize({ width: 1440, height: 960 });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'A little closer.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Cloud Current.' })).toBeVisible();
   await expect(page.locator('canvas')).toBeVisible();
   await expect(page.getByText('正在準備島嶼', { exact: false })).toHaveCount(0, { timeout: 30000 });
+  const stage = page.getByRole('region', { name: '互動 3D 島嶼' });
+  await expect(stage).toHaveAttribute('data-island-ready', 'true');
+  await expect(stage).toHaveAttribute('data-bird-ready', 'true');
+  await page.getByRole('button', { name: '暫停場景動畫' }).click();
+  await expect(page.getByRole('button', { name: '播放場景動畫' })).toBeVisible();
+  await page.getByRole('button', { name: '重設島嶼視角' }).click();
+  await expect(stage).toHaveAttribute('data-bird-ready', 'true');
   await page.screenshot({ path: '.impeccable/review/desktop.png', fullPage: true });
   const canvas = page.locator('canvas');
   const box = await canvas.boundingBox();
@@ -21,6 +28,8 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
   await page.mouse.move(box.x + box.width / 2 + 70, box.y + box.height / 2);
   await page.mouse.up();
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: '重設島嶼視角' }).click();
+  await expect(stage).toHaveAttribute('data-bird-ready', 'true');
   await page.screenshot({ path: '.impeccable/review/mobile.png', fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
@@ -28,6 +37,20 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
   await page.getByRole('button', { name: '加入朋友的島嶼' }).click();
   await expect(page.getByLabel('島嶼 ID', { exact: true })).toBeVisible();
   await expect(page.getByLabel('島嶼密碼', { exact: true })).toBeVisible();
+});
+
+test('a failed bird download leaves the 3D island and boarding controls available', async ({ page }) => {
+  await page.route('**/models/bird.glb', (route) => route.abort());
+  const attempted = page.waitForEvent('requestfailed', (request) =>
+    request.url().endsWith('/models/bird.glb'),
+  );
+  await page.goto('/');
+  await attempted;
+  const stage = page.getByRole('region', { name: '互動 3D 島嶼' });
+  await expect(stage).toHaveAttribute('data-island-ready', 'true');
+  await expect(stage.locator('canvas')).toBeVisible();
+  await page.getByRole('button', { name: '加入朋友的島嶼' }).click();
+  await expect(page.getByLabel('島嶼 ID', { exact: true })).toBeVisible();
 });
 
 test('two friends join, refresh, share playback and concurrently delete by identity', async ({

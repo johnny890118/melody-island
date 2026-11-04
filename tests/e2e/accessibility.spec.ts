@@ -30,7 +30,7 @@ test('home and join dialog support keyboard, reduced motion and narrow screens',
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto('/');
   await expect(page.locator('canvas')).toBeVisible();
-  await expect(page.getByRole('button', { name: '暫停島嶼旋轉' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '暫停場景動畫' })).toHaveCount(0);
   await expect(page.getByText('正在準備島嶼', { exact: false })).toHaveCount(0, { timeout: 30000 });
   await accessible(page);
   // macOS WebKit uses Option+Tab to include links in native keyboard traversal.

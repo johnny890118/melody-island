@@ -2,18 +2,32 @@
 import { Button } from '@/components/ui/button';
 import type { ReactNode } from 'react';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import React, { Component, Suspense, useEffect, useState, useRef } from 'react';
-import { Canvas } from '@react-three/fiber';
-import { Bounds, Center, OrbitControls, useProgress } from '@react-three/drei';
+import React, {
+  Component,
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  useRef,
+} from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
+import { Html, OrbitControls } from '@react-three/drei';
 import { RotateCcw, MoveHorizontal, Pause, Play } from 'lucide-react';
 import Island from './models/Island';
+import Bird from './models/Bird';
+import { ACESFilmicToneMapping, MathUtils, PerspectiveCamera } from 'three';
 
-class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+class SceneBoundary extends Component<
+  { children: ReactNode; optional?: boolean },
+  { failed: boolean }
+> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
   render() {
+    if (this.state.failed && this.props.optional) return null;
     return this.state.failed ? (
       <div className="scene-fallback" role="status">
         <p>島嶼暫時無法顯示</p>
@@ -24,20 +38,35 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
     );
   }
 }
-function Progress({ onProgress }: { onProgress(value: number): void }) {
-  const { progress } = useProgress();
-  useEffect(() => {
-    onProgress(progress);
-  }, [progress, onProgress]);
+function FitPortrait() {
+  const { camera, size, invalidate } = useThree();
+  useLayoutEffect(() => {
+    if (!(camera instanceof PerspectiveCamera) || !size.height) return;
+    const aspect = size.width / size.height;
+    camera.fov = MathUtils.radToDeg(
+      2 * Math.atan(Math.tan(MathUtils.degToRad(17.5)) * Math.max(1, 1.12 / aspect)),
+    );
+    camera.updateProjectionMatrix();
+    invalidate();
+  }, [camera, invalidate, size.width, size.height]);
   return null;
 }
 export default function Hero() {
   const controls = useRef<OrbitControlsImpl | null>(null);
-  const [progress, setProgress] = useState(0);
+  const [readyKey, setReadyKey] = useState(-1);
+  const [birdKey, setBirdKey] = useState(-1);
+  const [birdReadyKey, setBirdReadyKey] = useState(-1);
   const [sceneKey, setSceneKey] = useState(0);
   const [rotating, setRotating] = useState(true);
   const [active, setActive] = useState(true);
   const [reduced, setReduced] = useState(true);
+  const markIslandReady = useCallback(() => setReadyKey(sceneKey), [sceneKey]);
+  const markBirdReady = useCallback(() => setBirdReadyKey(sceneKey), [sceneKey]);
+  useEffect(() => {
+    if (readyKey !== sceneKey || !active) return;
+    const delay = window.setTimeout(() => setBirdKey(sceneKey), 350);
+    return () => window.clearTimeout(delay);
+  }, [active, readyKey, sceneKey]);
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const motion = () => setReduced(media.matches);
@@ -55,6 +84,8 @@ export default function Hero() {
     <section
       className="island-stage"
       aria-label="互動 3D 島嶼"
+      data-island-ready={readyKey === sceneKey}
+      data-bird-ready={birdReadyKey === sceneKey}
       onKeyDown={(event) => {
         if (
           event.target instanceof HTMLCanvasElement &&
@@ -69,34 +100,46 @@ export default function Hero() {
         }
       }}
     >
-      <div className="island-orbit" aria-hidden="true" />
-      <div className="scene-coordinate" aria-hidden="true">
-        A PLACE BETWEEN SONGS
-      </div>
       <SceneBoundary key={sceneKey}>
         <Canvas
           className="island-canvas"
           dpr={[1, 1.5]}
-          camera={{ position: [0, 8, 45], fov: 38 }}
+          camera={{ position: [2, 0.95, 5.55], fov: 35 }}
           frameloop={!active ? 'never' : reduced || !rotating ? 'demand' : 'always'}
-          gl={{ antialias: true, alpha: true }}
+          gl={{
+            antialias: true,
+            alpha: true,
+            toneMapping: ACESFilmicToneMapping,
+            toneMappingExposure: 1.04,
+          }}
           fallback={<div className="scene-fallback">此裝置不支援 WebGL；你仍可以加入共聽。</div>}
           onCreated={({ gl }) => {
             gl.domElement.setAttribute('aria-label', '拖曳旋轉島嶼，方向鍵旋轉');
             gl.domElement.setAttribute('tabindex', '0');
           }}
         >
-          <ambientLight intensity={1.5} />
-          <directionalLight position={[15, 25, 12]} intensity={2.8} color="#fff1d5" />
-          <hemisphereLight args={['#f9f3df', '#578b7a', 1.2]} />
-          <Suspense fallback={null}>
-            <Bounds fit clip observe margin={1.4} maxDuration={0}>
-              <Center>
-                <Island rotation={[0.08, 4.7, 0]} />
-              </Center>
-            </Bounds>
+          <FitPortrait />
+          <ambientLight intensity={0.73} color="#fff5e6" />
+          <directionalLight position={[-3, 5, 4]} intensity={3.1} color="#ffe9b5" />
+          <directionalLight position={[4, 1, -4]} intensity={2.4} color="#ffffff" />
+          <Suspense
+            fallback={
+              <Html center>
+                <div className="scene-progress" role="status">
+                  正在準備島嶼…
+                </div>
+              </Html>
+            }
+          >
+            <Island onReady={markIslandReady} />
           </Suspense>
-          <Progress onProgress={setProgress} />
+          {birdKey === sceneKey && (
+            <SceneBoundary optional>
+              <Suspense fallback={null}>
+                <Bird moving={!reduced && rotating} onReady={markBirdReady} />
+              </Suspense>
+            </SceneBoundary>
+          )}
           <OrbitControls
             ref={controls}
             makeDefault
@@ -110,20 +153,15 @@ export default function Hero() {
           />
         </Canvas>
       </SceneBoundary>
-      {progress < 100 && (
-        <div className="scene-progress" role="status">
-          正在準備島嶼 <span>{Math.round(progress)}%</span>
-        </div>
-      )}
       <div className="scene-tools">
         <span>
-          <MoveHorizontal size={15} /> 拖曳，換個角度聽
+          <MoveHorizontal size={15} /> 拖曳旋轉
         </span>
         {!reduced && (
           <Button
             variant="ghost"
             size="icon"
-            aria-label={rotating ? '暫停島嶼旋轉' : '開始島嶼旋轉'}
+            aria-label={rotating ? '暫停場景動畫' : '播放場景動畫'}
             onClick={() => setRotating((value) => !value)}
           >
             {rotating ? <Pause size={16} /> : <Play size={16} />}

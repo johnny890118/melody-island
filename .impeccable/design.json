@@ -15,12 +15,48 @@
       "accent": {
         "role": "accent",
         "displayName": "Vermilion"
+      },
+      "home-paper": {
+        "role": "neutral",
+        "displayName": "Cloud paper"
+      },
+      "home-ink": {
+        "role": "primary",
+        "displayName": "Aviation blue"
+      },
+      "home-muted": {
+        "role": "neutral",
+        "displayName": "Muted aviation blue"
+      },
+      "home-accent": {
+        "role": "accent",
+        "displayName": "Deep sky blue"
+      },
+      "home-rule": {
+        "role": "neutral",
+        "displayName": "Blue-gray rule"
+      },
+      "home-sunlight": {
+        "role": "accent",
+        "displayName": "Ivory sunlight"
+      },
+      "home-sky": {
+        "role": "neutral",
+        "displayName": "Open sky blue"
       }
     },
     "typographyMeta": {
       "display": {
         "displayName": "Editorial display",
-        "purpose": "Homepage title and short room titles."
+        "purpose": "Short room titles."
+      },
+      "home-display": {
+        "displayName": "Cloud Current display",
+        "purpose": "Stacked homepage title with an italic second line."
+      },
+      "home-display-mobile": {
+        "displayName": "Cloud Current mobile display",
+        "purpose": "Stacked homepage title at 560px and below."
       }
     },
     "motion": [
