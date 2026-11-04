@@ -1,4 +1,7 @@
 import type { NextConfig } from 'next';
+import { assertStagingConfig } from './lib/staging-config';
+
+assertStagingConfig(process.env);
 const firebaseProjectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'melody-island';
 const firebaseAuthHost = firebaseProjectId ? `${firebaseProjectId}.firebaseapp.com` : null;
 

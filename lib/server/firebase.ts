@@ -2,8 +2,10 @@ import { applicationDefault, cert, getApps, initializeApp } from 'firebase-admin
 import { getAppCheck } from 'firebase-admin/app-check';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
+import { assertStagingConfig } from '../staging-config';
 
 export function adminServices() {
+  assertStagingConfig(process.env);
   const projectId = process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   const emulator = process.env.FIRESTORE_EMULATOR_HOST;
   if (
