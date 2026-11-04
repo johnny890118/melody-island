@@ -10,15 +10,19 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:3100',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    launchOptions: {
-      args: [
-        '--enable-webgl',
-        '--use-gl=angle',
-        '--use-angle=swiftshader',
-        '--enable-unsafe-swiftshader',
-      ],
-    },
   },
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        browserName: 'chromium',
+        launchOptions: {
+          args: ['--enable-webgl', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
+        },
+      },
+    },
+    { name: 'webkit', use: { browserName: 'webkit' } },
+  ],
   webServer: {
     command: 'npm run dev -- --hostname 127.0.0.1 --port 3100',
     url: 'http://127.0.0.1:3100',

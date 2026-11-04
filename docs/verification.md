@@ -34,3 +34,5 @@ The opt-in `npm run smoke:youtube` loaded the real iframe and cued the official 
 Linux CI for `0b5992c` failed the concurrent 19-guest join stage. A local delayed-counter regression separately reproduced premature retry exhaustion: 11 of 20 operations passed with the old retry budget. The counter now uses bounded exponential jitter and up to 32 attempts; the test requires all 20 operations to pass and the 21st to be rejected without exceeding the budget. The E2E reports individual response statuses and errors if joins fail again.
 
 Remote CI for the prior pushed milestone d0b3144 passed: https://github.com/johnny890118/melody-island/actions/runs/41681329765. This does not establish the result for any newer commit.
+
+Remote run [41815834496](https://github.com/johnny890118/melody-island/actions/runs/41815834496) passed Chromium, including the 20-member scenario, but Linux WebKit rejected the Chromium-only `--enable-webgl` launch flag. Playwright now declares separate browser projects and applies SwiftShader arguments only to Chromium. The WebKit assertions remain enabled.
