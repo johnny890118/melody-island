@@ -5,7 +5,7 @@ test('touch rotates the real island horizontally while vertical swipes still scr
 }) => {
   test.skip(browserName !== 'chromium', 'CDP touch synthesis is Chromium-specific.');
   const context = await browser.newContext({
-    viewport: { width: 390, height: 844 },
+    viewport: { width: 390, height: 560 },
     hasTouch: true,
     isMobile: true,
     reducedMotion: 'reduce',

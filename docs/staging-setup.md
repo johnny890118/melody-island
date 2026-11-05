@@ -33,3 +33,10 @@ Keep emulator host and emulator override variables unset. Make sure Vercel expos
 - With two synthetic test users, run Google sign-in, joining, real YouTube playback, track transition, network recovery, and iPhone Safari. Record device/browser versions and separate actual audible synchronization from browser media clocks.
 - Run the positive and negative security checks in [production-runbook.md](production-runbook.md#staging-evidence-to-collect). Verify the expected staging project receives the test writes. Record statuses only, never credentials.
 - Complete acceptance before opening the PR. Keep main and production untouched pending review.
+
+
+## Same-tab Google sign-in
+
+Staging sets `NEXT_PUBLIC_AUTH_REDIRECT=true`. The browser uses its own hostname as the Firebase Auth helper domain. Next.js proxies `/__/auth/*` to the dedicated Firebase project's helper and allows only same-origin framing for these helper routes. The main application retains its frame restriction. The callback `https://melody-island-stage-20261105-preview.vercel.app/__/auth/handler` is registered on the staging Google provider. The browser reads the redirect result on return and displays a recoverable error when the callback fails.
+
+Production needs its own authorized hostname and Google callback before enabling this flag. The staging flag has only been set in the dedicated Vercel project's Preview environment. Firebase's [redirect guidance](https://firebase.google.com/docs/auth/web/redirect-best-practices) describes the proxy requirement.

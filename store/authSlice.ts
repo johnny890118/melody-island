@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { auth } from '@/app/config/firebase';
-import { signInWithPopup, GoogleAuthProvider, signOut, type User } from 'firebase/auth';
-import { errorCode, errorMessage } from '@/lib/errors';
+import { signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, signOut, type User } from 'firebase/auth';
+import { errorCode } from '@/lib/errors';
 export interface AuthUser {
   uid: string;
   email: string | null;
@@ -35,11 +35,22 @@ export const startGoogleLogin = createAsyncThunk<
   'auth/googleLogin',
   async (_, { rejectWithValue }) => {
     try {
-      return payload((await signInWithPopup(auth, new GoogleAuthProvider())).user);
+      const provider = new GoogleAuthProvider();
+      if (process.env.NEXT_PUBLIC_AUTH_REDIRECT === 'true') {
+        await signInWithRedirect(auth, provider);
+        return rejectWithValue('登入頁面未能開啟，請重試。');
+      }
+      return payload((await signInWithPopup(auth, provider)).user);
     } catch (error) {
       switch (errorCode(error)) {
         case 'auth/popup-closed-by-user':
           return rejectWithValue('已取消登入，可以再試一次。');
+        case 'auth/unauthorized-domain':
+          return rejectWithValue('此網址尚未獲得登入授權，請使用官方島嶼網址。');
+        case 'auth/network-request-failed':
+          return rejectWithValue('無法連接 Google 登入，請確認網路後重試。');
+        case 'auth/web-storage-unsupported':
+          return rejectWithValue('瀏覽器無法儲存登入狀態，請允許此網站儲存資料後重試。');
         case 'auth/popup-blocked':
           return rejectWithValue('瀏覽器封鎖了登入視窗。允許彈出視窗後再試。');
         default:
@@ -56,12 +67,13 @@ export const fetchUser = createAsyncThunk<AuthUser | null, void, { rejectValue: 
   'auth/fetchUser',
   async (_, { rejectWithValue }) => {
     try {
+      if (process.env.NEXT_PUBLIC_AUTH_REDIRECT === 'true') await getRedirectResult(auth);
       await auth.authStateReady();
       return auth.currentUser ? payload(auth.currentUser) : null;
     } catch (error) {
       return rejectWithValue({
         code: String(errorCode(error) || 'auth/state-error'),
-        message: errorMessage(error),
+        message: 'Google 登入未完成，請重新按「登入」再試。',
       });
     }
   },

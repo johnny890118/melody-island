@@ -12,7 +12,10 @@ export default function Navbar() {
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
   useEffect(() => {
-    dispatch(fetchUser());
+    void dispatch(fetchUser()).then((result) => {
+      if (fetchUser.rejected.match(result))
+        setError(result.payload?.message || '登入狀態無法讀取，請重新整理後再試。');
+    });
   }, [dispatch]);
   const login = async () => {
     if (status === 'loading') return;
@@ -51,7 +54,7 @@ export default function Navbar() {
             disabled={pending || status === 'loading'}
             onClick={login}
           >
-            {pending ? '正在登入…' : '登入'}
+            {pending ? '正在前往登入…' : '登入'}
             <ArrowUpRight size={16} aria-hidden="true" />
           </Button>
         )}

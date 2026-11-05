@@ -64,3 +64,15 @@ The homepage suspends continuous WebGL rendering while the scene is fully outsid
 The owner-led media hold recheck passed in both engines in an isolated production build. The fixture disabled guest skipping and verified the owner held the advance lease before intentionally delaying the guest. Chromium held one real Googlevideo request and WebKit held two. Both observed media readyState 0 during the hold and resumed playback after release. The room version advanced exactly twice for play and one automatic transition. Five pre-hold timeline samples were 199–200 ms in Chromium and 136–169 ms in WebKit on the same Mac. The prior inconclusive WebKit run remains recorded separately. See `measurements/youtube-media-hold-owner-leader.json`.
 
 With the production build running locally against demo emulators and `ENFORCE_APP_CHECK=true`, an HTTP probe sent a valid demo Auth token. Missing App Check, malformed App Check, and a foreign Origin were each rejected with the expected 403 response. This verifies fail-closed runtime behavior. It does not establish issuance or acceptance of real attestations, deployed edge limits, or staging project isolation.
+
+## Staging Google sign-in repair — 2026-11-05
+
+The Chrome session reproduced an immediate Firebase `auth/popup-blocked` response after the login button's click handler ran. The Chrome Console contained no additional messages. The dedicated staging Google provider and authorized hostname were enabled.
+
+Staging now uses same-tab Google redirect with a same-origin Firebase helper proxy. The Google callback was registered in the dedicated staging project. The helper iframe responds with HTTP 200 and `frame-ancestors 'self'`. An unauthenticated request to the Preview hostname still redirects to Vercel authentication (302), and the custom API still rejects requests without App Check (403).
+
+Using the real Google provider, Chrome reached the Google account chooser. The owner selected their account and reported returning to the application. Browser inspection confirmed the authenticated “登出” control, persistence after reload, successful room creation, real YouTube search, queue insertion, playback (including Chrome's audio-playing indicator), and pause. App Check enforcement remained enabled during these room commands.
+
+These observations cover one signed-in owner on one computer. The in-app browser shared that identity and therefore was not counted as an independent guest. Independent staging guest membership, cross-device audio drift and native iPhone Safari remain pending.
+
+Two prior UI-dependent E2E checks needed shorter viewports after the homepage footer was removed. Their assertions still require actual vertical scrolling and an offscreen scene that stops rendering.

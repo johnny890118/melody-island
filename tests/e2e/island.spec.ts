@@ -41,7 +41,7 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
-  await page.setViewportSize({ width: 390, height: 360 });
+  await page.setViewportSize({ width: 390, height: 240 });
   await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
   await expect(stage).toHaveAttribute('data-render-mode', 'never');
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
