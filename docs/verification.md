@@ -76,3 +76,15 @@ Using the real Google provider, Chrome reached the Google account chooser. The o
 These observations cover one signed-in owner on one computer. The in-app browser shared that identity and therefore was not counted as an independent guest. Independent staging guest membership, cross-device audio drift and native iPhone Safari remain pending.
 
 Two prior UI-dependent E2E checks needed shorter viewports after the homepage footer was removed. Their assertions still require actual vertical scrolling and an offscreen scene that stops rendering.
+
+## Independent native Safari and reconnect acceptance — 2026-11-05
+
+On the dedicated staging deployment of 68dd613, macOS Safari opened the acceptance room with a separate anonymous Firebase identity. The room first presented its password gate. A wrong password was rejected. The verified test password then admitted the guest, and both Safari and the Google-authenticated Chrome owner displayed two members with their distinct guest/owner interfaces.
+
+Safari initiated playback of a real YouTube track and Chrome converged to the same track and playing state. Chrome's pause propagated to Safari. With both players paused, their accessible YouTube controls displayed 29 seconds and 30 seconds. This is a coarse integer-second observation on one Mac, not an acoustic measurement or a cross-device latency result. Adding a second YouTube search result and switching tracks from Chrome also propagated to native Safari and resumed playback.
+
+For network recovery, Chrome DevTools put only the owner tab into Offline mode. The owner interface displayed offline and Firestore/YouTube requests reported ERR_INTERNET_DISCONNECTED. The connected Safari guest paused the room. Restoring Chrome to No throttling made it reconnect and adopt the shared paused state. DevTools was then closed and throttling left disabled.
+
+The physical iPhone check was requested separately. The owner reported inability to join or play, and the exact failure and iOS version remain under investigation. It has not passed.
+
+GitHub's verify check for 68dd613 completed successfully at https://github.com/johnny890118/melody-island/actions/runs/42014915843/job/127202922505 . The Vercel Preview Comments check also completed successfully.
