@@ -16,21 +16,34 @@ interface SyncedPlayerProps {
   onError(message: string): void;
   onReady(): void;
   onBlocked(): void;
+  onPlaying?(): void;
 }
 import { expectedSeconds } from '@/lib/session';
 
+const ALIGNMENT_TOLERANCE_SECONDS = 0.35;
+const DRIFT_TOLERANCE_SECONDS = 1.5;
+const CORRECTION_COOLDOWN_MS = 10000;
+
 const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function SyncedPlayer(
-  { session, clockOffset, onEnded, onError, onReady, onBlocked },
+  { session, clockOffset, onEnded, onError, onReady, onBlocked, onPlaying },
   ref,
 ) {
   const player = useRef<PlayerTarget | null>(null);
   const latest = useRef(session);
   latest.current = session;
-  const callbacks = useRef({ onEnded, onError, onReady, onBlocked });
-  callbacks.current = { onEnded, onError, onReady, onBlocked };
+  const callbacks = useRef({ onEnded, onError, onReady, onBlocked, onPlaying });
+  callbacks.current = { onEnded, onError, onReady, onBlocked, onPlaying };
   const offset = useRef(clockOffset);
   offset.current = clockOffset;
   const loaded = useRef('');
+  const timeline = useRef('');
+  const lastSeekAt = useRef(-Infinity);
+  const lastPlayAt = useRef(-Infinity);
+  const stableSince = useRef<number | null>(null);
+  const driftingSince = useRef<number | null>(null);
+  const autoplayBlocked = useRef(false);
+  const recoveringFromBuffer = useRef(false);
+  const initialAlignment = useRef(false);
   const [ready, setReady] = useState(false);
   const [muted, setMuted] = useState(false);
   const testPlayer =
@@ -64,26 +77,94 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     }
     callbacks.current.onEnded(data);
   }, []);
-  const sync = useCallback((force = false) => {
+  const sync = useCallback((force = false, gesture = false) => {
     const target = player.current;
     const data = latest.current;
     if (!target) return;
     try {
+      const now = Date.now();
       if (!data.currentVideo) {
-        target.stopVideo();
+        if (loaded.current) target.stopVideo();
         loaded.current = '';
+        timeline.current = '';
         return;
       }
-      const seconds = expectedSeconds(data, Date.now() + offset.current);
+      const seconds = expectedSeconds(data, now + offset.current);
+      const nextTimeline = `${data.currentVideo}:${data.isPlaying}:${data.positionMs}:${data.playbackUpdatedAt}`;
+      const changed = timeline.current !== nextTimeline;
       if (loaded.current !== data.currentVideo) {
         loaded.current = data.currentVideo;
-        if (data.isPlaying) target.loadVideoById(data.currentVideo, seconds);
+        timeline.current = nextTimeline;
+        driftingSince.current = null;
+        stableSince.current = null;
+        lastSeekAt.current = -Infinity;
+        lastPlayAt.current = now;
+        initialAlignment.current = true;
+        if (data.isPlaying && !autoplayBlocked.current)
+          target.loadVideoById(data.currentVideo, seconds);
         else target.cueVideoById(data.currentVideo, seconds);
-      } else {
-        if (force || Math.abs((target.getCurrentTime() || 0) - seconds) > 2)
+        return;
+      }
+      const state = target.getPlayerState?.();
+      const drift = Math.abs((target.getCurrentTime() || 0) - seconds);
+      timeline.current = nextTimeline;
+      if (!data.isPlaying) {
+        driftingSince.current = null;
+        stableSince.current = null;
+        if (state !== 2 && state !== 5) target.pauseVideo();
+        if ((changed || (force && now - lastSeekAt.current >= 1000)) && drift > ALIGNMENT_TOLERANCE_SECONDS) {
           target.seekTo(seconds, true);
-        if (data.isPlaying) target.playVideo();
-        else target.pauseVideo();
+          initialAlignment.current = false;
+          lastSeekAt.current = now;
+        }
+        return;
+      }
+      if (autoplayBlocked.current && !gesture) return;
+      // An ended player waits for the authoritative track advance. Replaying it
+      // locally can race the leader's lease handover and restart the old song.
+      if (state === 0 && !changed && !gesture) return;
+      // Seeking or replaying during buffering can restart loading indefinitely.
+      // Only a user gesture may override this wait.
+      if (state === 3 && !gesture) {
+        recoveringFromBuffer.current = true;
+        stableSince.current = null;
+        driftingSince.current = null;
+        return;
+      }
+      if (changed || force) {
+        driftingSince.current = null;
+        if (drift > ALIGNMENT_TOLERANCE_SECONDS && (changed || now - lastSeekAt.current >= 1000)) {
+          target.seekTo(seconds, true);
+          initialAlignment.current = false;
+          lastSeekAt.current = now;
+          stableSince.current = null;
+        }
+      } else if (state === 1) {
+        stableSince.current ??= now;
+        if (drift <= DRIFT_TOLERANCE_SECONDS) {
+          driftingSince.current = null;
+          recoveringFromBuffer.current = false;
+        } else driftingSince.current ??= now;
+        if (
+          driftingSince.current !== null &&
+          now - stableSince.current >= (recoveringFromBuffer.current ? 500 : 1500) &&
+          now - driftingSince.current >= (recoveringFromBuffer.current ? 500 : 3000) &&
+          now - lastSeekAt.current >= CORRECTION_COOLDOWN_MS
+        ) {
+          target.seekTo(seconds, true);
+          initialAlignment.current = false;
+          lastSeekAt.current = now;
+          stableSince.current = null;
+          driftingSince.current = null;
+          recoveringFromBuffer.current = false;
+        }
+      }
+      if (
+        gesture ||
+        (state !== 1 && state !== 3 && (force || changed || now - lastPlayAt.current >= CORRECTION_COOLDOWN_MS))
+      ) {
+        target.playVideo();
+        lastPlayAt.current = now;
       }
     } catch {
       callbacks.current.onError('播放器暫時無法同步，請點選重新同步。');
@@ -96,10 +177,13 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
       toggleMute: () => setMuted((value) => !value),
       enableAudio: () => {
         try {
+          autoplayBlocked.current = false;
           player.current?.unMute();
-          if (latest.current.isPlaying) player.current?.playVideo();
+          sync(true, true);
           setMuted(false);
-        } catch {}
+        } catch {
+          callbacks.current.onError('無法啟用聲音，請再按一次「開始聆聽」。');
+        }
       },
     }),
     [sync],
@@ -130,7 +214,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     if (!ready) return;
     const timer = setInterval(() => {
       if (!document.hidden) sync();
-    }, 5000);
+    }, 1000);
     const visible = () => {
       if (!document.hidden) sync(true);
     };
@@ -193,11 +277,43 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
           setReady(true);
           callbacks.current.onReady();
         }}
-        onAutoplayBlocked={() => callbacks.current.onBlocked()}
+        onAutoplayBlocked={() => {
+          autoplayBlocked.current = true;
+          callbacks.current.onBlocked();
+        }}
         onError={() => callbacks.current.onError('YouTube 播放器無法使用，請重試或選擇其他歌曲。')}
         onStateChange={({ data: state, target }) => {
+          if (target !== player.current) return;
           if (state === 0) reportEnded(target);
-          if (state === 1 && !latest.current.isPlaying) target.pauseVideo();
+          if (state === 3) {
+            recoveringFromBuffer.current = true;
+            stableSince.current = null;
+            driftingSince.current = null;
+          }
+          if (state === 1) {
+            if (!latest.current.isPlaying) target.pauseVideo();
+            else {
+              autoplayBlocked.current = false;
+              stableSince.current ??= Date.now();
+              if (initialAlignment.current) {
+                initialAlignment.current = false;
+                if (Math.abs(target.getCurrentTime() - expectedSeconds(
+                  latest.current, Date.now() + offset.current,
+                )) > ALIGNMENT_TOLERANCE_SECONDS) sync(true);
+              }
+              if (
+                recoveringFromBuffer.current &&
+                Date.now() - lastSeekAt.current >= CORRECTION_COOLDOWN_MS &&
+                Math.abs(target.getCurrentTime() - expectedSeconds(
+                  latest.current, Date.now() + offset.current,
+                )) > DRIFT_TOLERANCE_SECONDS
+              ) {
+                // One catch-up after decoding resumes, followed by the seek cooldown.
+                sync(true);
+              }
+              callbacks.current.onPlaying?.();
+            }
+          }
         }}
       />
     </div>

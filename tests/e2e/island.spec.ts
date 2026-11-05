@@ -449,3 +449,51 @@ test('a disconnected friend catches up with canonical playback after reconnectin
     await context.close();
   }
 });
+
+test('starting local listening never rewrites the shared room timeline', async ({ page, request, browserName }) => {
+  const owner = await identity(request);
+  const guest = await identity(request);
+  const created = await post(request, '/api/islands', owner, {
+    islandName: '開始聆聽驗收',
+    islandPassword: 'listen-test-123',
+  });
+  expect(created.status()).toBe(201);
+  const { id } = await created.json();
+  expect((await post(request, `/api/islands/${id}/join`, guest, {
+    islandPassword: 'listen-test-123',
+  })).ok()).toBe(true);
+  expect((await post(request, `/api/islands/${id}/commands`, owner, {
+    type: 'add',
+    song: { videoId: 'aaaaaaaaaaa', title: '共同的旋律' },
+    commandId: crypto.randomUUID(),
+  })).ok()).toBe(true);
+  expect((await post(request, `/api/islands/${id}/commands`, owner, {
+    type: 'play', expectedVersion: 1, commandId: crypto.randomUUID(),
+  })).ok()).toBe(true);
+  const room = adminDb().doc(`islands/${id}`);
+  const before = parseRoom((await room.get()).data());
+  const playbackWrites: string[] = [];
+  page.on('request', (outgoing) => {
+    if (!outgoing.url().endsWith('/commands') || outgoing.method() !== 'POST') return;
+    const body: unknown = outgoing.postDataJSON();
+    if (body && typeof body === 'object' && 'type' in body && typeof body.type === 'string' &&
+        ['play', 'pause', 'select', 'next', 'prev'].includes(body.type))
+      playbackWrites.push(body.type);
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page, guest);
+  await page.goto(`/island/${id}`);
+  const listen = page.getByRole('button', { name: '開始聆聽', exact: true });
+  await expect(listen).toBeEnabled();
+  await expect(page.getByText('在這台裝置開啟聲音，接上島上目前的旋律。')).toBeVisible();
+  await page.screenshot({ path: `.impeccable/review/start-listening-${browserName}.png`, fullPage: true });
+  await listen.click();
+  // The mock emits no playing acknowledgement, so the activation prompt stays available.
+  await expect(listen).toBeVisible();
+  await page.getByRole('button', { name: '重新同步播放' }).click();
+  const after = parseRoom((await room.get()).data());
+  expect(after.version).toBe(before.version);
+  expect(after.playbackUpdatedAt).toBe(before.playbackUpdatedAt);
+  expect(after.positionMs).toBe(before.positionMs);
+  expect(playbackWrites).toEqual([]);
+});

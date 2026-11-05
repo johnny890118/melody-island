@@ -1,0 +1,281 @@
+[
+  {
+    "engine": "chromium",
+    "realIframeReady": true,
+    "timeline": {
+      "samples": [
+        {
+          "ownerSeconds": 2.140643,
+          "ownerSeekCommands": 1,
+          "guestSeekCommands": 1,
+          "guestSeconds": 2.130032,
+          "observationGapMs": 0.199951171875,
+          "timelineDifferenceMs": 11
+        },
+        {
+          "ownerSeconds": 3.156205,
+          "ownerSeekCommands": 1,
+          "guestSeekCommands": 1,
+          "guestSeconds": 3.143343,
+          "observationGapMs": -2,
+          "timelineDifferenceMs": 11
+        },
+        {
+          "ownerSeconds": 4.1677,
+          "ownerSeekCommands": 1,
+          "guestSeekCommands": 1,
+          "guestSeconds": 4.157105,
+          "observationGapMs": 0.400146484375,
+          "timelineDifferenceMs": 11
+        },
+        {
+          "ownerSeconds": 5.179639,
+          "ownerSeekCommands": 1,
+          "guestSeekCommands": 1,
+          "guestSeconds": 5.168927,
+          "observationGapMs": 0.2001953125,
+          "timelineDifferenceMs": 11
+        },
+        {
+          "ownerSeconds": 6.186297,
+          "ownerSeekCommands": 1,
+          "guestSeekCommands": 1,
+          "guestSeconds": 6.176415,
+          "observationGapMs": 1,
+          "timelineDifferenceMs": 11
+        }
+      ],
+      "autoAdvance": {
+        "duration": 1343.661,
+        "nextVideo": "aqz-KE-bpKQ",
+        "versionDelta": 1,
+        "transitionKind": "next-command",
+        "mediaHold": {
+          "delayedRequests": 4,
+          "readyStateDuringHold": 0,
+          "holdMs": 10000,
+          "recoveryMs": 372,
+          "recoverySamples": [
+            {
+              "afterReleaseMs": 376,
+              "timelineDifferenceMs": 241,
+              "bothPlaying": true,
+              "ownerSeekCommands": 1,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 1388,
+              "timelineDifferenceMs": 241,
+              "bothPlaying": true,
+              "ownerSeekCommands": 1,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 2394,
+              "timelineDifferenceMs": 241,
+              "bothPlaying": true,
+              "ownerSeekCommands": 1,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 3405,
+              "timelineDifferenceMs": 241,
+              "bothPlaying": true,
+              "ownerSeekCommands": 1,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 4411,
+              "timelineDifferenceMs": 241,
+              "bothPlaying": true,
+              "ownerSeekCommands": 1,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 5422,
+              "timelineDifferenceMs": 241,
+              "bothPlaying": true,
+              "ownerSeekCommands": 1,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 6439,
+              "timelineDifferenceMs": 241,
+              "bothPlaying": true,
+              "ownerSeekCommands": 1,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 7452,
+              "timelineDifferenceMs": 241,
+              "bothPlaying": true,
+              "ownerSeekCommands": 1,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 8463,
+              "timelineDifferenceMs": 241,
+              "bothPlaying": true,
+              "ownerSeekCommands": 1,
+              "guestSeekCommands": 2
+            }
+          ],
+          "convergenceMs": 376,
+          "ownerSeekCommands": 0,
+          "guestSeekCommands": 1,
+          "ownerPlayCommands": 0,
+          "guestPlayCommands": 0,
+          "recoveredTimelineDifferenceMs": 241
+        }
+      }
+    },
+    "alerts": [
+      ""
+    ],
+    "pageErrors": [],
+    "failedResources": [],
+    "scope": "Real YouTube HTML media clocks in two isolated contexts on one host. No acoustic or cross-device measurement."
+  },
+  {
+    "engine": "webkit",
+    "realIframeReady": true,
+    "timeline": {
+      "samples": [
+        {
+          "ownerSeconds": 0.170627125,
+          "ownerSeekCommands": 0,
+          "guestSeekCommands": 0,
+          "guestSeconds": 0.378877667,
+          "observationGapMs": 0,
+          "timelineDifferenceMs": 208
+        },
+        {
+          "ownerSeconds": 1.177741625,
+          "ownerSeekCommands": 0,
+          "guestSeekCommands": 0,
+          "guestSeconds": 1.386321583,
+          "observationGapMs": 1,
+          "timelineDifferenceMs": 208
+        },
+        {
+          "ownerSeconds": 2.184841667,
+          "ownerSeekCommands": 0,
+          "guestSeekCommands": 0,
+          "guestSeconds": 2.393113875,
+          "observationGapMs": 0,
+          "timelineDifferenceMs": 208
+        },
+        {
+          "ownerSeconds": 3.191318751,
+          "ownerSeekCommands": 0,
+          "guestSeekCommands": 0,
+          "guestSeconds": 3.400062,
+          "observationGapMs": 1,
+          "timelineDifferenceMs": 208
+        },
+        {
+          "ownerSeconds": 4.197793416,
+          "ownerSeekCommands": 0,
+          "guestSeekCommands": 0,
+          "guestSeconds": 4.406026374,
+          "observationGapMs": -1,
+          "timelineDifferenceMs": 209
+        }
+      ],
+      "autoAdvance": {
+        "duration": 1343.661,
+        "nextVideo": "aqz-KE-bpKQ",
+        "versionDelta": 1,
+        "transitionKind": "next-command",
+        "mediaHold": {
+          "delayedRequests": 7,
+          "readyStateDuringHold": 0,
+          "holdMs": 10000,
+          "recoveryMs": 120,
+          "recoverySamples": [
+            {
+              "afterReleaseMs": 124,
+              "timelineDifferenceMs": 445,
+              "bothPlaying": true,
+              "ownerSeekCommands": 2,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 1133,
+              "timelineDifferenceMs": 11,
+              "bothPlaying": true,
+              "ownerSeekCommands": 2,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 2146,
+              "timelineDifferenceMs": 11,
+              "bothPlaying": true,
+              "ownerSeekCommands": 2,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 3151,
+              "timelineDifferenceMs": 10,
+              "bothPlaying": true,
+              "ownerSeekCommands": 2,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 4163,
+              "timelineDifferenceMs": 11,
+              "bothPlaying": true,
+              "ownerSeekCommands": 2,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 5174,
+              "timelineDifferenceMs": 11,
+              "bothPlaying": true,
+              "ownerSeekCommands": 2,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 6184,
+              "timelineDifferenceMs": 11,
+              "bothPlaying": true,
+              "ownerSeekCommands": 2,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 7190,
+              "timelineDifferenceMs": 11,
+              "bothPlaying": true,
+              "ownerSeekCommands": 2,
+              "guestSeekCommands": 2
+            },
+            {
+              "afterReleaseMs": 8204,
+              "timelineDifferenceMs": 11,
+              "bothPlaying": true,
+              "ownerSeekCommands": 2,
+              "guestSeekCommands": 2
+            }
+          ],
+          "convergenceMs": 124,
+          "ownerSeekCommands": 1,
+          "guestSeekCommands": 1,
+          "ownerPlayCommands": 0,
+          "guestPlayCommands": 0,
+          "recoveredTimelineDifferenceMs": 11
+        }
+      }
+    },
+    "alerts": [
+      ""
+    ],
+    "pageErrors": [],
+    "failedResources": [
+      {
+        "host": "www.youtube.com",
+        "error": "cancelled"
+      }
+    ],
+    "scope": "Real YouTube HTML media clocks in two isolated contexts on one host. No acoustic or cross-device measurement."
+  }
+]

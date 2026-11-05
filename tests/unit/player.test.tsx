@@ -3,6 +3,7 @@ type PlayerEvent = { target: PlayerTarget; data?: number };
 interface PlayerCallbacks {
   onReady(event: PlayerEvent): void;
   onStateChange(event: PlayerEvent): void;
+  onAutoplayBlocked(): void;
 }
 // @vitest-environment jsdom
 import React, { createRef } from 'react';
@@ -12,11 +13,13 @@ import { act, cleanup, render } from '@testing-library/react';
 const hooks = vi.hoisted(() => ({
   ready: (_event: PlayerEvent) => {},
   state: (_event: PlayerEvent) => {},
+  blocked: () => {},
 }));
 vi.mock('../../components/YouTubeFrame', () => ({
   default: (props: PlayerCallbacks) => {
     hooks.ready = props.onReady;
     hooks.state = props.onStateChange;
+    hooks.blocked = props.onAutoplayBlocked;
     return null;
   },
 }));
@@ -123,7 +126,8 @@ it('skips hidden-tab polling, resyncs on return and removes reconnect listeners 
   expect(target.seekTo).not.toHaveBeenCalled();
   hidden.mockReturnValue(false);
   act(() => document.dispatchEvent(new Event('visibilitychange')));
-  expect(target.seekTo).toHaveBeenCalledWith(12, true);
+  expect(target.seekTo).not.toHaveBeenCalled();
+  target.getCurrentTime.mockReturnValue(0);
   target.seekTo.mockClear();
   act(() => window.dispatchEvent(new Event('online')));
   expect(target.seekTo).toHaveBeenCalledOnce();
@@ -172,4 +176,142 @@ it('ignores a stale ended event after replaying the same video from the start', 
   target.getPlayerState.mockReturnValue(0);
   act(() => hooks.state({ data: 0, target }));
   expect(callbacks.onEnded).not.toHaveBeenCalled();
+});
+
+
+it('waits through buffering and corrects sustained drift once without replay storms', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(10000);
+  target.getCurrentTime.mockReturnValue(9);
+  const playing = { ...base, isPlaying: true, positionMs: 0 };
+  render(<SyncedPlayer session={playing} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  target.getPlayerState.mockReturnValue(3);
+  act(() => hooks.state({ data: 3, target }));
+  act(() => {
+    vi.advanceTimersByTime(12000);
+    window.dispatchEvent(new Event('online'));
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  expect(target.seekTo).not.toHaveBeenCalled();
+  expect(target.playVideo).not.toHaveBeenCalled();
+  target.getPlayerState.mockReturnValue(1);
+  act(() => hooks.state({ data: 1, target }));
+  act(() => vi.advanceTimersByTime(4000));
+  expect(target.seekTo).toHaveBeenCalledOnce();
+  act(() => vi.advanceTimersByTime(5000));
+  expect(target.seekTo).toHaveBeenCalledOnce();
+  expect(target.playVideo).not.toHaveBeenCalled();
+  expect(callbacks.onEnded).not.toHaveBeenCalled();
+});
+
+it('does not seek for a short drift spike or small clock noise', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(10000);
+  target.getCurrentTime.mockReturnValue(9);
+  const playing = { ...base, isPlaying: true, positionMs: 0 };
+  render(<SyncedPlayer session={playing} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  target.getCurrentTime.mockImplementation(() => (Date.now() - 1000) / 1000 - 0.5);
+  act(() => vi.advanceTimersByTime(12000));
+  expect(target.seekTo).not.toHaveBeenCalled();
+  target.getCurrentTime.mockReturnValue(0);
+  act(() => vi.advanceTimersByTime(2000));
+  target.getCurrentTime.mockImplementation(() => (Date.now() - 1000) / 1000);
+  act(() => vi.advanceTimersByTime(2000));
+  expect(target.seekTo).not.toHaveBeenCalled();
+});
+
+it('a listening gesture catches up to the current room position without advancing the room', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(10000);
+  const ref = createRef<PlayerHandle>();
+  const playing = { ...base, isPlaying: true, positionMs: 0 };
+  render(<SyncedPlayer ref={ref} session={playing} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  target.getPlayerState.mockReturnValue(2);
+  target.getCurrentTime.mockReturnValue(0);
+  act(() => vi.advanceTimersByTime(2000));
+  target.playVideo.mockClear();
+  act(() => ref.current?.enableAudio());
+  expect(target.seekTo).toHaveBeenCalledWith(11, true);
+  expect(target.unMute).toHaveBeenCalled();
+  expect(target.playVideo).toHaveBeenCalledOnce();
+  expect(callbacks.onEnded).not.toHaveBeenCalled();
+});
+
+it('starts a cued paused track when the room switches to playing', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(1000);
+  target.getPlayerState.mockReturnValue(5);
+  const view = render(<SyncedPlayer session={base} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  view.rerender(<SyncedPlayer session={{ ...base, isPlaying: true }} clockOffset={0} {...callbacks} />);
+  expect(target.playVideo).toHaveBeenCalledOnce();
+});
+
+it('stops retrying blocked autoplay until the listener activates audio', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(10000);
+  const ref = createRef<PlayerHandle>();
+  const playing = { ...base, isPlaying: true, positionMs: 0 };
+  render(<SyncedPlayer ref={ref} session={playing} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  act(() => hooks.blocked());
+  target.getPlayerState.mockReturnValue(2);
+  target.getCurrentTime.mockReturnValue(0);
+  act(() => {
+    vi.advanceTimersByTime(30000);
+    window.dispatchEvent(new Event('online'));
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  expect(target.playVideo).not.toHaveBeenCalled();
+  expect(target.seekTo).not.toHaveBeenCalled();
+  expect(callbacks.onBlocked).toHaveBeenCalledOnce();
+  act(() => ref.current?.enableAudio());
+  expect(target.playVideo).toHaveBeenCalledOnce();
+  expect(target.seekTo).toHaveBeenCalledWith(39, true);
+  expect(callbacks.onEnded).not.toHaveBeenCalled();
+});
+
+
+it('applies an authoritative play command to an unstarted cued player', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(1000);
+  target.getPlayerState.mockReturnValue(-1);
+  const view = render(<SyncedPlayer session={base} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  view.rerender(<SyncedPlayer session={{ ...base, isPlaying: true }} clockOffset={0} {...callbacks} />);
+  expect(target.playVideo).toHaveBeenCalledOnce();
+});
+
+it('never restarts an ended track while waiting for authoritative advancement', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(10000);
+  const playing = { ...base, isPlaying: true, positionMs: 0 };
+  render(<SyncedPlayer session={playing} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  target.getPlayerState.mockReturnValue(0);
+  act(() => vi.advanceTimersByTime(30000));
+  expect(target.playVideo).not.toHaveBeenCalled();
+  expect(target.seekTo).not.toHaveBeenCalled();
+});
+
+it('aligns the first decoded playback once, then leaves a progressing clock alone', () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(10000);
+  target.getCurrentTime.mockReturnValue(0);
+  const playing = { ...base, isPlaying: true, positionMs: 0 };
+  render(<SyncedPlayer session={playing} clockOffset={0} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  act(() => {
+    hooks.state({ data: 1, target });
+    hooks.state({ data: 1, target });
+  });
+  expect(target.seekTo).toHaveBeenCalledOnce();
+  expect(target.seekTo).toHaveBeenCalledWith(9, true);
+  target.getCurrentTime.mockImplementation(() => (Date.now() - 1000) / 1000);
+  act(() => vi.advanceTimersByTime(30000));
+  expect(target.seekTo).toHaveBeenCalledOnce();
+  expect(target.playVideo).not.toHaveBeenCalled();
 });

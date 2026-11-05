@@ -1,4 +1,5 @@
 'use client';
+import { estimateClockOffset, type ClockSample } from '@/lib/clock';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -61,6 +62,7 @@ export default function IslandPage() {
   const [playerReady, setPlayerReady] = useState(false);
   const [playerAttempt, setPlayerAttempt] = useState(0);
   const [blocked, setBlocked] = useState(false);
+  const [listening, setListening] = useState(false);
   const [offset, setOffset] = useState(0);
   const [retry, setRetry] = useState(0);
   const offsetRef = useRef(offset);
@@ -72,6 +74,7 @@ export default function IslandPage() {
   const request = useRef<AbortController | null>(null);
   const searchSequence = useRef(0);
   const pending = useRef(false);
+  const endedPending = useRef(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const owner = Boolean(uid) && session?.ownerUid === uid;
   const permissions = { ...DEFAULT_PERMISSIONS, ...session?.permissions };
@@ -173,12 +176,24 @@ export default function IslandPage() {
   useEffect(() => {
     if (gate !== 'ready') return;
     let cancelled = false;
+    let calibrating = false;
     const calibrate = async () => {
-      const start = Date.now();
+      if (calibrating) return;
+      calibrating = true;
+      const samples: ClockSample[] = [];
       try {
-        const result = await api<ClockResponse>('/api/time');
-        if (!cancelled) setOffset(result.now - (start + Date.now()) / 2);
-      } catch {}
+        for (let attempt = 0; attempt < 3 && !cancelled; attempt++) {
+          const sentAt = Date.now();
+          try {
+            const result = await api<ClockResponse>('/api/time');
+            samples.push({ sentAt, receivedAt: Date.now(), serverNow: result.now });
+          } catch { /* Retain successful samples if another request times out. */ }
+        }
+        const estimate = estimateClockOffset(samples);
+        if (!cancelled && estimate !== undefined) setOffset(estimate);
+      } finally {
+        calibrating = false;
+      }
     };
     calibrate();
     const heartbeat = () => {
@@ -358,9 +373,14 @@ export default function IslandPage() {
             onReady={() => setPlayerReady(true)}
             onError={setMessage}
             onBlocked={() => setBlocked(true)}
+            onPlaying={() => {
+              setBlocked(false);
+              setListening(true);
+            }}
             onEnded={(data) => {
-              if (data.leaderClientId === clientId.current)
-                command(
+              if (data.leaderClientId === clientId.current && !endedPending.current) {
+                endedPending.current = true;
+                void command(
                   {
                     type: 'ended',
                     videoId: data.currentVideo,
@@ -368,7 +388,10 @@ export default function IslandPage() {
                     clientId: clientId.current,
                   },
                   true,
-                );
+                ).finally(() => {
+                  endedPending.current = false;
+                });
+              }
             }}
           />
           <h2 className="now-playing-title">
@@ -381,18 +404,21 @@ export default function IslandPage() {
                 ? '按下播放，一起開始聽。'
                 : '搜尋喜歡的歌，加入大家的播放佇列。'}
           </p>
-          {blocked && (
-            <Button
-              variant="ghost"
-              className="action-button"
-              onClick={() => {
-                player.current?.enableAudio();
-                setBlocked(false);
-              }}
-            >
-              點擊啟用音訊
-              <Volume2 size={16} />
-            </Button>
+          {session.isPlaying && (blocked || !listening) && (
+            <div className="listening-prompt">
+              <p>在這台裝置開啟聲音，接上島上目前的旋律。</p>
+              <Button
+                variant="ghost"
+                className="action-button"
+                disabled={!playerReady}
+                onClick={() => {
+                  player.current?.enableAudio();
+                }}
+              >
+                開始聆聽
+                <Volume2 size={16} />
+              </Button>
+            </div>
           )}
           {!playerReady && (
             <Button

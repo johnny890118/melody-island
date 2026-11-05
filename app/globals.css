@@ -926,3 +926,18 @@ summary:focus-visible {
   overflow: hidden;
   white-space: nowrap;
 }
+
+
+.listening-prompt {
+  margin-block: 20px;
+}
+.listening-prompt p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.listening-prompt .action-button {
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}

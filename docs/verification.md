@@ -98,3 +98,23 @@ A new phone-mode WebKit emulator test initially returned to the app without an a
 Available Vercel join records showed the native macOS Safari rejection and subsequent successful join. No matching iPhone user-agent request was found in the available request query. The owner's earlier physical-phone failure report has no exact error, operating-system version or reproducible step yet. Classify it as reported/unreproduced, while physical iPhone Safari and cross-device audio measurements remain unverified.
 
 This Mac has Command Line Tools but no installed iOS Simulator or connected physical-iPhone control surface. Phone-mode Playwright WebKit is browser emulation and does not establish physical-device acceptance.
+
+## Synchronization and listening activation repair — 2026-11-05
+
+The owner confirmed successful physical iPhone Safari/Mac sign-in, create, join, play, pause, skip and reload, then reported intermittent seek oscillation and gesture-required audio.
+
+Source review found no media-position writeback from local player correction. Shared progression still comes from authenticated commands or the lease holder's version-checked ended command. The old adapter nevertheless issued playVideo every five seconds and sought during buffering. It could also replay an ended local player before authority advanced the track. These client behaviors were changed.
+
+The adapter now waits during buffering, confirms persistent drift, applies a seek cooldown, aligns startup once, and waits on an ended track for authoritative advancement. A listener gesture directly unmutes and aligns that local player to the latest room timeline. It does not publish play/pause/seek commands. Only confirmed playing hides the listening prompt. Repeated blocked-autoplay attempts are suppressed until another listener gesture.
+
+Cold-start-biased clock calibration was also reproduced during comparison. Calibration now selects the shortest of three round trips. Concurrent calibration calls are coalesced.
+
+The final paired real-player evidence and its limitations are recorded in docs/measurements/sync-comparison.md. Final buffering recovery used one guest seek in each engine. Room version increments remained exactly one for the next-track scenario.
+
+The next-stage Impeccable Critique and larger homepage/room redesign are recorded in remaining-work.md. Only the required listening prompt was changed visually in this patch.
+
+Final local checks for this patch: strict typecheck, lint, production build, 82 unit tests, 5 Rules tests and the migration rehearsal passed. Chromium E2E completed with 14 passed and 1 configured skip. The initial WebKit suite had 12 passed, 2 configured skips and a Google-emulator popup timeout; a targeted retry of popup login, reconnect and local listening passed all 3. The staging-style same-tab phone-mode redirect test passed separately. The popup timeout is retained as intermittent test evidence, not silently counted as a clean first-run suite.
+
+The earlier phone failure paragraphs above are historical diagnostics. The owner's subsequent physical iPhone/Mac success report supersedes that basic-flow status. The synchronization patch's physical-device follow-up remains unverified.
+
+After the final prompt acknowledgement change, the targeted local-listening regression passed again in both Chromium and WebKit (2/2): clicking activation and local resync did not change the authoritative room version, playback timestamp or position, and the prompt remained visible without a playing acknowledgement.

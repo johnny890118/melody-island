@@ -4,9 +4,10 @@ import { chromium, webkit, request as playwrightRequest, expect } from '@playwri
 import { mkdir, writeFile } from 'node:fs/promises';
 import { adminDb, identity, login, post } from '../tests/e2e/helpers';
 import { DEFAULT_PERMISSIONS } from '../lib/session';
-import { measureTimeline, sample, waitForPlayback } from './youtube-timeline';
+import { measureTimeline, sample, waitForPlayback, observePlayerCommands, measureRecovery } from './youtube-timeline';
 const timeline = process.env.MELODY_REAL_TIMELINE === 'true';
 const transition = timeline && process.env.MELODY_REAL_TRANSITION === 'true';
+const manualSwitch = process.env.MELODY_SYNC_MANUAL_SWITCH === 'true';
 const bufferProbe = transition && process.env.MELODY_REAL_BUFFER === 'true';
 const sampleId = 'M7lc1UVf-VE';
 const nextId = 'aqz-KE-bpKQ';
@@ -74,6 +75,7 @@ try {
       ['chromium', chromium],
       ['webkit', webkit],
     ] as const) {
+      if (process.env.MELODY_REAL_ENGINE && process.env.MELODY_REAL_ENGINE !== name) continue;
       if (transition) {
         const roomRef = db.doc(`islands/${id}`);
         const room = (await roomRef.get()).data();
@@ -97,6 +99,7 @@ try {
       const failedResources: { host: string; error: string | null }[] = [];
       try {
         const page = await browser.newPage();
+        await observePlayerCommands(page);
         page.on('pageerror', (error) => pageErrors.push(error.message.split('\n')[0]));
         page.on('requestfailed', (request) => {
           const host = new URL(request.url()).hostname;
@@ -124,10 +127,23 @@ try {
           stage?: string;
           autoAdvance?: {
             duration: number;
-            positionMs: number;
-            mediaHold?: { delayedRequests: number; readyStateDuringHold: number | null };
+            positionMs?: number;
+            mediaHold?: {
+              delayedRequests: number;
+              readyStateDuringHold: number | null;
+              holdMs: number;
+              recoveryMs: number;
+              ownerSeekCommands: number;
+              guestSeekCommands: number;
+              ownerPlayCommands: number;
+              guestPlayCommands: number;
+              recoveredTimelineDifferenceMs: number;
+              recoverySamples: Awaited<ReturnType<typeof measureRecovery>>;
+              convergenceMs: number | null;
+            };
             nextVideo: string;
             versionDelta: number;
+            transitionKind: 'next-command' | 'natural-ended';
           };
         } | null = null;
         if (guest) {
@@ -135,6 +151,7 @@ try {
           try {
             if (!ready) throw new Error('Owner iframe did not become ready.');
             const guestPage = await browser.newPage();
+            await observePlayerCommands(guestPage);
             await login(guestPage, guest);
             await guestPage.goto(`http://127.0.0.1:3100/island/${id}`);
             await expect(
@@ -170,12 +187,16 @@ try {
                 throw new Error('Unexpected fixture state before the ending test.');
               // Demo-only setup skips the wait for a whole video. Play and advance still use normal commands.
               const positionMs = Math.floor((duration - 9) * 1000);
-              await roomRef.update({ positionMs }, { lastUpdateTime: snapshot.updateTime });
-              await expect
-                .poll(async () => (await sample(page)).seconds, { timeout: 12000 })
-                .toBeGreaterThan(positionMs / 1000 - 1);
+              if (!manualSwitch) {
+                await roomRef.update({ positionMs }, { lastUpdateTime: snapshot.updateTime });
+                await expect
+                  .poll(async () => (await sample(page)).seconds, { timeout: 12000 })
+                  .toBeGreaterThan(positionMs / 1000 - 1);
+              }
+              const [ownerBefore, guestBefore] = await Promise.all([sample(page), sample(guestPage)]);
               let delayedRequests = 0;
               let readyStateDuringHold: number | null = null;
+              let releasedAt = 0;
               let releaseMedia = () => {};
               const mediaGate = new Promise<void>((resolve) => {
                 releaseMedia = resolve;
@@ -192,36 +213,72 @@ try {
               }
               try {
                 stage = 'natural advance';
-                await page.getByRole('button', { name: '播放', exact: true }).click();
+                await page.getByRole('button', { name: manualSwitch ? '下一首' : '播放', exact: true }).click();
                 await Promise.all(
                   [page, guestPage].map((client) =>
                     expect(client.getByRole('heading', { name: nextTitle })).toBeVisible({
                       timeout: 30000,
                     }),
                   ),
-                );
+                ).catch(async (error: unknown) => {
+                  const canonical = (await roomRef.get()).data();
+                  console.log(JSON.stringify({
+                    engine: name,
+                    naturalAdvanceFailure: {
+                      owner: await sample(page).catch(() => null),
+                      guest: await sample(guestPage).catch(() => null),
+                      canonical: {
+                        video: canonical?.currentVideo,
+                        playing: canonical?.isPlaying,
+                        positionMs: canonical?.positionMs,
+                        version: canonical?.version,
+                      },
+                    },
+                  }));
+                  throw error;
+                });
                 if (bufferProbe) {
                   stage = 'media hold';
                   await expect.poll(() => delayedRequests, { timeout: 8000 }).toBeGreaterThan(0);
                   readyStateDuringHold =
                     (await sample(guestPage).catch(() => null))?.readyState ?? null;
+                  await guestPage.evaluate(() => new Promise<void>((resolve) => setTimeout(resolve, 10000)));
                 }
               } finally {
+                releasedAt = Date.now();
                 releaseMedia();
               }
               stage = 'next track playback';
               await Promise.all([waitForPlayback(page), waitForPlayback(guestPage)]);
+              const recoveryMs = Date.now() - releasedAt;
+              const recoverySamples = await measureRecovery(page, guestPage, releasedAt);
+              const [ownerAfter, guestAfter] = await Promise.all([sample(page), sample(guestPage)]);
               const after = (await roomRef.get()).data();
               const versionDelta =
                 typeof after?.version === 'number' ? after.version - before.version : -1;
-              if (after?.currentVideo !== nextId || versionDelta !== 2)
-                throw new Error('Expected exactly one play and one automatic advance.');
+              if (after?.currentVideo !== nextId || versionDelta !== (manualSwitch ? 1 : 2))
+                throw new Error('Unexpected shared playback writes during the measured transition.');
               timelineResult.autoAdvance = {
                 duration,
-                positionMs,
+                ...(!manualSwitch ? { positionMs } : {}),
                 nextVideo: nextId,
                 versionDelta,
-                ...(bufferProbe ? { mediaHold: { delayedRequests, readyStateDuringHold } } : {}),
+                transitionKind: manualSwitch ? 'next-command' : 'natural-ended',
+                ...(bufferProbe ? { mediaHold: {
+                  delayedRequests, readyStateDuringHold, holdMs: 10000, recoveryMs,
+                  recoverySamples,
+                  convergenceMs: recoverySamples.find(point =>
+                    point.bothPlaying && point.timelineDifferenceMs <= 1500,
+                  )?.afterReleaseMs ?? null,
+                  ownerSeekCommands: (ownerAfter.commands.seekTo || 0) - (ownerBefore.commands.seekTo || 0),
+                  guestSeekCommands: (guestAfter.commands.seekTo || 0) - (guestBefore.commands.seekTo || 0),
+                  ownerPlayCommands: (ownerAfter.commands.playVideo || 0) - (ownerBefore.commands.playVideo || 0),
+                  guestPlayCommands: (guestAfter.commands.playVideo || 0) - (guestBefore.commands.playVideo || 0),
+                  recoveredTimelineDifferenceMs: Math.round(Math.abs(
+                    (guestAfter.seconds - ownerAfter.seconds) * 1000 -
+                    (guestAfter.observedAtMs - ownerAfter.observedAtMs),
+                  )),
+                } } : {}),
               };
             }
           } catch (error) {
