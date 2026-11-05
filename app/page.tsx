@@ -72,9 +72,6 @@ export default function HomePage() {
     <main className="home-page" id="main-content">
       <div className="moon-atmosphere" aria-hidden="true">
         <div className="moon-disc" />
-        <svg viewBox="0 0 1440 850" preserveAspectRatio="none" fill="none">
-          <path d="M440 680 1280 380" stroke="#ffc991" strokeDasharray="2 9" opacity=".35" />
-        </svg>
       </div>
       <div className="home-composition">
         <Hero />

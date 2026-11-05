@@ -12,7 +12,7 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
   await expect(page.getByRole('heading', { name: 'Melody Island' })).toBeVisible();
   const header = page.getByRole('banner');
   await expect(header.getByRole('link', { name: 'Melody Island 首頁' })).toBeVisible();
-  await expect(header.getByRole('button', { name: 'Google 登入' })).toBeEnabled();
+  await expect(header.getByRole('button', { name: '登入', exact: true })).toBeEnabled();
   await expect(page.getByText(/Moon Pass|掠月航線/i)).toHaveCount(0);
   await expect(page.locator('canvas')).toBeVisible();
   await expect(page.getByText('正在準備島嶼', { exact: false })).toHaveCount(0, { timeout: 30000 });

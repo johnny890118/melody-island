@@ -226,7 +226,12 @@ body:has(.home-page) .site-header {
   aspect-ratio: 1;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(circle at 33% 21%, #f4d2a8, #b57177 48%, #35263d 88%);
+  background:
+    radial-gradient(circle at 30% 24%, #f4d2a820, #35263d80 68%, #171321ed),
+    url('/moon-surface.jpg') center / cover,
+    #57404f;
+  background-blend-mode: normal, luminosity, normal;
+  box-shadow: inset -48px -24px 90px #17132180;
   border: 1px solid #efb7a462;
 }
 .moon-disc::after {
@@ -236,12 +241,6 @@ body:has(.home-page) .site-header {
   border: 1px solid #e9b8a05e;
   border-radius: 50%;
   transform: rotate(-18deg);
-}
-.moon-atmosphere svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
 }
 .home-composition {
   position: relative;
@@ -269,6 +268,7 @@ body:has(.home-page) .site-header {
   font-weight: 500;
 }
 .hero-title > p {
+  text-align: center;
   margin: 26px 0 0;
   font-size: 14px;
   line-height: 1.65;
@@ -743,9 +743,6 @@ body:has(.home-page) .site-header {
     top: 14px;
     left: 56%;
     width: min(92vw, 390px);
-  }
-  .moon-atmosphere svg {
-    height: 62%;
   }
   .home-composition {
     display: grid;

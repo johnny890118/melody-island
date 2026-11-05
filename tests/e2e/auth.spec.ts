@@ -13,7 +13,7 @@ test('Google emulator sign-in can cancel, retry, persist on reload and sign out'
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  const login = page.getByRole('button', { name: 'Google 登入' });
+  const login = page.getByRole('button', { name: '登入', exact: true });
   const create = page.getByRole('button', { name: '登入並建立島嶼' });
   const abandoned = await openLogin(page, login);
   await expect(create).toBeDisabled();

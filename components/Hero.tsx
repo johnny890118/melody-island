@@ -196,6 +196,9 @@ export default function Hero() {
           </DialogTrigger>
           <DialogContent className="island-dialog" aria-describedby={undefined}>
             <DialogTitle>3D 模型來源</DialogTitle>
+            <a href="https://svs.gsfc.nasa.gov/4720/" target="_blank" rel="noreferrer">
+              月球材質：NASA’s Scientific Visualization Studio
+            </a>
             <a
               href="https://sketchfab.com/3d-models/foxs-islands-163b68e09fcc47618450150be7785907"
               target="_blank"

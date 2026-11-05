@@ -51,7 +51,7 @@ export default function Navbar() {
             disabled={pending || status === 'loading'}
             onClick={login}
           >
-            {pending ? '正在登入…' : 'Google 登入'}
+            {pending ? '正在登入…' : '登入'}
             <ArrowUpRight size={16} aria-hidden="true" />
           </Button>
         )}
