@@ -35,3 +35,9 @@ After synchronization and iPhone listening acceptance, use Impeccable Critique f
 ### Direction selected
 
 The owner subsequently selected A, Lunar Approach, authorizing implementation of the proposal. The homepage and room are being adapted within direction 06; this supersedes the record-only instruction above. The synchronization controller, authoritative server commands and production Firebase remain unchanged. Physical iPhone acceptance of the synchronization patch remains with the owner. See the Lunar Approach section in verification.md for actual UI evidence and remaining risks; do not infer a project-wide release pass from a design review.
+
+## Current priority — radio reliability (2026-11-06)
+
+The owner's latest instruction pauses further homepage/room redesign. Preserve existing Lunar Approach / 06 Moon Pass UI. A previously requested subtitle alignment remains pending and is excluded from the radio milestone. The current replacement protocol, reproduced failures, real-player comparison and acceptance limits are in [radio reliability review](verification/radio-reliability.md) and [sync architecture](architecture/sync.md). Earlier lease-based descriptions above are historical, not the new protocol.
+
+New physical iPhone + Mac verification remains pending. Prior user-confirmed device flows are not evidence for the new controller. Production Firebase, rules, migration and main merge remain unauthorized. Keep the existing PR as a Draft.

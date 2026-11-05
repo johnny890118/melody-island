@@ -6,7 +6,7 @@ import type { PlayerTarget } from '@/lib/types';
 interface PlayerEvents {
   onReady(event: { target: PlayerTarget }): void;
   onStateChange(event: { target: PlayerTarget; data: number }): void;
-  onError(): void;
+  onError(event?: { data?: number }): void;
   onAutoplayBlocked(): void;
 }
 
@@ -88,8 +88,8 @@ export default function YouTubeFrame(props: PlayerEvents) {
             onStateChange: (event) => {
               if (!cancelled) events.current.onStateChange(event);
             },
-            onError: () => {
-              if (!cancelled) events.current.onError();
+            onError: (event) => {
+              if (!cancelled) events.current.onError({ data: typeof event?.data === 'number' ? event.data : undefined });
             },
             onAutoplayBlocked: () => {
               if (!cancelled) events.current.onAutoplayBlocked();

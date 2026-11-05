@@ -2,7 +2,7 @@
 // It does not establish audible playback, inter-device drift, or Safari/iPhone compatibility.
 import { chromium, webkit, request as playwrightRequest, expect } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { adminDb, identity, login, post } from '../tests/e2e/helpers';
+import { adminDb, identity, login, post, localOrigin } from '../tests/e2e/helpers';
 import { DEFAULT_PERMISSIONS } from '../lib/session';
 import { measureTimeline, sample, waitForPlayback, observePlayerCommands, measureRecovery } from './youtube-timeline';
 const timeline = process.env.MELODY_REAL_TIMELINE === 'true';
@@ -63,13 +63,13 @@ try {
         commandId: crypto.randomUUID(),
       });
       if (!next.ok()) throw new Error('Could not add the transition fixture.');
-      // Keep the intentionally stalled client out of the advance-leader role.
+      // Restrict manual guest skip; a v3 guest can still relay a server-verified expiry.
       const permissions = await post(api, `/api/islands/${id}/commands`, owner, {
         type: 'permissions',
         permissions: { ...DEFAULT_PERMISSIONS, guestsCanSkip: false },
         commandId: crypto.randomUUID(),
       });
-      if (!permissions.ok()) throw new Error('Could not configure owner-only advance.');
+      if (!permissions.ok()) throw new Error('Could not configure owner-only manual skip.');
     }
     for (const [name, engine] of [
       ['chromium', chromium],
@@ -107,13 +107,15 @@ try {
             failedResources.push({ host, error: request.failure()?.errorText || null });
         });
         await login(page, owner);
-        await page.goto(`http://127.0.0.1:3100/island/${id}`);
+        await page.goto(`${localOrigin()}/island/${id}?syncDebug=1`);
         await expect(
           page.getByRole('heading', { name: 'Real iframe smoke — synthetic room' }),
         ).toBeVisible();
         await expect(page.getByTestId('test-player')).toHaveCount(0);
         let ready = false;
         try {
+          if (await page.locator('.video-frame').getAttribute('aria-busy') !== null)
+            await expect(page.locator('.video-frame')).toHaveAttribute('aria-busy', 'false', { timeout: 22000 });
           await expect(page.getByRole('button', { name: '播放', exact: true })).toBeEnabled({
             timeout: 22000,
           });
@@ -153,7 +155,7 @@ try {
             const guestPage = await browser.newPage();
             await observePlayerCommands(guestPage);
             await login(guestPage, guest);
-            await guestPage.goto(`http://127.0.0.1:3100/island/${id}`);
+            await guestPage.goto(`${localOrigin()}/island/${id}?syncDebug=1`);
             await expect(
               guestPage.getByRole('heading', { name: 'Real iframe smoke — synthetic room' }),
             ).toBeVisible();
@@ -164,16 +166,12 @@ try {
               if (!Number.isFinite(duration) || duration < 15)
                 throw new Error('Invalid fixture duration.');
               const roomRef = db.doc(`islands/${id}`);
-              stage = 'host leadership';
-              await expect
-                .poll(
-                  async () => {
-                    const room = (await roomRef.get()).data();
-                    return room?.leaderUid === owner.localId;
-                  },
-                  { timeout: 15000 },
-                )
-                .toBe(true);
+              // Protocol-v2 baseline needs a lease; v3 uses server deadlines.
+              if (typeof (await roomRef.get()).data()?.playbackRevision !== 'number') {
+                stage = 'legacy host leadership';
+                await expect.poll(async () => (await roomRef.get()).data()?.leaderUid === owner.localId,
+                  { timeout: 15000 }).toBe(true);
+              }
               stage = 'near-end fixture';
               const snapshot = await roomRef.get();
               const before = snapshot.data();
@@ -188,7 +186,10 @@ try {
               // Demo-only setup skips the wait for a whole video. Play and advance still use normal commands.
               const positionMs = Math.floor((duration - 9) * 1000);
               if (!manualSwitch) {
-                await roomRef.update({ positionMs }, { lastUpdateTime: snapshot.updateTime });
+                await roomRef.update({ positionMs,
+                  ...(typeof before.playbackRevision === 'number' ? { playbackRevision: before.playbackRevision + 1 } : {}),
+                  ...(typeof before.trackEpoch === 'number' ? { trackEpoch: before.trackEpoch + 1 } : {}),
+                }, { lastUpdateTime: snapshot.updateTime });
                 await expect
                   .poll(async () => (await sample(page)).seconds, { timeout: 12000 })
                   .toBeGreaterThan(positionMs / 1000 - 1);

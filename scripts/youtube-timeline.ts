@@ -32,6 +32,9 @@ export async function sample(page: Page) {
         duration: element.duration,
         paused: element.paused,
         readyState: element.readyState,
+        networkState: element.networkState,
+        mediaErrorCode: element.error?.code ?? null,
+        ended: element.ended,
         observedAtMs: performance.timeOrigin + performance.now(),
       };
     },
@@ -47,8 +50,10 @@ export async function waitForPlayback(page: Page) {
       async () => {
         const unblock = page.getByRole('button', { name: /點擊啟用音訊|開始聆聽/ });
         if (!activated && await unblock.isVisible()) {
-          await unblock.click({ timeout: 1500 });
-          activated = true;
+          // Autoplay may succeed between visibility and the click, removing the
+          // prompt. In that case observe media again rather than fail the probe.
+          try { await unblock.click({ timeout: 1500 }); activated = true; }
+          catch { /* Poll actual media readiness; a persistent block still times out. */ }
         }
         const point = await sample(page).catch(() => null);
         return !!point && !point.paused && point.readyState >= 2 && point.seconds > 0;

@@ -7,6 +7,8 @@ export interface SongInput {
   videoId: string;
   title: string;
   thumbnail?: string;
+  /** Server-admitted metadata; parseCommand never accepts it from a browser. */
+  durationMs?: number;
 }
 export interface Song extends SongInput {
   thumbnail: string;
@@ -23,6 +25,8 @@ export interface Playback {
   positionMs: number;
   isPlaying: boolean;
   playbackUpdatedAt: number;
+  playbackRevision?: number;
+  trackEpoch?: number;
 }
 export interface Room extends Playback {
   id: string;
@@ -41,17 +45,20 @@ export interface Room extends Playback {
   leaderUid?: string;
   leaderClientId?: string;
   leaseExpiresAt?: number;
+  leaseTerm?: number;
 }
 interface CommandMetadata {
   commandId?: string;
   expectedVersion?: number;
+  expectedPlaybackRevision?: number;
 }
 export type RoomCommand = CommandMetadata &
   (
     | { type: 'add'; song: SongInput }
     | { type: 'remove' | 'select'; videoId: string }
     | { type: 'play' | 'pause' | 'next' | 'prev' }
-    | { type: 'ended'; clientId: string; videoId: string }
+    | { type: 'ended'; clientId: string; videoId: string; trackEpoch?: number; leaseTerm?: number }
+    | { type: 'advance'; videoId: string; trackEpoch?: number }
     | { type: 'lease'; clientId: string }
     | { type: 'mode'; shuffle: boolean }
     | { type: 'permissions'; permissions: Permissions }

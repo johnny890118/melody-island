@@ -18,6 +18,11 @@ function boolean(value: unknown): boolean {
   if (typeof value !== 'boolean') throw new SessionError('資料狀態不正確。');
   return value;
 }
+function counter(value: unknown): number {
+  const result = numeric(value);
+  if (!Number.isSafeInteger(result)) throw new SessionError('狀態版本不正確。');
+  return result;
+}
 export function parsePermissions(value: unknown): Permissions {
   const data = record(value);
   if (
@@ -35,7 +40,8 @@ export function parseCommand(value: unknown): RoomCommand {
   const data = record(value);
   const meta = {
     ...(typeof data.commandId === 'string' ? { commandId: data.commandId } : {}),
-    ...(typeof data.expectedVersion === 'number' ? { expectedVersion: data.expectedVersion } : {}),
+    ...(data.expectedVersion !== undefined ? { expectedVersion: counter(data.expectedVersion) } : {}),
+    ...(data.expectedPlaybackRevision !== undefined ? { expectedPlaybackRevision: counter(data.expectedPlaybackRevision) } : {}),
   };
   switch (data.type) {
     case 'add': {
@@ -55,7 +61,14 @@ export function parseCommand(value: unknown): RoomCommand {
     case 'prev':
       return { ...meta, type: data.type };
     case 'ended':
-      return { ...meta, type: 'ended', videoId: text(data.videoId), clientId: text(data.clientId) };
+      return { ...meta, type: 'ended', videoId: text(data.videoId), clientId: text(data.clientId),
+        ...(data.trackEpoch !== undefined ? { trackEpoch: counter(data.trackEpoch) } : {}),
+        ...(data.leaseTerm !== undefined ? { leaseTerm: counter(data.leaseTerm) } : {}),
+      };
+    case 'advance':
+      return { ...meta, type: 'advance', videoId: text(data.videoId),
+        ...(data.trackEpoch !== undefined ? { trackEpoch: counter(data.trackEpoch) } : {}),
+      };
     case 'lease':
       return { ...meta, type: 'lease', clientId: text(data.clientId) };
     case 'mode':
@@ -96,6 +109,7 @@ export function parseRoom(value: unknown): Room {
       title: text(song.title),
       thumbnail: text(song.thumbnail),
       ...(typeof song.addedByUid === 'string' ? { addedByUid: song.addedByUid } : {}),
+      ...(song.durationMs !== undefined ? { durationMs: numeric(song.durationMs) } : {}),
     };
   });
   return {
@@ -109,12 +123,15 @@ export function parseRoom(value: unknown): Room {
     playlist,
     permissions: parsePermissions(data.permissions),
     shuffle: boolean(data.shuffle),
-    version: numeric(data.version),
+    version: counter(data.version),
     updatedAt: numeric(data.updatedAt),
     currentVideo: text(data.currentVideo),
     positionMs: numeric(data.positionMs),
     isPlaying: boolean(data.isPlaying),
     playbackUpdatedAt: numeric(data.playbackUpdatedAt),
+    playbackRevision: data.playbackRevision === undefined ? 0 : counter(data.playbackRevision),
+    trackEpoch: data.trackEpoch === undefined ? 0 : counter(data.trackEpoch),
+    leaseTerm: data.leaseTerm === undefined ? 0 : counter(data.leaseTerm),
     ...(typeof data.lastChangedBy === 'string' ? { lastChangedBy: data.lastChangedBy } : {}),
     ...(typeof data.leaderUid === 'string' ? { leaderUid: data.leaderUid } : {}),
     ...(typeof data.leaderClientId === 'string' ? { leaderClientId: data.leaderClientId } : {}),

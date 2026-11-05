@@ -1,5 +1,5 @@
 'use client';
-import { estimateClockOffset, type ClockSample } from '@/lib/clock';
+import { RoomClock } from '@/lib/clock';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -68,11 +68,10 @@ export default function IslandPage() {
   const searchTrigger = useRef<HTMLButtonElement>(null);
   const [searchError, setSearchError] = useState('');
   const [searched, setSearched] = useState(false);
-  const [offset, setOffset] = useState(0);
+  const [roomClock] = useState(() => new RoomClock());
+  const [clockReady, setClockReady] = useState(false);
+  const [legacyDuration, setLegacyDuration] = useState<{ videoId: string; trackEpoch: number; durationMs: number }>();
   const [retry, setRetry] = useState(0);
-  const offsetRef = useRef(offset);
-  offsetRef.current = offset;
-  const clientId = useRef('');
   const player = useRef<PlayerHandle | null>(null);
   const dataRef = useRef<Room | null>(null);
   dataRef.current = session;
@@ -89,7 +88,6 @@ export default function IslandPage() {
   useEffect(() => {
     let cancelled = false;
     let offRoom = () => {};
-    clientId.current ||= crypto.randomUUID();
     if (!/^[A-Za-z0-9_-]{10}$/.test(islandId || '')) {
       setGate('missing');
       return;
@@ -160,6 +158,7 @@ export default function IslandPage() {
         return await api<CommandResponse>(`/api/islands/${islandId}/commands`, {
           commandId: crypto.randomUUID(),
           expectedVersion: dataRef.current?.version,
+          expectedPlaybackRevision: dataRef.current?.playbackRevision ?? 0,
           ...intent,
         });
       } catch (error) {
@@ -182,57 +181,75 @@ export default function IslandPage() {
     if (gate !== 'ready') return;
     let cancelled = false;
     let calibrating = false;
-    const calibrate = async () => {
-      if (calibrating) return;
+    let calibration: AbortController | undefined;
+    const calibrate = async (resume = false) => {
+      if (calibrating && !resume) return;
+      if (resume) {
+        calibration?.abort();
+        roomClock.invalidate();
+        setClockReady(false);
+      }
+      const controller = new AbortController();
+      calibration = controller;
       calibrating = true;
-      const samples: ClockSample[] = [];
+      const timeout = setTimeout(() => controller.abort(), 15000);
+      const samples: { sentAt: number; receivedAt: number; serverNow: number }[] = [];
       try {
-        for (let attempt = 0; attempt < 3 && !cancelled; attempt++) {
-          const sentAt = Date.now();
+        for (let attempt = 0; attempt < 3 && !cancelled && !controller.signal.aborted; attempt++) {
+          const sentAt = performance.now();
           try {
-            const result = await api<ClockResponse>('/api/time');
-            samples.push({ sentAt, receivedAt: Date.now(), serverNow: result.now });
+            const result = await api<ClockResponse>('/api/time', undefined, { signal: controller.signal });
+            if (Number.isFinite(result.now)) samples.push({ sentAt, receivedAt: performance.now(), serverNow: result.now });
           } catch { /* Retain successful samples if another request times out. */ }
         }
-        const estimate = estimateClockOffset(samples);
-        if (!cancelled && estimate !== undefined) setOffset(estimate);
+        if (cancelled || calibration !== controller) return;
+        const best = samples.sort((a, b) => a.receivedAt - a.sentAt - (b.receivedAt - b.sentAt))[0];
+        if (!cancelled && best) {
+          roomClock.calibrate(best.serverNow, best.sentAt, best.receivedAt);
+          setClockReady(true);
+        } else if (!cancelled && !Number.isFinite(roomClock.uncertaintyMs)) {
+          setMessage('無法確認房間時間，請重新整理或檢查網路。');
+        }
       } finally {
-        calibrating = false;
+        clearTimeout(timeout);
+        if (calibration === controller) calibrating = false;
       }
     };
     calibrate();
-    const heartbeat = () => {
-      const latest = dataRef.current;
-      if (latest && latest.ownerUid !== uid && !latest.permissions?.guestsCanSkip) return;
-      if (
-        latest?.leaderClientId !== clientId.current &&
-        (latest?.leaseExpiresAt ?? 0) > Date.now() + offsetRef.current
-      )
-        return;
-      if (!document.hidden && navigator.onLine)
-        command({ type: 'lease', clientId: clientId.current }, true);
-    };
-    heartbeat();
-    const leaseTimer = setInterval(heartbeat, 10000);
     const clockTimer = setInterval(calibrate, 60000);
     const online = () => {
       setConnection('cached');
-      calibrate();
-      heartbeat();
+      calibrate(true);
     };
     const offline = () => setConnection('offline');
     window.addEventListener('online', online);
     window.addEventListener('offline', offline);
-    document.addEventListener('visibilitychange', heartbeat);
+    const visible = () => { if (!document.hidden) void calibrate(true); };
+    document.addEventListener('visibilitychange', visible);
     return () => {
       cancelled = true;
-      clearInterval(leaseTimer);
+      calibration?.abort();
       clearInterval(clockTimer);
       window.removeEventListener('online', online);
       window.removeEventListener('offline', offline);
-      document.removeEventListener('visibilitychange', heartbeat);
+      document.removeEventListener('visibilitychange', visible);
     };
-  }, [gate, command, uid]);
+  }, [gate, roomClock]);
+  const admittedDuration = session?.playlist.find(song => song.videoId === session.currentVideo)?.durationMs;
+  useEffect(() => {
+    if (gate !== 'ready' || !session?.currentVideo || admittedDuration) return;
+    const videoId = session.currentVideo;
+    const trackEpoch = session.trackEpoch ?? 0;
+    const controller = new AbortController();
+    void api<unknown>(`/api/islands/${islandId}/playback`, undefined, { signal: controller.signal }).then(result => {
+      if (!result || typeof result !== 'object' || !('videoId' in result) || result.videoId !== videoId ||
+        !('trackEpoch' in result) || result.trackEpoch !== trackEpoch || !('durationMs' in result) ||
+        typeof result.durationMs !== 'number' || !Number.isFinite(result.durationMs) || result.durationMs <= 0)
+        throw new Error('無法確認影片長度；請重試或選擇其他歌曲。');
+      if (!controller.signal.aborted) setLegacyDuration({ videoId, trackEpoch, durationMs: result.durationMs });
+    }).catch(error => { if (!controller.signal.aborted) setMessage(errorMessage(error)); });
+    return () => controller.abort();
+  }, [gate, islandId, session?.currentVideo, session?.trackEpoch, admittedDuration]);
   const search = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!query.trim()) return;
@@ -378,29 +395,33 @@ export default function IslandPage() {
             key={playerAttempt}
             ref={player}
             session={session}
-            clockOffset={offset}
+            clock={roomClock}
+            durationMs={admittedDuration ?? (legacyDuration?.videoId === session.currentVideo && legacyDuration.trackEpoch === (session.trackEpoch ?? 0) ? legacyDuration.durationMs : undefined)}
+            canRelay={connection === 'synced'}
             onReady={() => setPlayerReady(true)}
-            onError={setMessage}
+            onError={(error) => { setMessage(error); setPlayerReady(false); }}
             onBlocked={() => setBlocked(true)}
             onPlaying={() => {
               setBlocked(false);
               setListening(true);
             }}
-            onEnded={(data) => {
-              if (data.leaderClientId === clientId.current && !endedPending.current) {
+            onAdvance={(data) => {
+              if (!endedPending.current) {
                 endedPending.current = true;
-                void command(
+                return command(
                   {
-                    type: 'ended',
+                    type: 'advance',
                     videoId: data.currentVideo,
                     expectedVersion: data.version,
-                    clientId: clientId.current,
+                    expectedPlaybackRevision: data.playbackRevision ?? 0,
+                    trackEpoch: data.trackEpoch ?? 0,
                   },
                   true,
-                ).finally(() => {
+                ).then(result => Boolean(result)).finally(() => {
                   endedPending.current = false;
                 });
               }
+              return Promise.resolve(false);
             }}
           />
           <div className="track-details">
@@ -421,7 +442,7 @@ export default function IslandPage() {
               <Button
                 variant="ghost"
                 className="action-button"
-                disabled={!playerReady}
+                disabled={!playerReady || !clockReady}
                 onClick={() => {
                   player.current?.enableAudio();
                   setMuted(false);
@@ -665,7 +686,7 @@ export default function IslandPage() {
             className="icon-button transport-play"
             aria-label={session.isPlaying ? '暫停' : '播放'}
             title={session.isPlaying ? '暫停全房播放' : '開始全房播放'}
-            disabled={!canControl || busy || !playerReady || !session.playlist.length}
+            disabled={!canControl || busy || !clockReady || !session.playlist.length}
             onClick={() => command({ type: session.isPlaying ? 'pause' : 'play' })}
           >
             {session.isPlaying ? <Pause size={20} /> : <Play size={20} />}

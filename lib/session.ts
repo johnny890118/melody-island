@@ -63,7 +63,7 @@ export function applyCommand(
     mode: 'guestsCanControlPlayback',
   };
   const capability = capabilities[kind];
-  if (!['lease', 'ended', 'permissions'].includes(kind) && !capability)
+  if (!['lease', 'ended', 'advance', 'permissions'].includes(kind) && !capability)
     throw new SessionError('不支援的操作。');
   if (capability && !owner && !permissions[capability])
     throw new SessionError('你目前沒有這項操作權限。', 403);
@@ -71,19 +71,21 @@ export function applyCommand(
     throw new SessionError('目前由島主管理自動切歌。', 403);
   const playlist = [...(data.playlist || [])];
   const version = data.version || 0;
-  // Queue operations commute by identity; playback operations must use the observed version.
-  if (
-    !['add', 'remove', 'lease', 'permissions'].includes(kind) &&
-    command.expectedVersion !== version
-  )
+  const revision = data.playbackRevision ?? 0;
+  const playbackIntent = ['play', 'pause', 'select', 'next', 'prev', 'ended', 'advance'].includes(kind);
+  // Playback conflicts use only the timeline revision, not queue/roster/permission chatter.
+  if (playbackIntent && command.expectedPlaybackRevision !== undefined
+    ? command.expectedPlaybackRevision !== revision
+    : !['add', 'remove', 'lease', 'permissions'].includes(kind) && command.expectedVersion !== version)
     throw new SessionError('播放狀態已更新，請再試一次。', 409);
   const patch: Partial<Room> = {};
-  const changeTrack = (videoId: string) =>
+  const changeTrack = (videoId: string, startAt = now, epochDelta = 1) =>
     Object.assign(patch, {
       currentVideo: videoId,
       positionMs: 0,
       isPlaying: Boolean(videoId),
-      playbackUpdatedAt: now,
+      playbackUpdatedAt: startAt,
+      trackEpoch: (data.trackEpoch ?? 0) + epochDelta,
     });
   if (kind === 'add') {
     const song = command.song;
@@ -103,6 +105,7 @@ export function applyCommand(
       title: song.title.trim(),
       thumbnail: `https://i.ytimg.com/vi/${song.videoId}/mqdefault.jpg`,
       addedByUid: actor.uid,
+      ...(song.durationMs !== undefined ? { durationMs: song.durationMs } : {}),
     });
     patch.playlist = playlist;
   }
@@ -117,21 +120,27 @@ export function applyCommand(
     }
   }
   if (kind === 'play' || kind === 'pause') {
+    if ((kind === 'play') === data.isPlaying) return {};
     const current = data.currentVideo || playlist[0]?.videoId || '';
     if (!current) throw new SessionError('先加入一首歌曲吧。');
+    const durationMs = playlist.find(song => song.videoId === current)?.durationMs;
+    if (kind === 'play' && (!data.currentVideo || (durationMs && data.positionMs >= durationMs))) {
+      changeTrack(current);
+    } else {
     Object.assign(patch, {
       currentVideo: current,
       positionMs: Math.round(expectedSeconds(data, now) * 1000),
       isPlaying: kind === 'play',
       playbackUpdatedAt: now,
     });
+    }
   }
   if (kind === 'select') {
     if (!playlist.some((item) => item.videoId === command.videoId))
       throw new SessionError('歌曲已不在佇列中。', 409);
     changeTrack(command.videoId);
   }
-  if (kind === 'next' || kind === 'prev' || kind === 'ended') {
+  if (kind === 'next' || kind === 'prev' || kind === 'ended' || kind === 'advance') {
     if (
       kind === 'ended' &&
       (!data.isPlaying ||
@@ -141,14 +150,43 @@ export function applyCommand(
         command.videoId !== data.currentVideo)
     )
       throw new SessionError('主持狀態已更新。', 409);
+    if (kind === 'ended' || kind === 'advance') {
+      if (!data.isPlaying || command.videoId !== data.currentVideo || command.expectedPlaybackRevision !== revision || command.trackEpoch !== (data.trackEpoch ?? 0) ||
+        (kind === 'ended' && command.leaseTerm !== (data.leaseTerm ?? 0)))
+        throw new SessionError('歌曲播放實例或主持租約已更新。', 409);
+      const duration = playlist.find(song => song.videoId === data.currentVideo)?.durationMs;
+      if (!duration || expectedSeconds(data, now) * 1000 < duration)
+        throw new SessionError('權威時間線尚未到達這首歌的結尾。', 409);
+    }
     if (!playlist.length) return {};
     const current = playlist.findIndex((item) => item.videoId === data.currentVideo);
+    if (kind === 'ended' || kind === 'advance') {
+      let index = current;
+      let duration = playlist[index].durationMs ?? 0;
+      let deadline = data.playbackUpdatedAt + duration - data.positionMs;
+      // Bounded catch-up after suspension; anchors remain scheduled deadlines,
+      // not request-arrival times, so loading/network delays never accumulate.
+      for (let step = 0; step < 100; step++) {
+        if (playlist.length === 1 || (!data.shuffle && index === playlist.length - 1)) {
+          Object.assign(patch, { isPlaying: false, positionMs: duration, playbackUpdatedAt: deadline });
+          break;
+        }
+        index = data.shuffle
+          ? (index + 1 + ((version + step) % (playlist.length - 1))) % playlist.length
+          : index + 1;
+        changeTrack(playlist[index].videoId, deadline, step + 1);
+        duration = playlist[index].durationMs ?? 0;
+        if (!duration || deadline + duration > now) break;
+        deadline += duration;
+      }
+    } else {
     let index = (current + (kind === 'prev' ? -1 : 1) + playlist.length) % playlist.length;
     if (data.shuffle && playlist.length > 1) {
       // Deterministic across transaction retries; state version is the shared shuffle seed.
       index = (Math.max(current, 0) + 1 + (version % (playlist.length - 1))) % playlist.length;
     }
     changeTrack(playlist[index].videoId);
+    }
   }
   if (kind === 'mode') {
     if (typeof command.shuffle !== 'boolean') throw new SessionError('播放模式不正確。');
@@ -176,8 +214,11 @@ export function applyCommand(
       (data.leaderClientId !== command.clientId || data.leaderUid !== actor.uid)
     )
       return {};
-    return { leaderClientId: command.clientId, leaderUid: actor.uid, leaseExpiresAt: now + 25000 };
+    const sameLiveTerm = (data.leaseExpiresAt ?? 0) > now && data.leaderUid === actor.uid && data.leaderClientId === command.clientId;
+    return { leaderClientId: command.clientId, leaderUid: actor.uid, leaseExpiresAt: now + 25000,
+      leaseTerm: sameLiveTerm ? data.leaseTerm ?? 0 : (data.leaseTerm ?? 0) + 1 };
   }
   if (!Object.keys(patch).length) return {};
-  return { ...patch, version: version + 1, lastChangedBy: actor.uid, updatedAt: now };
+  const timelineChanged = ['currentVideo', 'positionMs', 'isPlaying', 'playbackUpdatedAt'].some(key => key in patch);
+  return { ...patch, ...(timelineChanged ? { playbackRevision: revision + 1 } : {}), version: version + 1, lastChangedBy: actor.uid, updatedAt: now };
 }

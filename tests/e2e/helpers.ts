@@ -9,6 +9,13 @@ export interface EmulatorIdentity {
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 export const projectId = 'demo-melody-island';
+export function localOrigin() {
+  const value = process.env.MELODY_PREVIEW_ORIGIN || 'http://127.0.0.1:3100';
+  const url = new URL(value);
+  if (url.protocol !== 'http:' || url.hostname !== '127.0.0.1' || !['3100', '3200'].includes(url.port) || url.username || url.password || url.pathname !== '/')
+    throw new Error('Only isolated local demo previews are allowed');
+  return url.origin;
+}
 export function adminDb() {
   if (
     process.env.FIRESTORE_EMULATOR_HOST !== '127.0.0.1:8080' ||
@@ -85,7 +92,7 @@ export async function post(
   user: EmulatorIdentity,
   body: unknown,
 ) {
-  return request.post(`http://127.0.0.1:3100${path}`, {
+  return request.post(`${localOrigin()}${path}`, {
     headers: { Authorization: `Bearer ${user.idToken}` },
     data: body,
   });

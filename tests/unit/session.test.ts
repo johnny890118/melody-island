@@ -12,6 +12,7 @@ const song = (id: string): Song => ({
   videoId: id,
   title: id,
   thumbnail: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+  durationMs: 60000,
 });
 const ids = ['aaaaaaaaaaa', 'bbbbbbbbbbb', 'ccccccccccc'];
 const room = (overrides: Partial<Room> = {}): Room => ({
@@ -35,7 +36,8 @@ const room = (overrides: Partial<Room> = {}): Room => ({
 });
 const actor = { uid: 'guest' };
 const command = (type: string, extra: Record<string, unknown> = {}) =>
-  parseCommand({ type, expectedVersion: 4, ...extra });
+  parseCommand({ type, expectedVersion: 4,
+    ...(type === 'ended' ? { expectedPlaybackRevision: 0, trackEpoch: 0, leaseTerm: 0 } : {}), ...extra });
 describe('timeline', () => {
   it('uses server anchor, including timestamp nanoseconds', () => {
     expect(timestampToMillis({ seconds: 2, nanoseconds: 500000000 })).toBe(2500);
@@ -179,7 +181,7 @@ describe('authorization and leadership', () => {
     const current = room({
       leaderUid: 'guest',
       leaderClientId: 'leader-client',
-      leaseExpiresAt: 9000,
+      leaseExpiresAt: 90000,
     });
     expect(() =>
       applyCommand(
@@ -193,7 +195,7 @@ describe('authorization and leadership', () => {
       current,
       command('ended', { clientId: 'leader-client', videoId: ids[0] }),
       actor,
-      5000,
+      61000,
     );
     expect(next.currentVideo).toBe(ids[1]);
     expect(() =>
@@ -201,7 +203,7 @@ describe('authorization and leadership', () => {
         { ...current, ...next },
         command('ended', { clientId: 'leader-client', videoId: ids[0] }),
         actor,
-        5001,
+        61001,
       ),
     ).toThrow();
   });
@@ -217,5 +219,54 @@ describe('authorization and leadership', () => {
   it('rejects malformed room ids', () => {
     expect(() => assertRoomId('../secrets')).toThrow();
     expect(assertRoomId('abcDEF_123')).toBe('abcDEF_123');
+  });
+});
+
+describe('radio reliability regressions', () => {
+  it('treats repeated play as a no-op instead of creating a new timeline anchor', () => {
+    expect(applyCommand(room(), command('play'), actor, 5000)).toEqual({});
+  });
+  it('rejects premature completion against the admitted content duration', () => {
+    const content = { ...song(ids[0]), durationMs: 300000 };
+    expect(() => applyCommand(room({
+      playlist: [content], leaderUid: actor.uid, leaderClientId: 'radio-client-id',
+      leaseExpiresAt: 20000,
+    }), command('ended', { clientId: 'radio-client-id', videoId: ids[0] }), actor, 5000)).toThrow();
+  });
+  it('finishes a single-song queue without implicitly replaying it', () => {
+    const content = { ...song(ids[0]), durationMs: 60000 };
+    const result = applyCommand(room({ playlist: [content], positionMs: 0,
+      leaderUid: actor.uid, leaderClientId: 'radio-client-id', leaseExpiresAt: 100000,
+    }), command('ended', { clientId: 'radio-client-id', videoId: ids[0] }), actor, 61000);
+    expect(result.isPlaying).toBe(false);
+    expect(result.positionMs).toBe(60000);
+  });
+});
+
+describe('server-authoritative deadline protocol', () => {
+  const advance = (extra: Record<string, unknown> = {}) => parseCommand({ type: 'advance', videoId: ids[0], expectedPlaybackRevision: 0, trackEpoch: 0, ...extra });
+  it('allows a member to relay an expired deadline without manual skip rights or a leader lease', () => {
+    const state = room({ permissions: { ...DEFAULT_PERMISSIONS, guestsCanSkip: false }, leaderUid: 'offline-owner', leaderClientId: 'offline-client', leaseExpiresAt: 90000 });
+    const patch = applyCommand(state, advance(), actor, 61000);
+    expect(patch.currentVideo).toBe(ids[1]); expect(patch.playbackUpdatedAt).toBe(59000);
+    expect(() => applyCommand(state, command('next'), actor, 61000)).toThrow('權限');
+  });
+  it('rejects an early deadline even when a local player says ended', () => {
+    expect(() => applyCommand(room(), advance(), actor, 5000)).toThrow('尚未到達');
+  });
+  it('fences the playback instance independently of same video identity', () => {
+    expect(() => applyCommand(room({ trackEpoch: 2 }), advance({ trackEpoch: 1 }), actor, 61000)).toThrow();
+  });
+  it('ignores unrelated room version changes while accepting the exact timeline revision', () => {
+    const patch = applyCommand(room({ version: 99 }), advance(), actor, 61000);
+    expect(patch.currentVideo).toBe(ids[1]); expect(patch.version).toBe(100); expect(patch.playbackRevision).toBe(1);
+  });
+  it('catches up multiple elapsed tracks atomically using scheduled anchors', () => {
+    const patch = applyCommand(room(), advance(), actor, 180000);
+    expect(patch).toMatchObject({ currentVideo: ids[2], isPlaying: false, positionMs: 60000, playbackUpdatedAt: 179000, trackEpoch: 2, playbackRevision: 1 });
+  });
+  it('an explicit play after the finite queue finished starts a new playback instance', () => {
+    const patch = applyCommand(room({ isPlaying: false, positionMs: 60000 }), command('play'), actor, 100000);
+    expect(patch).toMatchObject({ isPlaying: true, positionMs: 0, playbackUpdatedAt: 100000, trackEpoch: 1 });
   });
 });
