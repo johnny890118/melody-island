@@ -33,3 +33,27 @@ test('Google emulator sign-in can cancel, retry, persist on reload and sign out'
   await logout.click();
   await expect(login).toBeEnabled();
 });
+
+test.describe('redirect flow', () => {
+  test.use({ isMobile: true, hasTouch: true });
+  test('same-tab Google sign-in returns, persists and signs out on a phone-sized browser', async ({ page }) => {
+    test.skip(process.env.MELODY_TEST_AUTH_REDIRECT !== 'true', 'Requires the redirect build configuration.');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await page.getByRole('button', { name: '登入', exact: true }).click();
+    await page.waitForURL(
+      (url) => url.origin === 'http://127.0.0.1:3100' && url.pathname === '/emulator/auth/handler',
+    );
+    await page.getByText('Add new account', { exact: true }).click();
+    await page.getByText('Auto-generate user information', { exact: true }).click();
+    await page.getByRole('button', { name: 'Sign in with Google.com' }).click();
+    await page.waitForURL((url) => url.origin === 'http://127.0.0.1:3100' && url.pathname === '/');
+    const logout = page.getByRole('button', { name: '登出', exact: true });
+    await expect(logout).toBeEnabled({ timeout: 20000 });
+    await expect(page.getByRole('button', { name: '建立島嶼', exact: true })).toBeEnabled();
+    await page.reload();
+    await expect(logout).toBeEnabled();
+    await logout.click();
+    await expect(page.getByRole('button', { name: '登入', exact: true })).toBeEnabled();
+  });
+});

@@ -22,7 +22,10 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/__/auth/:path*',
+        source:
+          process.env.NEXT_PUBLIC_USE_EMULATORS === 'true'
+            ? '/emulator/auth/:path*'
+            : '/__/auth/:path*',
         headers: [
           { key: 'Content-Security-Policy', value: "base-uri 'self'; object-src 'none'; frame-ancestors 'self'" },
         ],
@@ -42,6 +45,25 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    if (
+      process.env.NEXT_PUBLIC_USE_EMULATORS === 'true' &&
+      process.env.NEXT_PUBLIC_AUTH_REDIRECT === 'true'
+    ) {
+      return [
+        {
+          source: '/emulator/auth/:path*',
+          destination: 'http://127.0.0.1:9099/emulator/auth/:path*',
+        },
+        {
+          source: '/identitytoolkit.googleapis.com/:path*',
+          destination: 'http://127.0.0.1:9099/identitytoolkit.googleapis.com/:path*',
+        },
+        {
+          source: '/securetoken.googleapis.com/:path*',
+          destination: 'http://127.0.0.1:9099/securetoken.googleapis.com/:path*',
+        },
+      ];
+    }
     if (!firebaseAuthHost) return [];
 
     return [

@@ -88,3 +88,13 @@ For network recovery, Chrome DevTools put only the owner tab into Offline mode. 
 The physical iPhone check was requested separately. The owner reported inability to join or play, and the exact failure and iOS version remain under investigation. It has not passed.
 
 GitHub's verify check for 68dd613 completed successfully at https://github.com/johnny890118/melody-island/actions/runs/42014915843/job/127202922505 . The Vercel Preview Comments check also completed successfully.
+
+## Targeted Safari redirect diagnostic — 2026-11-05
+
+Native macOS Safari completed the real staging Google redirect and showed the authenticated logout control and existing-room entry. Reload preserved the session.
+
+A new phone-mode WebKit emulator test initially returned to the app without an authenticated session when the Auth Emulator helper ran on port 9099, a different origin from the app on port 3100. This harness did not reproduce staging's same-origin helper architecture. The explicit redirect/emulator configuration now proxies only the fixed local Auth Emulator helper and token endpoints through port 3100. The test passed with mobile and touch modes enabled after this configuration change, covering sign-in, callback, reload persistence and logout. CI runs this targeted regression with npm run test:e2e:redirect. Existing desktop scenarios were not manually rerun for this diagnostic.
+
+Available Vercel join records showed the native macOS Safari rejection and subsequent successful join. No matching iPhone user-agent request was found in the available request query. The owner's earlier physical-phone failure report has no exact error, operating-system version or reproducible step yet. Classify it as reported/unreproduced, while physical iPhone Safari and cross-device audio measurements remain unverified.
+
+This Mac has Command Line Tools but no installed iOS Simulator or connected physical-iPhone control surface. Phone-mode Playwright WebKit is browser emulation and does not establish physical-device acceptance.

@@ -31,6 +31,7 @@ export default defineConfig({
     env: {
       NEXT_PUBLIC_USE_EMULATORS: 'true',
       NEXT_PUBLIC_TEST_PLAYER: 'true',
+      NEXT_PUBLIC_AUTH_REDIRECT: process.env.MELODY_TEST_AUTH_REDIRECT === 'true' ? 'true' : 'false',
       NEXT_PUBLIC_FIREBASE_PROJECT_ID: 'demo-melody-island',
       FIREBASE_PROJECT_ID: 'demo-melody-island',
       FIRESTORE_EMULATOR_HOST: '127.0.0.1:8080',

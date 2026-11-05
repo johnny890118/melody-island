@@ -27,6 +27,7 @@ jobs:
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
       - run: npm run test:e2e:webkit
+      - run: npm run test:e2e:redirect
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

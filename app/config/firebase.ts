@@ -32,7 +32,11 @@ export const appCheck =
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 if (emulator && typeof window !== 'undefined' && !globalThis.__melodyEmulatorsConnected) {
-  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+  const authEmulatorOrigin =
+    process.env.NEXT_PUBLIC_AUTH_REDIRECT === 'true'
+      ? window.location.origin
+      : 'http://127.0.0.1:9099';
+  connectAuthEmulator(auth, authEmulatorOrigin, { disableWarnings: true });
   connectFirestoreEmulator(db, '127.0.0.1', 8080);
   globalThis.__melodyEmulatorsConnected = true;
 }
