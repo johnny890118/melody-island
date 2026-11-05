@@ -44,6 +44,7 @@ function FitPortrait() {
   useLayoutEffect(() => {
     if (!(camera instanceof PerspectiveCamera) || !size.height) return;
     const aspect = size.width / size.height;
+    camera.aspect = aspect;
     camera.fov = MathUtils.radToDeg(
       2 * Math.atan(Math.tan(MathUtils.degToRad(17.5)) * Math.max(1, 1.12 / aspect)),
     );
@@ -120,7 +121,7 @@ export default function Hero() {
             antialias: true,
             alpha: true,
             toneMapping: ACESFilmicToneMapping,
-            toneMappingExposure: 1.04,
+            toneMappingExposure: 0.94,
           }}
           fallback={<div className="scene-fallback">此裝置不支援 WebGL；你仍可以加入共聽。</div>}
           onCreated={({ gl }) => {
@@ -129,9 +130,9 @@ export default function Hero() {
           }}
         >
           <FitPortrait />
-          <ambientLight intensity={0.73} color="#f3d9ff" />
-          <directionalLight position={[-3, 5, 4]} intensity={3.1} color="#ffcea5" />
-          <directionalLight position={[4, 1, -4]} intensity={2.4} color="#c4b7ff" />
+          <ambientLight intensity={0.48} color="#cbbce5" />
+          <directionalLight position={[3, 5, -1]} intensity={3.4} color="#ffcea5" />
+          <directionalLight position={[-4, 2, 4]} intensity={1.5} color="#bcb9ee" />
           <Suspense
             fallback={
               <Html center>
@@ -175,6 +176,7 @@ export default function Hero() {
             onClick={() => setRotating((value) => !value)}
           >
             {rotating ? <Pause size={16} /> : <Play size={16} />}
+            <span className="scene-motion-label">{rotating ? '暫停場景' : '播放場景'}</span>
           </Button>
         )}
         <Button

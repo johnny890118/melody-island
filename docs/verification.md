@@ -118,3 +118,28 @@ Final local checks for this patch: strict typecheck, lint, production build, 82 
 The earlier phone failure paragraphs above are historical diagnostics. The owner's subsequent physical iPhone/Mac success report supersedes that basic-flow status. The synchronization patch's physical-device follow-up remains unverified.
 
 After the final prompt acknowledgement change, the targeted local-listening regression passed again in both Chromium and WebKit (2/2): clicking activation and local resync did not change the authoritative room version, playback timestamp or position, and the prompt remained visible without a playing acknowledgement.
+
+## Lunar Approach A implementation — 2026-11-05
+
+The owner selected proposal A after reviewing the static concept. The code-led implementation retains the original interactive island and phoenix GLBs, canonical navbar/favicon branding, direction 06 colors and local shadcn/Lucide controls. The generated proposal is not used as a shipping background or player substitute.
+
+The homepage groups title, centered tagline and entry actions, crops the moon into the distant upper-right field and removes the decorative orbit. Directional lighting connects the original low-poly island with the night palette. Scene controls reserve their own space below the canvas. Explicit camera aspect recalibration and settled-resize captures address clipping seen during a viewport transition. The room uses larger video/shared-queue columns on desktop, ordered rows with a textual current/playing marker, direct add-song access and a focused search dialog/mobile bottom sheet. Closing search returns focus to add-song. Search errors and no-results are local to search. Mobile transport retains current-track and shared-state text. Local audio activation still waits for actual playing acknowledgement and does not publish room timeline changes.
+
+The synchronization adapter, clock-estimation helper and server command implementation have no changes in this UI milestone. One local UI state correction clears the mute indicator when the listener explicitly enables audio. No new shared seek command, online-presence claim, background 3D room scene or optional feature was added.
+
+Validation:
+- Typecheck, lint, production build and 82 unit tests passed during implementation. Rules Emulator: 5 passed. Synthetic migration/rollback rehearsal passed; no production migration or rule deploy.
+- Initial Chromium full suite: 13 passed, 1 configured skip, 1 outdated listening-copy assertion. Initial WebKit full suite: 11 passed, 2 configured skips, the same outdated-copy assertion and a 120-second 20-client timeout. The copy assertion was updated to the new explicit device-state wording, not removed.
+- Corrected targeted UI/player suite: 10 passed across Chromium and WebKit (room accessibility/long titles/search no-results, homepage real GLB, two friends, latest-search cancellation and local listening without shared playback writes).
+- WebKit 20-client isolated retry passed in 37.2 seconds. This is a passed retry after an observed timeout, not a clean first-run suite or proof of a diagnosed timeout cause.
+- Same-tab phone-mode WebKit redirect: 1 passed. Focus/capture follow-up for two friends: 2 passed. Home/reduced-motion follow-up: 4 passed; explicit resize follow-up: 2 passed.
+
+Browser evidence includes desktop home/room inspection and search open/close with focus returning to add-song. Captures cover home 1440×960, 1280×720, 900×720, 390×844, 390×600 and 320×640 reduced motion; room captures include desktop/mobile viewport-only images to avoid treating fixed-bar full-page stitching as obstruction. Room screenshots explicitly use mock-player/E2E data. They prove interface layout and mock state behavior, not new real YouTube or acoustic synchronization measurements. The user's post-patch physical iPhone check is still pending.
+
+Impeccable mechanical scans of the changed homepage, Hero and room TSX returned zero findings. Public raster provenance comments were embedded for existing assets; encoded image data excluding metadata was verified unchanged. Original source/creator of the legacy logo/unused Google image is not established by that metadata. No new raster replaces the original models.
+
+Independent finish review requested two narrow corrections: reduce lunar crater-field dominance with a stronger shaded side, and retain visible scene-motion copy on mobile. These were applied together and submitted for a verdict pass; the final verdict is recorded below when available.
+
+The verdict pass marked both lunar shading and visible mobile scene-motion copy resolved, with no material regression from that batch: **ship for the two scored fixes**. This is narrower than whole-project release or award-quality approval. The final four homepage/accessibility tests passed after the corrections. The final screenshot-resize polling helper was narrowed with an HTMLCanvasElement runtime guard for strict TypeScript; it does not weaken the resize assertion.
+
+Final UI screenshots are archived in docs/design/lunar-approach-home-desktop.png, lunar-approach-home-mobile.png, lunar-approach-room-desktop.png and lunar-approach-search-mobile.png. Homepage captures show actual GLBs; the room/search captures use explicitly labelled mock-player fixtures. The independent report is lunar-approach-finish-review.md. DESIGN.md and its token sidecar were merged to reflect actual CSS without changing the approved brand/world.

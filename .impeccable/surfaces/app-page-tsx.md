@@ -7,16 +7,14 @@ related_targets: ["components/Hero.tsx"]
 
 # Homepage · Experience
 
-## Direction contract
+THESIS: Approved A, Lunar Approach, within direction 06 Moon Pass. A real private island floats close to the visitor while a partly shaded moon recedes into the upper distance.
 
-THESIS: Moon Pass, the corrected sixth direction: a private island passing in front of a rose-gold moon.
+OWN-WORLD: Inherit Melody Island midnight plum, lunar ivory, warm amber, Cormorant/Manrope and original island/phoenix GLBs. No decorative orbit, replacement poster or new icon library.
 
-OWN-WORLD: Lunar ivory on midnight plum. A rose-gold moon, orbital ellipse and scattered stars frame the original island and phoenix.
+STORY: Discover and directly rotate the island, then join friends or create a room without waiting for an animation.
 
-STORY: Look, drag to turn, then board a friend's island or create your own.
+FIRST VIEWPORT: Complete island in the middle/right foreground, distant shaded moon cropped upper-right, title/tagline/actions grouped left. Mobile composes the island first with actions following naturally. The flight and light/dark crossing supply the authored living moment; reduced motion rests in a readable pose.
 
-FIRST VIEWPORT: A large interactive island centered to the right in front of the moon, a stacked serif title to the left and a boarding action on the right below. On mobile the island comes first, then title and actions.
+FORM: Code-led real WebGL continuation of seed:6de4952aba70d7ee. Owner selected proposal A on 2026-11-05; docs/design/lunar-approach-concept.png is the illustrated composition reference, not a shipping plate or exact model/brand authority. The proposal explicitly preserves actual GLBs, shared controls and player behavior.
 
-FORM: Sixth direction, Moon Pass. Code-led from the approved interactive preview. seed:6de4952aba70d7ee
-
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+FINISH: Browser inspect desktop/mobile and short viewports, isolated independent finish review, document actual outcomes and evidence. Preserve synchronization controller and server APIs. No production Firebase or main merge.

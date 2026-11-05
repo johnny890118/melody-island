@@ -27,6 +27,19 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
 
   await expect(stage).toHaveAttribute('data-bird-ready', 'true');
   await page.screenshot({ path: '.impeccable/review/desktop.png', fullPage: true });
+  for (const width of [1280, 900]) {
+    await page.setViewportSize({ width, height: 720 });
+    await expect.poll(() => page.locator('canvas').evaluate((canvas) =>
+      canvas instanceof HTMLCanvasElement
+        ? Math.abs(canvas.width / canvas.height - canvas.clientWidth / canvas.clientHeight)
+        : Infinity,
+    )).toBeLessThan(0.01);
+    // Let the ResizeObserver and demand-rendered camera commit after the CSS resize.
+    await page.waitForTimeout(250);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `.impeccable/review/home-${width}.png`, fullPage: true });
+  }
+  await page.setViewportSize({ width: 1440, height: 960 });
   const canvas = page.locator('canvas');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Canvas is not rendered');
@@ -35,9 +48,23 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
   await page.mouse.move(box.x + box.width / 2 + 70, box.y + box.height / 2);
   await page.mouse.up();
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(() => page.locator('canvas').evaluate((canvas) =>
+    canvas instanceof HTMLCanvasElement
+      ? Math.abs(canvas.width / canvas.height - canvas.clientWidth / canvas.clientHeight)
+      : Infinity,
+  )).toBeLessThan(0.01);
+  await page.waitForTimeout(250);
   await page.getByRole('button', { name: '重設島嶼視角' }).click();
   await expect(stage).toHaveAttribute('data-bird-ready', 'true');
   await page.screenshot({ path: '.impeccable/review/mobile.png', fullPage: true });
+  await page.setViewportSize({ width: 390, height: 600 });
+  await expect.poll(() => page.locator('canvas').evaluate((canvas) =>
+    canvas instanceof HTMLCanvasElement
+      ? Math.abs(canvas.width / canvas.height - canvas.clientWidth / canvas.clientHeight)
+      : Infinity,
+  )).toBeLessThan(0.01);
+  await page.waitForTimeout(250);
+  await page.screenshot({ path: '.impeccable/review/home-short.png', fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
@@ -102,6 +129,7 @@ test('two friends join, refresh, share playback and concurrently delete by ident
     );
   const a = await first.newPage();
   const b = await second.newPage();
+  await a.setViewportSize({ width: 1440, height: 960 });
   await login(a, owner);
   await login(b, guest);
   await Promise.all([a.goto(`/island/${id}`), b.goto(`/island/${id}`)]);
@@ -115,6 +143,7 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   await expect(b.getByRole('heading', { name: '一起聽海', exact: true })).toBeVisible();
   await expect(b.getByTestId('test-player')).toHaveAttribute('data-playing', 'false');
   await a.screenshot({ path: '.impeccable/review/room-desktop.png', fullPage: true });
+  await a.screenshot({ path: '.impeccable/review/room-desktop-viewport.png' });
   const results = await Promise.all(
     songIds.slice(0, 2).map((videoId, index) =>
       post(request, `/api/islands/${id}/commands`, index ? guest : owner, {
@@ -132,7 +161,9 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   expect('password' in room).toBe(false);
   await a.setViewportSize({ width: 390, height: 844 });
   await a.screenshot({ path: '.impeccable/review/room-mobile.png', fullPage: true });
+  await a.screenshot({ path: '.impeccable/review/room-mobile-viewport.png' });
   await a.setViewportSize({ width: 390, height: 600 });
+  await a.getByRole('button', { name: '加歌', exact: true }).click();
   const searchInput = a.getByRole('textbox', { name: '搜尋歌曲或歌手' });
   await searchInput.focus();
   const transportTop = async () => {
@@ -153,6 +184,8 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   await a.keyboard.press('Tab');
   await expectClear(a.getByRole('button', { name: '搜尋', exact: true }));
   await a.screenshot({ path: '.impeccable/review/room-mobile-focused.png' });
+  await a.keyboard.press('Escape');
+  await expect(a.getByRole('button', { name: '加歌', exact: true })).toBeFocused();
   await a.locator('.room-management > summary').click();
   await a.getByRole('checkbox', { name: '切換上一首／下一首' }).focus();
   await expectClear(a.getByRole('checkbox', { name: '切換上一首／下一首' }));
@@ -396,6 +429,7 @@ test('search keeps the latest result when an earlier request is interrupted', as
       }),
     );
     await page.goto(`/island/${id}`);
+    await page.getByRole('button', { name: '加歌', exact: true }).click();
     const input = page.getByRole('textbox', { name: '搜尋歌曲或歌手' });
     await input.fill('old');
     await input.press('Enter');
@@ -485,7 +519,7 @@ test('starting local listening never rewrites the shared room timeline', async (
   await page.goto(`/island/${id}`);
   const listen = page.getByRole('button', { name: '開始聆聽', exact: true });
   await expect(listen).toBeEnabled();
-  await expect(page.getByText('在這台裝置開啟聲音，接上島上目前的旋律。')).toBeVisible();
+  await expect(page.getByText('此裝置尚未開啟聲音，點一下接上島上的旋律。')).toBeVisible();
   await page.screenshot({ path: `.impeccable/review/start-listening-${browserName}.png`, fullPage: true });
   await listen.click();
   // The mock emits no playing acknowledgement, so the activation prompt stays available.

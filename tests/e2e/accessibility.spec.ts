@@ -83,6 +83,17 @@ test('room, permissions, long titles and join gate pass automated accessibility 
   await page.goto(`/island/${id}`);
   await expect(page.getByTestId('test-player')).toBeVisible();
   await accessible(page);
+  const addSong = page.getByRole('button', { name: '加歌', exact: true });
+  await addSong.click();
+  await expect(page.getByRole('textbox', { name: '搜尋歌曲或歌手' })).toBeFocused();
+  await page.route('**/api/search?**', (route) => route.fulfill({ json: { items: [] } }));
+  await page.getByRole('textbox', { name: '搜尋歌曲或歌手' }).fill('沒有符合的旋律');
+  await page.getByRole('button', { name: '搜尋', exact: true }).click();
+  await expect(page.getByText('找不到這首歌，試試歌手名稱或其他關鍵字。')).toBeVisible();
+  await accessible(page);
+  await page.screenshot({ path: `.impeccable/review/song-search-${browserName}.png` });
+  await page.keyboard.press('Escape');
+  await expect(addSong).toBeFocused();
   await page.locator('summary').click();
   await accessible(page);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

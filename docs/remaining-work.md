@@ -31,3 +31,7 @@ The six original requests have implementation coverage in the ledger above. The 
 ## Next design phase requested on 2026-11-05
 
 After synchronization and iPhone listening acceptance, use Impeccable Critique for both homepage and room. The homepage needs stronger cosmic depth, immersion, visual impact and composition. The room needs a more developed layout, hierarchy and shared-listening experience. Propose stronger alternatives against top Awwwards visual quality while retaining Melody Island, the 06 Moon Pass art direction, real interactive 3D island and phoenix. Composition and interface may change substantially. Record-only for the current phase; do not implement this redesign during the synchronization fix.
+
+### Direction selected
+
+The owner subsequently selected A, Lunar Approach, authorizing implementation of the proposal. The homepage and room are being adapted within direction 06; this supersedes the record-only instruction above. The synchronization controller, authoritative server commands and production Firebase remain unchanged. Physical iPhone acceptance of the synchronization patch remains with the owner. See the Lunar Approach section in verification.md for actual UI evidence and remaining risks; do not infer a project-wide release pass from a design review.

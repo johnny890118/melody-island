@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-03T16:39:32.558Z",
+  "generatedAt": "2026-11-05T15:48:26.478016Z",
   "title": "Design System: Melody Island",
   "extensions": {
     "colorMeta": {
@@ -36,13 +36,9 @@
         "role": "neutral",
         "displayName": "Mauve rule"
       },
-      "home-moonlight": {
-        "role": "accent",
-        "displayName": "Lunar highlight"
-      },
-      "home-sky": {
+      "home-background": {
         "role": "neutral",
-        "displayName": "Twilight violet"
+        "displayName": "Deep night"
       }
     },
     "typographyMeta": {
@@ -69,7 +65,11 @@
     "breakpoints": [
       {
         "name": "compact",
-        "value": "900px"
+        "value": "1000px"
+      },
+      {
+        "name": "room-stack",
+        "value": "760px"
       },
       {
         "name": "mobile",
@@ -84,12 +84,28 @@
       "refersTo": "button-primary",
       "description": "Primary room entry or submission.",
       "html": "<button class=\"ds-primary\">一起登島</button>",
-      "css": ".ds-primary{background:#f5ecdc;color:#171321;border:1px solid #f5ecdc;border-radius:4px;padding:15px 20px;min-height:52px;font:13px Manrope,sans-serif}.ds-primary:hover{background:#372b42;color:#f5ecdc}.ds-primary:focus-visible{outline:2px solid #ffc991;outline-offset:5px}"
+      "css": ".ds-primary{background:var(--ink);color:var(--paper);border:1px solid var(--ink);border-radius:4px;padding:15px 20px;min-height:52px;font:13px Manrope,sans-serif}.ds-primary:hover{background:#ffe0bd;color:var(--paper)}.ds-primary:focus-visible{outline:2px solid var(--accent);outline-offset:5px}"
+    },
+    {
+      "name": "Board a friend’s island",
+      "kind": "button",
+      "refersTo": "home-button-board",
+      "description": "Filled homepage join action; paired with the outlined create or return action.",
+      "html": "<button class=\"ds-home-board\">一起登島</button>",
+      "css": ".ds-home-board{background:var(--accent);color:var(--paper);border:1px solid var(--ink);border-radius:4px;padding:15px 18px;min-height:52px;font:13px Manrope,sans-serif;transition:background .2s,color .2s}.ds-home-board:hover{background:#ffe0bd}.ds-home-board:focus-visible{outline:2px solid var(--accent);outline-offset:5px}"
+    },
+    {
+      "name": "Create or return",
+      "kind": "button",
+      "refersTo": "home-button-create",
+      "description": "Outlined secondary homepage action, determined by account and island state.",
+      "html": "<button class=\"ds-home-create\">建立島嶼</button>",
+      "css": ".ds-home-create{background:var(--paper);color:var(--ink);border:1px solid var(--ink);border-radius:4px;padding:15px 18px;min-height:52px;font:13px Manrope,sans-serif;transition:background .2s,color .2s}.ds-home-create:hover{background:var(--hover)}.ds-home-create:focus-visible{outline:2px solid var(--accent);outline-offset:5px}"
     }
   ],
   "narrative": {
     "northStar": "A place between songs",
-    "overview": "A lunar flyby centered on an actual interactive miniature island. Operational rooms prioritize playback, queue and search.",
+    "overview": "A small, tangible island framed as an open listening postcard. The homepage is an Experience surface; the listening room is Operate. Awwwards-level craft is the ambition, not a claim of an award or completed external evaluation.",
     "keyCharacteristics": [
       "Real 3D centerpiece",
       "Midnight plum ground",
@@ -103,10 +119,13 @@
       }
     ],
     "dos": [
-      "Preserve focused-control clearance above the transport."
+      "Keep the interactive island central and the complete miniature silhouette readable.",
+      "Preserve quiet space, honest connection states and clear Chinese action labels.",
+      "Keep mock-player captures explicitly labelled as test evidence."
     ],
     "donts": [
-      "Invent perfect synchronization or activity counts."
+      "Do not fabricate active users, listening counts, testimonials or perfect synchronization.",
+      "Do not introduce large blur layers, card grids or progress decoration unrelated to actual state."
     ]
   }
 }

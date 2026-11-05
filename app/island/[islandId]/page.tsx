@@ -3,6 +3,7 @@ import { estimateClockOffset, type ClockSample } from '@/lib/clock';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -63,6 +64,10 @@ export default function IslandPage() {
   const [playerAttempt, setPlayerAttempt] = useState(0);
   const [blocked, setBlocked] = useState(false);
   const [listening, setListening] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchTrigger = useRef<HTMLButtonElement>(null);
+  const [searchError, setSearchError] = useState('');
+  const [searched, setSearched] = useState(false);
   const [offset, setOffset] = useState(0);
   const [retry, setRetry] = useState(0);
   const offsetRef = useRef(offset);
@@ -236,7 +241,8 @@ export default function IslandPage() {
     request.current = controller;
     const sequence = ++searchSequence.current;
     setSearching(true);
-    setMessage('');
+    setSearchError('');
+    setSearched(false);
     try {
       const data = await api<SearchResponse>(
         `/api/search?q=${encodeURIComponent(query.trim())}&islandId=${encodeURIComponent(islandId)}`,
@@ -245,13 +251,16 @@ export default function IslandPage() {
           signal: controller.signal,
         },
       );
-      if (sequence === searchSequence.current) setResults(data.items);
+      if (sequence === searchSequence.current) {
+        setResults(data.items);
+        setSearched(true);
+      }
     } catch (error) {
       if (
         !(error instanceof Error && error.name === 'AbortError') &&
         sequence === searchSequence.current
       )
-        setMessage(errorMessage(error));
+        setSearchError(errorMessage(error));
     } finally {
       if (sequence === searchSequence.current) setSearching(false);
     }
@@ -364,7 +373,7 @@ export default function IslandPage() {
         </p>
       )}
       <div className="room-grid">
-        <div>
+        <section className="listening-stage" aria-label="正在共聽">
           <SyncedPlayer
             key={playerAttempt}
             ref={player}
@@ -394,6 +403,8 @@ export default function IslandPage() {
               }
             }}
           />
+          <div className="track-details">
+          <p className="shared-playback-state">{session.isPlaying ? '島上正在播放' : '島上已暫停'}</p>
           <h2 className="now-playing-title">
             {current?.title || (session.playlist.length ? '歌單準備好了。' : '讓第一首歌登島。')}
           </h2>
@@ -406,13 +417,14 @@ export default function IslandPage() {
           </p>
           {session.isPlaying && (blocked || !listening) && (
             <div className="listening-prompt">
-              <p>在這台裝置開啟聲音，接上島上目前的旋律。</p>
+              <p>此裝置尚未開啟聲音，點一下接上島上的旋律。</p>
               <Button
                 variant="ghost"
                 className="action-button"
                 disabled={!playerReady}
                 onClick={() => {
                   player.current?.enableAudio();
+                  setMuted(false);
                 }}
               >
                 開始聆聽
@@ -429,28 +441,33 @@ export default function IslandPage() {
               重試播放器
             </Button>
           )}
+          </div>
           <Button variant="ghost" className="resync" onClick={() => player.current?.sync()}>
             重新同步播放
           </Button>
-        </div>
-        <div>
+        </section>
+        <aside className="listening-sidebar" aria-label="共用歌單">
           <section className="room-section">
-            <h2>
-              接下來聽什麼<span className="queue-count">{session.playlist.length} / 100 首</span>
-            </h2>
+            <div className="queue-heading">
+              <div><h2>接下來聽什麼</h2><span className="queue-count">{session.playlist.length} / 100 首</span></div>
+              <Button ref={searchTrigger} variant="ghost" className="add-song-button" disabled={!canEdit} onClick={() => setSearchOpen(true)}><Plus size={17} />加歌</Button>
+            </div>
+            {!canEdit && <p className="quiet-notice">島主尚未開放加歌。</p>}
             {!session.playlist.length ? (
               <p className="room-empty">
                 島上還很安靜。
                 <br />
                 搜尋一首喜歡的歌，邀請大家一起聽。
+                {canEdit && <Button variant="ghost" className="add-song-button" onClick={() => setSearchOpen(true)}>加入第一首歌<Plus size={16} /></Button>}
               </p>
             ) : (
               <ol className="queue-list">
-                {session.playlist.map((song) => (
+                {session.playlist.map((song, index) => (
                   <li
                     key={song.videoId}
                     className={`queue-row ${song.videoId === session.currentVideo ? 'current' : ''}`}
                   >
+                    <span className="queue-position" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
                     <Image
                       className="queue-art"
                       src={song.thumbnail}
@@ -461,10 +478,12 @@ export default function IslandPage() {
                     <Button
                       variant="ghost"
                       className="queue-song"
+                      aria-label={song.title}
                       disabled={!canControl || busy}
                       onClick={() => command({ type: 'select', videoId: song.videoId })}
                     >
-                      {song.title}
+                      <span>{song.title}</span>
+                      {song.videoId === session.currentVideo && <span className="playing-label">{session.isPlaying ? '播放中' : '目前曲目'}</span>}
                     </Button>
                     <Button
                       variant="ghost"
@@ -481,8 +500,10 @@ export default function IslandPage() {
               </ol>
             )}
           </section>
-          <section className="room-section">
-            <h2>找一段旋律</h2>
+          <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+            <DialogContent className="song-search-dialog" aria-describedby="song-search-description" onCloseAutoFocus={(event) => { event.preventDefault(); searchTrigger.current?.focus(); }}>
+            <DialogTitle>找一段旋律</DialogTitle>
+            <DialogDescription id="song-search-description">找到喜歡的歌，放進大家的下一段旋律。</DialogDescription>
             <form onSubmit={search} className="room-search">
               <Input
                 aria-label="搜尋歌曲或歌手"
@@ -494,6 +515,8 @@ export default function IslandPage() {
                   request.current?.abort();
                   searchSequence.current++;
                   setSearching(false);
+                  setSearched(false);
+                  setSearchError('');
                 }}
               />
               <Button
@@ -512,6 +535,9 @@ export default function IslandPage() {
                 正在尋找音樂…
               </p>
             )}
+            {searchError && <p role="alert" className="form-error">{searchError}</p>}
+            {message && <p role="status" className="quiet-notice">{message}</p>}
+            {searched && !searching && !results.length && <p className="room-empty" role="status">找不到這首歌，試試歌手名稱或其他關鍵字。</p>}
             <ul className="queue-list">
               {results.map((song) => (
                 <li className="queue-row" key={song.videoId}>
@@ -534,7 +560,8 @@ export default function IslandPage() {
                 </li>
               ))}
             </ul>
-          </section>
+            </DialogContent>
+          </Dialog>
           <details className="room-management">
             <summary>島嶼成員與權限</summary>{' '}
             <section className="room-section">
@@ -606,10 +633,10 @@ export default function IslandPage() {
               )}
             </section>
           </details>
-        </div>
+        </aside>
       </div>
       <div className="transport" aria-label="播放控制">
-        <span className="transport-title">{current?.title || '等待音樂登島'}</span>
+        <div className="transport-title"><span>{current?.title || '等待音樂登島'}</span><small>{session.isPlaying ? '全房播放中' : '全房已暫停'}</small></div>
         <div className="transport-buttons">
           <Button
             variant="ghost"
@@ -637,6 +664,7 @@ export default function IslandPage() {
             size="icon"
             className="icon-button transport-play"
             aria-label={session.isPlaying ? '暫停' : '播放'}
+            title={session.isPlaying ? '暫停全房播放' : '開始全房播放'}
             disabled={!canControl || busy || !playerReady || !session.playlist.length}
             onClick={() => command({ type: session.isPlaying ? 'pause' : 'play' })}
           >
@@ -657,6 +685,7 @@ export default function IslandPage() {
             size="icon"
             className="icon-button"
             aria-label={muted ? '取消靜音' : '靜音'}
+            title="只影響這台裝置的聲音"
             aria-pressed={muted}
             onClick={() => {
               player.current?.toggleMute();
@@ -667,7 +696,7 @@ export default function IslandPage() {
           </Button>
         </div>
         <span className="transport-status">
-          {status} · {session.isPlaying ? '正在共聽' : '已暫停'}
+          {muted ? '此裝置已靜音' : blocked || (session.isPlaying && !listening) ? '此裝置尚未開啟聲音' : '本機音量可獨立調整'}
         </span>
       </div>
     </main>

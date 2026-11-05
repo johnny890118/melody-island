@@ -83,8 +83,19 @@ export default function HomePage() {
           </h1>
           <p>不同的地方，同一首歌。</p>
         </div>
-        <div className="home-actions">
+        <div className="home-actions" aria-label="開始共聽">
           <div className="home-action-list">
+            <CustomDialog
+              title="朋友在島上等你"
+              description="輸入朋友分享的島嶼 ID 與密碼。無須 Google 帳號也能加入。"
+              inputs={[
+                { label: 'islandId', placeholder: '島嶼 ID', maxLength: 10 },
+                { label: 'islandPassword', placeholder: '島嶼密碼', type: 'password' },
+              ]}
+              onConfirm={join}
+              triggerLabel="加入朋友的島嶼"
+              confirmLabel="一起登島"
+            />
             {!user || user.isAnonymous ? (
               <Button
                 variant="ghost"
@@ -123,17 +134,7 @@ export default function HomePage() {
                 disabled={!ready || !user || user.isAnonymous}
               />
             )}
-            <CustomDialog
-              title="朋友在島上等你"
-              description="輸入朋友分享的島嶼 ID 與密碼。無須 Google 帳號也能加入。"
-              inputs={[
-                { label: 'islandId', placeholder: '島嶼 ID', maxLength: 10 },
-                { label: 'islandPassword', placeholder: '島嶼密碼', type: 'password' },
-              ]}
-              onConfirm={join}
-              triggerLabel="加入朋友的島嶼"
-              confirmLabel="一起登島"
-            />
+
           </div>
         </div>
         {notice && (
