@@ -58,3 +58,9 @@ Awwwards直接案例頁在此工具出現timeout／不可取得，故得獎／�
 先確定選案；接著定稿首頁場景與手機構圖，再完成房間現播／待播／本機聲音骨架，最後補搜尋、成員權限與各種失敗狀態。維持local shadcn/ui + Lucide。實作期間同步協定保持隔離，完成後跑既有回歸與實機驗收。
 
 本次到提案即停，不更新 DESIGN.md 為任何未核准新方向，不合併 main，不改正式 Firebase，不部署正式網站。
+
+## Decision-gallery review scope
+
+Independent follow-up: three findings resolved, fixed transport clearance partially resolved. All mobile proposals expose their intended initial task priorities. This is decision-gallery acceptance only, not shipping acceptance. See [review](proposal-review.md). Twelve main captures and six search captures were rendered at1440x1000 and390x844; checks.json retains document widths with no horizontal overflow. Fixed controls in a full-page capture retain their original viewport position. Their appearance over later offscreen content is not proof of final responsive clearance. Full interactions and text scaling remain required after selection.
+
+Room images are explicitly labeled YouTube thumbnail composition mocks, without an iframe or click-blocking mask. Search uses local shadcn/Dialog and Lucide; capture waits for the opening animation. Typecheck, lint and proposal detector passed (0 findings). Prototype interaction state is illustrative and does not mutate real rooms or certify media playback.
