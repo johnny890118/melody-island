@@ -148,3 +148,17 @@ it('delivers pause/resume across delayed iframe acknowledgements and confirms pr
   expect(target.loadVideoById).toHaveBeenCalledOnce();
   expect(callbacks.onAdvance).not.toHaveBeenCalled();
 });
+it('acknowledges native iframe activation and does not keep the listening prompt latched', () => {
+  vi.useFakeTimers(); vi.setSystemTime(1000);
+  const view = render(<SyncedPlayer session={{ ...base, isPlaying: true }} {...callbacks} />);
+  act(() => hooks.ready({ target })); act(() => hooks.blocked());
+  target.getCurrentTime.mockReturnValue(13); act(() => hooks.state({ data: 1, target }));
+  expect(callbacks.onPlaying).not.toHaveBeenCalled();
+  target.getCurrentTime.mockReturnValue(14); act(() => vi.advanceTimersByTime(1000));
+  expect(callbacks.onPlaying).toHaveBeenCalledOnce();
+  view.rerender(<SyncedPlayer session={{ ...base, positionMs: 14000, playbackUpdatedAt: 2000, playbackRevision: 1 }} {...callbacks} />);
+  target.getPlayerState.mockReturnValue(2);
+  view.rerender(<SyncedPlayer session={{ ...base, isPlaying: true, positionMs: 14000, playbackUpdatedAt: 2000, playbackRevision: 2 }} {...callbacks} />);
+  expect(target.playVideo).toHaveBeenCalledOnce();
+  expect(target.loadVideoById).toHaveBeenCalledOnce();
+});

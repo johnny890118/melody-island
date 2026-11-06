@@ -162,3 +162,13 @@ it('discards an old play acknowledgement when a newer same-video replay replaces
   expect(step(player, 1300, media(60), replay).map(action => action.type)).toEqual(['seek']);
   for (let t = 2300; t <= 12300; t += 1000) expect(step(player, t, media((t - 1300) / 1000), replay).some(action => action.type === 'blocked')).toBe(false);
 });
+it('recognizes a native iframe listening gesture from content progress and allows a later room resume', () => {
+  const player = new RadioPlayer(); step(player, 0); player.block(100);
+  expect(step(player, 1000, media(1))).toEqual([]);
+  expect(step(player, 2000, media(2))).toEqual([]);
+  expect(player.diagnostics().phase).toBe('playing');
+  const paused = { ...base, isPlaying: false, positionMs: 2000, playbackUpdatedAt: 3100, playbackRevision: 2 };
+  step(player, 2100, media(2.1), paused);
+  const resumed = { ...paused, isPlaying: true, playbackUpdatedAt: 3200, playbackRevision: 3 };
+  expect(step(player, 2200, media(2.1, 2), resumed).map(action => action.type)).toEqual(['play']);
+});

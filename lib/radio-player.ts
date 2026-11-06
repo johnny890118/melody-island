@@ -28,6 +28,7 @@ export class RadioPlayer {
   private loaded = '';
   private epoch = -1;
   private blocked = false;
+  private blockedProgress: { at: number; seconds: number } | undefined;
   private progress: Progress[] = [];
   private pending: PendingSeek | undefined;
   private requestedPlaying: boolean | undefined;
@@ -43,7 +44,7 @@ export class RadioPlayer {
   private readonly counts: Partial<Record<RadioAction['type'], number>> = {};
 
   diagnostics() { return { phase: this.phase, counts: { ...this.counts }, trace: this.trace.slice() }; }
-  block(now: number) { this.blocked = true; this.pendingPlay = undefined; this.phase = 'blocked'; this.note(now, 'autoplay-blocked'); }
+  block(now: number) { this.blocked = true; this.blockedProgress = undefined; this.pendingPlay = undefined; this.phase = 'blocked'; this.note(now, 'autoplay-blocked'); }
   providerError(code: number, now: number) { this.phase = 'interrupted'; this.note(now, `youtube-provider-error-${code}`); }
   completionResult(key: string, accepted: boolean, now: number) {
     if (this.completion?.key !== key) return;
@@ -107,6 +108,7 @@ export class RadioPlayer {
     if (!attached) { this.note(mono, 'awaiting-player-attachment'); return actions; }
     if (this.loaded !== incoming.currentVideo) {
       this.loaded = incoming.currentVideo; this.epoch = epoch; this.progress = []; this.pending = undefined;
+      this.blockedProgress = undefined;
       this.resumeNeeded = false;
       this.pendingPlay = incoming.isPlaying && !this.blocked ? { at: mono, seconds: expected } : undefined;
       this.completion = undefined;
@@ -119,6 +121,7 @@ export class RadioPlayer {
     if (epoch !== this.epoch) {
       this.epoch = epoch; this.progress = []; this.pending = undefined; this.completion = undefined;
       this.pendingPlay = undefined;
+      this.blockedProgress = undefined;
       this.correctionUsed = false; this.alignmentNeeded = true; this.requestedPlaying = undefined;
       this.restartNeeded = true;
       this.note(mono, 'new-playback-instance-same-resource');
@@ -128,8 +131,9 @@ export class RadioPlayer {
     }
     const resourceMatches = media.videoId === incoming.currentVideo;
     const contentMatches = resourceMatches && !!duration && media.duration > 0 && Math.abs(media.duration * 1000 - duration) <= 1500;
-    if (trigger === 'activate') this.blocked = false;
+    if (trigger === 'activate') { this.blocked = false; this.blockedProgress = undefined; }
     if (!incoming.isPlaying) {
+      this.blockedProgress = undefined;
       this.pendingPlay = undefined; this.resumeNeeded = false;
       this.phase = 'paused'; this.progress = [];
       if (media.state === 1 || media.state === 3) {
@@ -146,7 +150,27 @@ export class RadioPlayer {
       if (this.pending && Math.abs(media.seconds - this.pending.target) <= 0.5) this.pending = undefined;
       return actions;
     }
-    if (this.blocked && trigger !== 'activate') { this.phase = 'blocked'; this.note(mono, 'awaiting-local-listening-gesture'); return actions; }
+    if (this.blocked && trigger !== 'activate') {
+      const previous = this.blockedProgress;
+      // The user may activate YouTube's native control rather than our button.
+      // Matching content actually advancing proves playback was allowed; merely
+      // seeing a cached PLAYING state does not. This observation sends no command.
+      if (media.state === 1 && contentMatches) {
+        if (previous && mono > previous.at && media.seconds > previous.seconds + 0.05) {
+          this.blocked = false; this.blockedProgress = undefined;
+          this.pendingPlay = undefined; this.resumeNeeded = false;
+          this.pending = undefined; this.progress = []; this.correctionUsed = false;
+          this.requestedPlaying = true; this.alignmentNeeded = true;
+          this.note(mono, 'native-content-progress-clears-autoplay-latch');
+        } else {
+          this.blockedProgress = { at: mono, seconds: media.seconds };
+          this.phase = 'blocked'; this.note(mono, 'awaiting-native-content-progress'); return actions;
+        }
+      } else {
+        this.blockedProgress = undefined;
+        this.phase = 'blocked'; this.note(mono, 'awaiting-local-listening-gesture'); return actions;
+      }
+    }
     const seek = (reason: string) => {
       if (this.pending) return;
       this.pending = { at: mono, target: expected, playing: true };

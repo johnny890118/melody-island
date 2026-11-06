@@ -27,3 +27,13 @@ The adapter reports confirmed playing transitions from the controller, including
 - Real YouTube Chromium host + WebKit listener: six settled/rapid pause-resume cycles passed both before and after. Each player loaded its resource once. These ordinary desktop runs did not naturally reproduce the physical-device failure; do not present them as proof that the iPhone problem is resolved. Raw [before](../measurements/radio-resume-before.json) and [after](../measurements/radio-resume-after.json).
 
 Physical acceptance of the candidate patch remains pending at this commit. Use only Chrome and the mirrored iPhone, perform the initial listening gesture once, then check subsequent Mac-controlled resumes without silently clicking a phone play/activation prompt. No production changes or main merge are authorized.
+
+## Native-control activation follow-up
+
+Physical mirroring showed a further discrepancy: content was visibly playing after the owner's initial activation, while the page still offered “開始聆聽”. Code review and a new failing regression established that the blocked latch ignored successful native iframe activation: even matching content progressing on two later observations could not clear it, so a later remote resume could remain suppressed.
+
+The follow-up observes matching content progress while blocked. Two distinct advancing observations clear the stale latch, invalidate older local pending operations and notify confirmed playback. This sends no play/seek/room command merely to clear the latch. It does not infer permission from a single cached PLAYING value, and mismatched/advertising-like media cannot establish this proof. New epochs/resources reset that observation history.
+
+Validation: 121 unit/component tests, typecheck, lint and isolated production build passed; six focused Chromium/WebKit membership, reconnect and local-listening E2E scenarios passed. Both full CI runs for the preceding 119-test commit 7965a7a passed; the new follow-up CI is assessed separately.
+
+Mirroring input limitations were also observed: programmatic taps did not reliably activate even Safari's address field. The owner's explicit initial tap must not be counted as automated success. Bring the mirrored window to the foreground before inspecting video, since a background/occluded video layer can yield stale screenshots. Device build reload and actual media progression require confirmation. The owner declined physical network interruption; keep that item **not tested**, do not toggle cellular/network settings. Mac Safari is outside the authorized test surfaces.
