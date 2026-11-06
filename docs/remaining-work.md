@@ -41,3 +41,11 @@ The owner subsequently selected A, Lunar Approach, authorizing implementation of
 The owner's latest instruction pauses further homepage/room redesign. Preserve existing Lunar Approach / 06 Moon Pass UI. A previously requested subtitle alignment remains pending and is excluded from the radio milestone. The current replacement protocol, reproduced failures, real-player comparison and acceptance limits are in [radio reliability review](verification/radio-reliability.md) and [sync architecture](architecture/sync.md). Earlier lease-based descriptions above are historical, not the new protocol.
 
 New physical iPhone + Mac verification remains pending. Prior user-confirmed device flows are not evidence for the new controller. Production Firebase, rules, migration and main merge remain unauthorized. Keep the existing PR as a Draft.
+
+## Current acceptance scope — 2026-11-07
+
+Runtime 6f1bdb1 is deployed to independent Staging. Physical pause/resume (two cycles), next-track following, Mac refresh/local activation without disrupting phone playback, and the last-track terminal stop were observed; scope and limitations are in [pause/resume evidence](verification/pause-resume.md). Both runtime CI runs passed, and a fresh 121-test unit run passed. These supersede older pending wording above only for those named cases.
+
+The owner now requests one uninterrupted real-YouTube ten-minute run, natural first-to-next progression and a final stop before the next design phase. That new run is in progress; do not label it passed until evidence is collected. Physical network interruption remains **not tested**, intentionally skipped.
+
+After this acceptance, the authorized design deliverable is Impeccable Critique plus 2–3 distinct homepage/room proposals with desktop/mobile rendered previews. This supersedes earlier implementation authorization for the new exploration: stop for the owner's selection before broad UI changes. Preserve the public Melody Island brand, direction 06, real interactive island and phoenix, all existing functions and the authoritative playback protocol. No main merge, production Firebase change or production deployment.
