@@ -42,3 +42,9 @@ Staging sets `NEXT_PUBLIC_AUTH_REDIRECT=true`. The browser uses its own hostname
 Production needs its own authorized hostname and Google callback before enabling this flag. The staging flag has only been set in the dedicated Vercel project's Preview environment. Firebase's [redirect guidance](https://firebase.google.com/docs/auth/web/redirect-best-practices) describes the proxy requirement.
 
 The local same-tab regression uses npm run test:e2e:redirect. Its explicit emulator build proxies Auth helper and token endpoints to the fixed local port 9099 so WebKit tests use the same-origin storage model as hosted staging. The hosted staging guard rejects emulator configurations.
+
+## Radio metadata acceptance — 2026-11-06
+
+The authenticated Chrome room initially displayed “無法確認影片長度，請稍後再試。” The independent staging service was enabled, but its server key permitted only `youtube.api.v3.V3DataSearchService.List`. Its restriction was updated to additionally permit the read-only `youtube.api.v3.V3DataVideoService.List`. The existing restriction metadata was backed up before the update; no key string was retrieved, replaced or printed. No production project, Firebase rules, billing or App Check setting changed.
+
+After propagation and reload, Chrome Network showed the member-only `/playback` endpoint returning **200 OK** (one observed request: 5.30s), and the application error disappeared. The existing Google session persisted and the room connected. A manual staging playback check showed Chrome's active-media indicator and YouTube advancing from approximately 0:42 to 1:32. A shared pause then left both application and iframe paused at approximately 1:33. This is a single desktop environment check, not a latency benchmark or a physical iPhone/Mac synchronization pass. Automated room tests remain confined to the demo emulators.
