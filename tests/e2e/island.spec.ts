@@ -519,7 +519,8 @@ test('starting local listening never rewrites the shared room timeline', async (
   await page.goto(`/island/${id}`);
   const listen = page.getByRole('button', { name: '開始聆聽', exact: true });
   await expect(listen).toBeEnabled();
-  await expect(page.getByText('此裝置尚未開啟聲音，點一下接上島上的旋律。')).toBeVisible();
+  await expect(page.locator('.transport').getByRole('button', { name: '開始聆聽', exact: true })).toBeInViewport();
+  await expect(page.getByText('此裝置尚未開啟聲音，請按下方「開始聆聽」。')).toBeVisible();
   await page.screenshot({ path: `.impeccable/review/start-listening-${browserName}.png`, fullPage: true });
   await listen.click();
   // The mock emits no playing acknowledgement, so the activation prompt stays available.

@@ -131,3 +131,9 @@ The homepage loads the island first and adds the phoenix after the island is rea
 - Keep mock-player captures explicitly labelled as test evidence.
 - Do not fabricate active users, listening counts, testimonials or perfect synchronization.
 - Do not introduce large blur layers, card grids or progress decoration unrelated to actual state.
+
+## Room transport activation
+
+Playback actions stay in the fixed bottom transport. When a playing room needs this device's first listening gesture, a labelled moonlight “開始聆聽” action occupies the transport's local-status slot and becomes a full-width row on mobile. Shared play/pause/skip and local mute remain separate and available according to their existing permissions. The in-page notice points to that action; no second activation button is hidden below the player. Extra scroll/focus clearance applies while the mobile activation row is present.
+
+YouTube's supported player parameters hide its normal control strip and disable its keyboard shortcuts/fullscreen control. Preserve YouTube branding, required links and advertisements; do not cover the embedded player with a click-blocking overlay. This is functional hardening within direction 06, not a new visual direction.

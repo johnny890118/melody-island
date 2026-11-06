@@ -1,4 +1,5 @@
 'use client';
+import './room-controls.css';
 import { RoomClock } from '@/lib/clock';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -362,6 +363,7 @@ export default function IslandPage() {
       </main>
     );
   const current = session.playlist.find((song) => song.videoId === session.currentVideo);
+  const needsListening = session.isPlaying && (blocked || !listening);
   const status =
     connection === 'synced' ? '已連線' : connection === 'offline' ? '離線' : '正在重新連線';
   return (
@@ -436,21 +438,9 @@ export default function IslandPage() {
                 ? '按下播放，一起開始聽。'
                 : '搜尋喜歡的歌，加入大家的播放佇列。'}
           </p>
-          {session.isPlaying && (blocked || !listening) && (
-            <div className="listening-prompt">
-              <p>此裝置尚未開啟聲音，點一下接上島上的旋律。</p>
-              <Button
-                variant="ghost"
-                className="action-button"
-                disabled={!playerReady || !clockReady}
-                onClick={() => {
-                  player.current?.enableAudio();
-                  setMuted(false);
-                }}
-              >
-                開始聆聽
-                <Volume2 size={16} />
-              </Button>
+          {needsListening && (
+            <div className="listening-prompt" id="listening-help">
+              <p>此裝置尚未開啟聲音，請按下方「開始聆聽」。</p>
             </div>
           )}
           {!playerReady && (
@@ -716,9 +706,19 @@ export default function IslandPage() {
             {muted ? <VolumeX size={19} /> : <Volume2 size={19} />}
           </Button>
         </div>
-        <span className="transport-status">
-          {muted ? '此裝置已靜音' : blocked || (session.isPlaying && !listening) ? '此裝置尚未開啟聲音' : '本機音量可獨立調整'}
-        </span>
+        {needsListening ? (
+          <Button
+            variant="ghost"
+            className="transport-listen"
+            aria-describedby="listening-help"
+            disabled={!playerReady || !clockReady}
+            onClick={() => { player.current?.enableAudio(); setMuted(false); }}
+          >
+            開始聆聽 <Volume2 size={16} />
+          </Button>
+        ) : (
+          <span className="transport-status">{muted ? '此裝置已靜音' : '本機音量可獨立調整'}</span>
+        )}
       </div>
     </main>
   );

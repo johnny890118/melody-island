@@ -15,7 +15,7 @@ type PlayerConstructor = new (
   options: {
     width: string;
     height: string;
-    playerVars: { playsinline: number; rel: number; origin: string };
+    playerVars: { playsinline: number; rel: number; origin: string; controls: number; disablekb: number; fs: number };
     events: PlayerEvents;
   },
 ) => PlayerTarget & { destroy(): void };
@@ -80,7 +80,7 @@ export default function YouTubeFrame(props: PlayerEvents) {
         player = new Player(mount, {
           width: '100%',
           height: '100%',
-          playerVars: { playsinline: 1, rel: 0, origin: window.location.origin },
+          playerVars: { playsinline: 1, rel: 0, origin: window.location.origin, controls: 0, disablekb: 1, fs: 0 },
           events: {
             onReady: (event) => {
               if (!cancelled) events.current.onReady(event);

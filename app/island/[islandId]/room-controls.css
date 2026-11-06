@@ -1,0 +1,25 @@
+.transport .transport-listen {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--paper);
+}
+.transport .transport-listen:hover:not(:disabled) {
+  background: var(--ink);
+}
+@media (max-width: 760px) {
+  .transport .transport-listen {
+    justify-self: stretch;
+    width: 100%;
+  }
+  .room-page:has(.transport-listen) {
+    padding-bottom: 240px;
+  }
+  html:has(.transport-listen) {
+    scroll-padding-bottom: 220px;
+  }
+  .room-page:has(.transport-listen) :is(button, input, summary) {
+    scroll-margin-bottom: 220px;
+  }
+}

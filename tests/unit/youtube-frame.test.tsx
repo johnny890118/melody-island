@@ -11,8 +11,8 @@ it('creates one iframe after the Strict Mode probe and destroys it only on actua
   const create = vi.fn();
   class FakePlayer {
     destroy = destroy;
-    constructor(node: HTMLElement) {
-      create();
+    constructor(node: HTMLElement, options: { playerVars: { controls: number; disablekb: number; fs: number } }) {
+      create(options.playerVars);
       node.replaceWith(document.createElement('iframe'));
     }
   }
@@ -28,7 +28,7 @@ it('creates one iframe after the Strict Mode probe and destroys it only on actua
     </StrictMode>,
   );
   await act(async () => {});
-  expect(create).toHaveBeenCalledOnce();
+  expect(create).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ controls: 0, disablekb: 1, fs: 0 }));
   expect(view.container.querySelectorAll('iframe')).toHaveLength(1);
   expect(destroy).not.toHaveBeenCalled();
   view.unmount();
