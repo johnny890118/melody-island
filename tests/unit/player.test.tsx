@@ -129,3 +129,22 @@ it('reports startup failure and cancels the timer after attachment', () => {
   render(<SyncedPlayer session={base} {...callbacks} />); act(() => hooks.ready({ target }));
   act(() => vi.advanceTimersByTime(20000)); expect(callbacks.onError).not.toHaveBeenCalled();
 });
+it('delivers pause/resume across delayed iframe acknowledgements and confirms progress on a later tick', () => {
+  vi.useFakeTimers(); vi.setSystemTime(1000); target.getCurrentTime.mockReturnValue(12);
+  const view = render(<SyncedPlayer session={{ ...base, isPlaying: true }} {...callbacks} />);
+  act(() => hooks.ready({ target }));
+  target.getCurrentTime.mockReturnValue(13);
+  act(() => vi.advanceTimersByTime(1000));
+  view.rerender(<SyncedPlayer session={{ ...base, positionMs: 13000, playbackUpdatedAt: 2000, playbackRevision: 1 }} {...callbacks} />);
+  expect(target.pauseVideo).toHaveBeenCalled();
+  view.rerender(<SyncedPlayer session={{ ...base, isPlaying: true, positionMs: 13000, playbackUpdatedAt: 2000, playbackRevision: 2 }} {...callbacks} />);
+  expect(target.playVideo).toHaveBeenCalledOnce();
+  target.getPlayerState.mockReturnValue(2);
+  act(() => hooks.state({ data: 2, target }));
+  expect(callbacks.onBlocked).not.toHaveBeenCalled();
+  target.getPlayerState.mockReturnValue(1); target.getCurrentTime.mockReturnValue(14);
+  act(() => vi.advanceTimersByTime(1000));
+  expect(callbacks.onPlaying).toHaveBeenCalledTimes(2);
+  expect(target.loadVideoById).toHaveBeenCalledOnce();
+  expect(callbacks.onAdvance).not.toHaveBeenCalled();
+});

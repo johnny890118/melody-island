@@ -52,3 +52,7 @@ Before production: verify a backup and migration review where needed, `YOUTUBE_A
 - [Apple coordinated playback](https://developer.apple.com/documentation/avfoundation/supporting-coordinated-media-playback): local suspension and rejoining a coordinated timeline inform the separation of local buffering from shared intent. Melody Island uses a radio policy and does not pause all peers for one listener.
 
 These are protocol design references, not a claim of implementing SharePlay, Spotify Jam internals, or equivalent acoustic guarantees.
+
+## Transport acknowledgement
+
+A new paused-to-playing authority transition is a latched intent, not inferred success from one cached iframe state. It survives clock calibration and is delivered even if the iframe still says PLAYING before its previous pause acknowledgement. A pending play waits for matching content progress; transient PAUSED observations do not cause an autoplay-blocked latch or polling retries. Buffering/unknown media suspends the acknowledgement budget. Explicit autoplay rejection and a genuine unacknowledged request expose local activation without changing the room. A newer resource/epoch or authoritative pause invalidates the older pending transport. See [pause/resume evidence](../verification/pause-resume.md).

@@ -106,3 +106,59 @@ it('reconnection renews local alignment after an earlier unacknowledged correcti
   step(player, 31000, media(21));
   expect(step(player, 32000, media(22))).toContainEqual({ type: 'seek', seconds: 32, reason: 'stable-content-joins-authoritative-timeline' });
 });
+it('issues resume even when the iframe still reports playing before its delayed pause acknowledgement', () => {
+  const player = new RadioPlayer(); step(player, 0); step(player, 1000, media(1));
+  const paused = { ...base, isPlaying: false, positionMs: 1000, playbackRevision: 2, playbackUpdatedAt: 2000 };
+  expect(step(player, 1100, media(1.1), paused).some(action => action.type === 'pause')).toBe(true);
+  const resumed = { ...paused, isPlaying: true, playbackRevision: 3, playbackUpdatedAt: 2200 };
+  expect(step(player, 1200, media(1.1), resumed).some(action => action.type === 'play')).toBe(true);
+  expect(step(player, 1300, media(1.1, 2), resumed).some(action => action.type === 'blocked')).toBe(false);
+});
+it('waits for resume acknowledgement instead of classifying a stale paused observation as autoplay rejection', () => {
+  const player = new RadioPlayer();
+  const paused = { ...base, isPlaying: false, positionMs: 1000, playbackRevision: 2, playbackUpdatedAt: 2000 };
+  step(player, 1000, media(1, 2), paused);
+  const resumed = { ...paused, isPlaying: true, playbackRevision: 3, playbackUpdatedAt: 2200 };
+  expect(step(player, 1200, media(1, 2), resumed).some(action => action.type === 'play')).toBe(true);
+  expect(step(player, 1300, media(1, 2), resumed)).toEqual([]);
+  expect(step(player, 2200, media(2), resumed).some(action => action.type === 'blocked')).toBe(false);
+});
+it('retains a resume intent while clock calibration is unavailable', () => {
+  const player = new RadioPlayer();
+  const paused = { ...base, isPlaying: false, positionMs: 1000, playbackRevision: 2, playbackUpdatedAt: 2000 };
+  step(player, 1000, media(1, 2), paused);
+  const resumed = { ...paused, isPlaying: true, playbackRevision: 3, playbackUpdatedAt: 2200 };
+  expect(player.decide(resumed, media(1, 2), 2200, 1200, Infinity, 'snapshot')).toEqual([]);
+  expect(step(player, 1300, media(1, 2), resumed).some(action => action.type === 'play')).toBe(true);
+});
+it('does not classify ten seconds of acknowledged buffering as a rejected resume', () => {
+  const player = new RadioPlayer();
+  const paused = { ...base, isPlaying: false, positionMs: 1000, playbackRevision: 2, playbackUpdatedAt: 2000 };
+  step(player, 1000, media(1, 2), paused);
+  const resumed = { ...paused, isPlaying: true, playbackRevision: 3, playbackUpdatedAt: 2200 };
+  expect(step(player, 1200, media(1, 3), resumed).map(action => action.type)).toEqual(['play']);
+  for (let t = 2200; t <= 12200; t += 1000) expect(step(player, t, media(1, 3), resumed)).toEqual([]);
+  expect(step(player, 12300, media(1, 2), resumed)).toEqual([]);
+  expect(step(player, 13200, media(2), resumed).some(action => action.type === 'blocked')).toBe(false);
+  expect(player.diagnostics().counts.play).toBe(1);
+});
+it('does not deliver a second resume when an explicit replay also changes the epoch', () => {
+  const player = new RadioPlayer();
+  const paused = { ...base, isPlaying: false, positionMs: 60000, playbackRevision: 2, playbackUpdatedAt: 2000 };
+  step(player, 1000, media(60, 2), paused);
+  const replay = { ...paused, isPlaying: true, positionMs: 0, playbackRevision: 3, trackEpoch: 2, playbackUpdatedAt: 2200 };
+  expect(step(player, 1200, media(60, 2), replay).map(action => action.type)).toEqual(['seek', 'play']);
+  expect(step(player, 1300, media(0, 2), replay)).toEqual([]);
+  expect(step(player, 2200, media(1), replay)).toEqual([]);
+  expect(player.diagnostics().counts).toEqual({ cue: 1, seek: 1, play: 1 });
+});
+it('discards an old play acknowledgement when a newer same-video replay replaces it', () => {
+  const player = new RadioPlayer();
+  const paused = { ...base, isPlaying: false, positionMs: 60000, playbackRevision: 2, playbackUpdatedAt: 2000 };
+  step(player, 1000, media(60, 2), paused);
+  const resume = { ...paused, isPlaying: true, playbackRevision: 3, playbackUpdatedAt: 2200 };
+  step(player, 1200, media(60, 2), resume);
+  const replay = { ...resume, positionMs: 0, playbackRevision: 4, trackEpoch: 2, playbackUpdatedAt: 2300 };
+  expect(step(player, 1300, media(60), replay).map(action => action.type)).toEqual(['seek']);
+  for (let t = 2300; t <= 12300; t += 1000) expect(step(player, t, media((t - 1300) / 1000), replay).some(action => action.type === 'blocked')).toBe(false);
+});

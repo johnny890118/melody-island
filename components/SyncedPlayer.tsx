@@ -41,6 +41,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     try {
       const props = latest.current;
       const controller = policy.current;
+      const previousPhase = controller.phase;
       const actions = controller.decide({ ...props.session, durationMs: props.durationMs },
         target ? observe(target, props.session.currentVideo) : { state: -1, seconds: 0, duration: 0, videoId: '' }, props.clock?.now() ?? Date.now() + (props.clockOffset ?? 0),
         performance.now(), props.clock?.uncertaintyMs ?? 0, trigger, props.canRelay ?? true, target !== null);
@@ -63,6 +64,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
             });
         }
       }
+      if (controller.phase === 'playing' && previousPhase !== 'playing') props.onPlaying?.();
       if (new URLSearchParams(window.location.search).get('syncDebug') === '1')
         window.__melodySyncDiagnostics = controller.diagnostics();
     } catch {
@@ -128,10 +130,9 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
       policy.current.providerError(code, performance.now());
       latest.current.onError(`YouTube 播放器無法使用${code ? `（${code}）` : ''}，請按重試播放器或選擇其他歌曲。`);
     }}
-    onStateChange={({ target, data }) => {
+    onStateChange={({ target }) => {
       if (target !== player.current) return;
       run('state');
-      if (data === 1 && policy.current.phase === 'playing') latest.current.onPlaying?.();
     }}
   /></div>;
 });
