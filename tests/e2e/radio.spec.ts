@@ -109,3 +109,18 @@ test('duration metadata is authenticated, member-only and read-only', async ({ r
   expect(await response.json()).toMatchObject({ videoId: ids[0], durationMs: 60000, trackEpoch: before.trackEpoch });
   expect(await fixture.room()).toEqual(before);
 });
+test('first resume of a terminal legacy position admits duration and explicitly restarts', async ({ request }) => {
+  const fixture = await setup(request, 1);
+  const initial = await fixture.room();
+  await fixture.ref.update({
+    playlist: initial.playlist.map(({ durationMs: _duration, ...song }) => song),
+    isPlaying: false, positionMs: 70000, playbackUpdatedAt: Date.now(),
+    playbackRevision: (initial.playbackRevision ?? 0) + 1,
+  });
+  const paused = await fixture.room();
+  expect((await post(request, `/api/islands/${fixture.id}/commands`, fixture.owner, {
+    type: 'play', expectedPlaybackRevision: paused.playbackRevision, commandId: crypto.randomUUID(),
+  })).status()).toBe(200);
+  expect(await fixture.room()).toMatchObject({ isPlaying: true, positionMs: 0, trackEpoch: (paused.trackEpoch ?? 0) + 1 });
+  expect((await fixture.room()).playlist[0].durationMs).toBe(60000);
+});
