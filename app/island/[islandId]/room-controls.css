@@ -49,7 +49,7 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .transport .transport-title { max-width: 100%; }
 .transport .transport-title > span { font-size: 13px; }
 .transport .transport-listen { justify-self: end; }
-.room-members-dialog { width: calc(100vw - 32px); max-width: 640px; max-height: min(85svh, 800px); overflow-y: auto; border: 1px solid #a78d9c70; border-radius: 12px; padding: 32px; background: var(--paper); }
+.room-members-dialog { width: calc(100vw - 32px); max-width: 640px; max-height: min(85svh, 800px); overflow-y: auto; border: 1px solid #a78d9c70; border-radius: 12px; padding: 12px 16px 16px; background: var(--paper); }
 .room-members-dialog .room-section { margin-bottom: 0; padding-top: 0; }
 .room-members-dialog .members-line > span { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-block: 10px; }
 .room-members-dialog .member-actions { display: flex; gap: 10px; }
@@ -77,7 +77,7 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
   .transport .transport-title { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .transport-buttons { gap: 14px; justify-self: center; }
   .transport .transport-listen { justify-self: stretch; }
-  .room-members-dialog { top: auto; bottom: 0; left: 0; width: 100%; max-height: 88svh; transform: none; border-radius: 16px 16px 0 0; padding: 32px 24px max(24px, env(safe-area-inset-bottom)); }
+  .room-members-dialog { top: auto; bottom: 0; left: 0; width: 100%; max-height: 88svh; transform: none; border-radius: 16px 16px 0 0; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion: reduce) { .room-page, .room-members-dialog { scroll-behavior: auto; } }
 @media (max-width: 760px) {
@@ -94,7 +94,7 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .room-menu-actions button span { margin-inline-start: auto; color: var(--muted); font-size: 12px; }
 .room-panel-heading { display: flex; align-items: center; min-height: 44px; }
 .room-menu-back { width: 44px; height: 44px; flex-shrink: 0; }
-.room-members-dialog > button:last-child { inset-block-start: 32px; inset-inline-end: 32px; }
+.room-members-dialog > button:last-child { inset-block-start: 12px; inset-inline-end: 16px; }
 .room-info dt, .room-password-form p { color: var(--muted); font-size: 13px; }
 .room-info dd { display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow-wrap: anywhere; }
 .room-info dd button { min-height: 44px; }
@@ -104,8 +104,10 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .room-copy-toast {
   position: fixed;
   z-index: 60;
-  inset-block-start: max(16px, env(safe-area-inset-top));
-  inset-inline-end: max(16px, env(safe-area-inset-right));
+  top: max(20px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -122,5 +124,4 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .room-copy-toast svg { flex-shrink: 0; color: var(--accent); }
 @media (max-width: 760px) {
   .room-menu-dialog { max-width: none; }
-  .room-members-dialog > button:last-child { inset-inline-end: 24px; }
 }
