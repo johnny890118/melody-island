@@ -30,7 +30,7 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .transport .room-more-button {
   position: absolute;
   inset-block-end: calc(100% + 12px);
-  inset-inline-end: max(5vw, env(safe-area-inset-right));
+  inset-inline-end: max(12px, calc(env(safe-area-inset-right) + 8px));
   width: 44px;
   height: 44px;
   border: 1px solid #a78d9c70;
@@ -85,7 +85,6 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
   .room-heading h1 { font-family: Manrope, 'PingFang TC', sans-serif; font-size: 25px; }
   .room-heading > div:first-child { min-width: 0; }
   .room-heading p { font-size: 11px; line-height: 1.7; }
-  .transport .room-more-button { inset-inline-end: max(6vw, env(safe-area-inset-right)); }
   .room-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .room-page .track-details { margin-top: 14px; }
   .room-page .queue-row { min-height: 78px; }
