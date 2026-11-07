@@ -1,0 +1,40 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 960
+    },
+    "scope": "local production build, no CPU/network throttling, software WebGL; LCP excludes Canvas readiness",
+    "fcpMs": 564,
+    "lcpMs": 564,
+    "cls": 0.00041696977026668594,
+    "observedSceneAndFontsReadyMs": 1294.800000000745,
+    "transferBytes": 919674,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "durationMs": 5.199999999254942,
+        "transferBytes": 140384
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "scope": "local production build, no CPU/network throttling, software WebGL; LCP excludes Canvas readiness",
+    "fcpMs": 28,
+    "lcpMs": 28,
+    "cls": 0.0010950772960642602,
+    "observedSceneAndFontsReadyMs": 602.5,
+    "transferBytes": 919674,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "durationMs": 4.599999997764826,
+        "transferBytes": 140384
+      }
+    ]
+  }
+]

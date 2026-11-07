@@ -1,0 +1,50 @@
+# Isolated staging setup
+
+The independent Vercel and Firebase projects are both named `melody-island-stage-20261105`. Use the protected [Staging Preview](https://melody-island-stage-20261105-preview.vercel.app/) for acceptance. The existing production Vercel project's Preview variables are shared with other environments. Avoid signing in or creating rooms on its older previews.
+
+## Account access and project creation
+
+1. Sign in to Firebase with an account allowed to create a project. In this workspace run `npx --no-install firebase login` and finish the browser prompt. Run `npx --no-install firebase login:list` to confirm the session. Do not send tokens or key files in chat.
+2. In the Firebase console, create a dedicated project with a globally unique ID, for example `melody-island-stage-<suffix>`. If a separate project already exists, confirm it is reserved for staging and has no production data or shared service account. Record the actual ID and intended Firestore region before setup.
+3. Deploy `codex/modernize-island` to the dedicated Vercel project's Preview environment. Assign the stable Staging alias to the resulting deployment and verify that an unauthenticated request redirects to Vercel authentication. The dedicated project's Production deployment is a static bootstrap page.
+
+## Bind the dedicated Firebase project
+
+1. Register a web app in the staging project and copy its own Firebase web configuration. Create an empty Firestore database with restrictive rules. Enable Google sign-in and anonymous sign-in there. Register the staging hostname as an Auth authorized domain.
+2. Provision a dedicated Admin service account in the staging project with only the permissions the app requires for Firestore, Auth and App Check. Verify it has no grants in the production project. Store its private key directly in protected Vercel Preview variables. Use a separate, restricted YouTube key or leave search unavailable until its test quota is configured.
+3. Set the branch-specific variables below. Verify the Firebase web API key and App ID together against the staging web app in the Firebase console. The build guard checks environment consistency but cannot verify the provider project behind a copied API key.
+
+| Variable | Staging value |
+| --- | --- |
+| `STAGING_FIREBASE_PROJECT_ID`, `FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Same dedicated Firebase project ID |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Dedicated project's `.firebaseapp.com` auth domain |
+| `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_APP_ID` | Staging web app values |
+| `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | Dedicated staging account only |
+| `APP_ORIGIN` | Canonical staging HTTPS origin with no trailing slash |
+| `MELODY_DEPLOYMENT` | Set to `staging` as an explicit marker; Vercel Preview also uses its system marker |
+| `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | Key registered only for the staging app/domain |
+| `ENFORCE_APP_CHECK` | Enable after confirming the browser can obtain a real staging token, before acceptance |
+
+Keep emulator host and emulator override variables unset. Make sure Vercel exposes system variables. A Preview build without the dedicated configuration now fails intentionally. Older Preview deployments do not gain this guard retroactively.
+
+## Acceptance order
+
+- Confirm the Firebase Console project ID, web app configuration, Vercel branch and staging URL match before any data operation. Confirm Firestore is new/empty before installing reviewed rules using the explicit staging project target. Do not run a migration or import production data.
+- With two synthetic test users, run Google sign-in, joining, real YouTube playback, track transition, network recovery, and iPhone Safari. Record device/browser versions and separate actual audible synchronization from browser media clocks.
+- Run the positive and negative security checks in [production-runbook.md](production-runbook.md#staging-evidence-to-collect). Verify the expected staging project receives the test writes. Record statuses only, never credentials.
+- Complete acceptance before opening the PR. Keep main and production untouched pending review.
+
+
+## Same-tab Google sign-in
+
+Staging sets `NEXT_PUBLIC_AUTH_REDIRECT=true`. The browser uses its own hostname as the Firebase Auth helper domain. Next.js proxies `/__/auth/*` to the dedicated Firebase project's helper and allows only same-origin framing for these helper routes. The main application retains its frame restriction. The callback `https://melody-island-stage-20261105-preview.vercel.app/__/auth/handler` is registered on the staging Google provider. The browser reads the redirect result on return and displays a recoverable error when the callback fails.
+
+Production needs its own authorized hostname and Google callback before enabling this flag. The staging flag has only been set in the dedicated Vercel project's Preview environment. Firebase's [redirect guidance](https://firebase.google.com/docs/auth/web/redirect-best-practices) describes the proxy requirement.
+
+The local same-tab regression uses npm run test:e2e:redirect. Its explicit emulator build proxies Auth helper and token endpoints to the fixed local port 9099 so WebKit tests use the same-origin storage model as hosted staging. The hosted staging guard rejects emulator configurations.
+
+## Radio metadata acceptance — 2026-11-06
+
+The authenticated Chrome room initially displayed “無法確認影片長度，請稍後再試。” The independent staging service was enabled, but its server key permitted only `youtube.api.v3.V3DataSearchService.List`. Its restriction was updated to additionally permit the read-only `youtube.api.v3.V3DataVideoService.List`. The existing restriction metadata was backed up before the update; no key string was retrieved, replaced or printed. No production project, Firebase rules, billing or App Check setting changed.
+
+After propagation and reload, Chrome Network showed the member-only `/playback` endpoint returning **200 OK** (one observed request: 5.30s), and the application error disappeared. The existing Google session persisted and the room connected. A manual staging playback check showed Chrome's active-media indicator and YouTube advancing from approximately 0:42 to 1:32. A shared pause then left both application and iframe paused at approximately 1:33. This is a single desktop environment check, not a latency benchmark or a physical iPhone/Mac synchronization pass. Automated room tests remain confined to the demo emulators.

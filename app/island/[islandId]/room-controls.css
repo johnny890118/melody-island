@@ -1,0 +1,147 @@
+.transport .transport-listen {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--paper);
+}
+.transport .transport-listen:hover:not(:disabled) {
+  background: var(--ink);
+}
+@media (max-width: 760px) {
+  .transport .transport-listen {
+    justify-self: stretch;
+    width: 100%;
+  }
+  .room-page:has(.transport-listen) {
+    padding-bottom: 260px;
+  }
+  html:has(.transport-listen) {
+    scroll-padding-bottom: 220px;
+  }
+  .room-page:has(.transport-listen) :is(button, input, summary) {
+    scroll-margin-bottom: 220px;
+  }
+}
+/* Approved A: listening deck. Room authority and player lifecycle stay unchanged. */
+.room-page { max-width: 1440px; padding: 32px 5vw 190px; }
+body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, transparent 55%), #100e18; }
+.room-heading { align-items: center; min-height: 44px; margin-bottom: 30px; }
+.transport .room-more-button {
+  position: absolute;
+  inset-block-end: calc(100% + 12px);
+  inset-inline-end: max(12px, calc(env(safe-area-inset-right) + 8px));
+  width: 44px;
+  height: 44px;
+  border: 1px solid #a78d9c70;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 4px 12px #09060f80;
+}
+.transport .room-more-button:hover { background: #261e32; }
+.room-heading h1 { font-size: 36px; line-height: 1.25; }
+.room-grid { grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr); gap: 5vw; align-items: start; }
+.room-page .video-frame { min-height: 200px; }
+.room-page .track-details { margin-top: 20px; border: 0; padding-bottom: 0; }
+.room-page .now-playing-title { font-size: clamp(22px, 2.2vw, 30px); line-height: 1.4; margin-bottom: 10px; }
+.listening-stage > .resync { font-size: 12px; padding: 0; min-height: 44px; color: var(--muted); }
+.listening-sidebar > .room-section { border-top: 0; padding-top: 0; }
+.queue-heading { border-bottom: 1px solid #a78d9c60; margin-bottom: 0; padding-bottom: 14px; }
+.queue-heading h2 { margin: 0; font-size: 18px; font-weight: 500; }
+.queue-search-entry { display: flex; gap: 10px; width: 100%; border: 1px solid #a78d9c70; border-radius: 4px; min-height: 46px; margin: 0 0 16px; font-size: 12px; }
+.listening-sidebar > .room-section > .queue-list { max-height: 65svh; overflow-y: auto; scrollbar-color: #8f778d #211a2e; scrollbar-width: thin; }
+.room-page .queue-row { min-height: 88px; gap: 12px; padding: 12px 0; }
+.room-page .queue-row.current { background: transparent; }
+.room-page .queue-art { width: 64px; height: 48px; border-radius: 3px; }
+.room-page .queue-song { font-size: 13px; line-height: 1.6; }
+.room-page .playing-label { font-size: 11px; }
+.transport { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 24px; padding: 16px 5vw max(16px, env(safe-area-inset-bottom)); background: #201929; }
+.transport-track { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.transport-art { flex-shrink: 0; width: 64px; height: 48px; border-radius: 3px; object-fit: cover; }
+.transport .transport-title { max-width: 100%; }
+.transport .transport-title > span { font-size: 13px; }
+.transport .transport-listen { justify-self: end; }
+.room-members-dialog { width: calc(100vw - 32px); max-width: 640px; max-height: min(85svh, 800px); overflow-y: auto; border: 1px solid #a78d9c70; border-radius: 12px; padding: 12px 16px 16px; background: var(--paper); }
+.room-members-dialog .room-section { margin-bottom: 0; padding-top: 0; }
+.member-group { padding-block: 10px; border-bottom: 1px solid var(--rule); }
+.member-group h3 { margin: 0 0 6px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.member-group p { margin: 0; }
+.resident-list { list-style: none; padding: 0; margin: 0; }
+.resident-list li { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-height: 32px; }
+.resident-list li + li { border-top: 1px solid var(--rule); }
+.room-members-dialog .member-actions { display: flex; gap: 10px; }
+.room-members-dialog .member-actions button { padding: 10px; min-height: 44px; }
+.member-name { color: var(--ink); overflow-wrap: anywhere; }
+.room-members-dialog .permission-options { gap: 2px; }
+.room-members-dialog legend { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; }
+.room-members-dialog .permission-options label { width: fit-content; }
+@media (max-width: 1000px) {
+  .room-grid { gap: 28px; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); }
+  .transport-art { display: none; }
+}
+@media (max-width: 760px) {
+  .room-page { padding: 22px 6vw 200px; }
+  .room-heading { flex-direction: row; margin-bottom: 22px; }
+  .room-heading h1 { font-family: Manrope, 'PingFang TC', sans-serif; font-size: 25px; }
+  .room-heading > div:first-child { min-width: 0; }
+  .room-heading p { font-size: 11px; line-height: 1.7; }
+  .room-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .room-page .track-details { margin-top: 14px; }
+  .room-page .queue-row { min-height: 78px; }
+  .listening-sidebar > .room-section > .queue-list { max-height: none; overflow: visible; }
+  .room-page .queue-art { width: 56px; height: 42px; }
+  .transport { grid-template-columns: minmax(0, 1fr); padding: 12px 6vw max(12px, env(safe-area-inset-bottom)); gap: 8px; }
+  .transport-track { width: 100%; }
+  .transport .transport-title { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .transport-buttons { gap: 14px; justify-self: center; }
+  .transport .transport-listen { justify-self: stretch; }
+  .room-members-dialog { top: auto; bottom: 0; left: 0; width: 100%; max-height: 88svh; transform: none; border-radius: 16px 16px 0 0; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) { .room-page, .room-members-dialog { scroll-behavior: auto; } }
+@media (max-width: 760px) {
+  .transport-buttons { gap: clamp(6px, 3vw, 12px); }
+  .room-members-dialog fieldset { min-width: 0; }
+}
+/* An explicit width lets the 200px player minimum letterbox on narrow screens
+   instead of deriving a 355px minimum width from the 16:9 aspect ratio. */
+.room-page .video-frame { width: 100%; min-width: 0; }
+
+.room-menu-dialog { max-width: 460px; }
+.room-menu-actions, .room-info, .room-password-form { display: grid; gap: 8px; }
+.room-menu-actions button { justify-content: flex-start; min-height: 48px; gap: 12px; }
+.room-menu-actions button span { margin-inline-start: auto; color: var(--muted); font-size: 12px; }
+.room-panel-heading { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; min-height: 44px; }
+.room-panel-heading h2 { grid-area: 1 / 2; text-align: center; }
+.room-menu-back { grid-area: 1 / 1; width: 44px; height: 44px; }
+.room-members-dialog > button:last-child { inset-block-start: 12px; inset-inline-end: 16px; }
+.room-info dt, .room-password-form p { color: var(--muted); font-size: 13px; }
+.room-info dd { display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow-wrap: anywhere; }
+.room-info .room-info-id { justify-content: flex-start; gap: 4px; }
+.room-info-id button { width: 28px; height: 28px; flex-shrink: 0; }
+.room-password-form { border-top: 1px solid #a78d9c70; padding-top: 16px; }
+.room-password-form input, .room-password-form button { min-height: 44px; }
+.room-password-form button { justify-self: start; }
+.room-copy-toast {
+  position: fixed;
+  z-index: 60;
+  top: max(20px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 32px);
+  padding: 12px 16px;
+  border: 1px solid #a78d9c70;
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 8px 24px #09060f80;
+  font-size: 13px;
+  pointer-events: none;
+}
+.room-copy-toast svg { flex-shrink: 0; color: var(--accent); }
+@media (max-width: 760px) {
+  .room-menu-dialog { max-width: none; }
+}

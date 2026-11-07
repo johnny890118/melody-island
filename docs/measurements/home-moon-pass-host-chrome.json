@@ -1,0 +1,68 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 960
+    },
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+    "run": 1,
+    "scope": "Installed Chrome on the host, localhost production, reduced motion; viewport dimensions do not emulate hardware",
+    "longTaskTotalMs": 1121,
+    "longestTaskMs": 731,
+    "fcpMs": 488,
+    "lcpMs": 488,
+    "cls": 0,
+    "islandAndFontsReadyMs": 1597.5,
+    "fullSceneReadyMs": 2464.5,
+    "transferBytes": 1921656,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "startMs": 6.900000000372529,
+        "endMs": 28.700000000186265,
+        "durationMs": 21.799999999813735,
+        "transferBytes": 140384
+      },
+      {
+        "url": "/models/bird.glb",
+        "startMs": 1907.7000000001863,
+        "endMs": 1933.4000000003725,
+        "durationMs": 25.700000000186265,
+        "transferBytes": 1042944
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4 Pro, Unspecified Version)",
+    "run": 1,
+    "scope": "Installed Chrome on the host, localhost production, reduced motion; viewport dimensions do not emulate hardware",
+    "longTaskTotalMs": 0,
+    "longestTaskMs": 0,
+    "fcpMs": 156,
+    "lcpMs": 156,
+    "cls": 0,
+    "islandAndFontsReadyMs": 878,
+    "fullSceneReadyMs": 1677.9000000003725,
+    "transferBytes": 1921656,
+    "model": [
+      {
+        "url": "/models/island.glb",
+        "startMs": 6.6000000005587935,
+        "endMs": 19.200000000186265,
+        "durationMs": 12.599999999627471,
+        "transferBytes": 140384
+      },
+      {
+        "url": "/models/bird.glb",
+        "startMs": 894.1000000005588,
+        "endMs": 933,
+        "durationMs": 38.89999999944121,
+        "transferBytes": 1042944
+      }
+    ]
+  }
+]

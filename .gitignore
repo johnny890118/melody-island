@@ -38,3 +38,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+!.env.example
+/test-results/
+/playwright-report/
+/firebase-debug.log
+/firestore-debug.log
+/.impeccable/review/
+/.impeccable/questions/
+/.agents/skills/impeccable/scripts/bin/

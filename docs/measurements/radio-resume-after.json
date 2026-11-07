@@ -1,0 +1,1009 @@
+{
+  "passed": true,
+  "stage": "cycle-6-rapid",
+  "cycles": [
+    {
+      "cycle": 1,
+      "kind": "settled",
+      "resumeObservedMs": 903,
+      "observations": [
+        {
+          "seconds": 4.36762,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 2,
+            "pauseVideo": 1,
+            "seekTo": 1
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984931968.6
+        },
+        {
+          "seconds": 4.025636427,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 2,
+            "seekTo": 2,
+            "pauseVideo": 1
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984931967
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "kind": "settled",
+      "resumeObservedMs": 890,
+      "observations": [
+        {
+          "seconds": 6.785393,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 3,
+            "pauseVideo": 2,
+            "seekTo": 1
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984934450.3
+        },
+        {
+          "seconds": 6.477698165,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 3,
+            "seekTo": 3,
+            "pauseVideo": 2
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984934450
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "kind": "settled",
+      "resumeObservedMs": 901,
+      "observations": [
+        {
+          "seconds": 9.236399,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 4,
+            "pauseVideo": 3,
+            "seekTo": 1
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984936944
+        },
+        {
+          "seconds": 8.935791467,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 4,
+            "seekTo": 4,
+            "pauseVideo": 3
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984936942
+        }
+      ]
+    },
+    {
+      "cycle": 4,
+      "kind": "rapid",
+      "resumeObservedMs": 910,
+      "observations": [
+        {
+          "seconds": 11.703896,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 5,
+            "pauseVideo": 4,
+            "seekTo": 1
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984939432.8
+        },
+        {
+          "seconds": 11.391497891,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 5,
+            "seekTo": 5,
+            "pauseVideo": 4
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984939432
+        }
+      ]
+    },
+    {
+      "cycle": 5,
+      "kind": "rapid",
+      "resumeObservedMs": 891,
+      "observations": [
+        {
+          "seconds": 14.136238,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 6,
+            "pauseVideo": 5,
+            "seekTo": 1
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984941886.5
+        },
+        {
+          "seconds": 13.807873183,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 6,
+            "seekTo": 6,
+            "pauseVideo": 5
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984941885
+        }
+      ]
+    },
+    {
+      "cycle": 6,
+      "kind": "rapid",
+      "resumeObservedMs": 901,
+      "observations": [
+        {
+          "seconds": 16.570657,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 7,
+            "pauseVideo": 6,
+            "seekTo": 1
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984944363.7002
+        },
+        {
+          "seconds": 16.242055811,
+          "commands": {
+            "addEventListener": 4,
+            "unMute": 2,
+            "loadVideoById": 1,
+            "playVideo": 7,
+            "seekTo": 7,
+            "pauseVideo": 6
+          },
+          "duration": 634.601,
+          "paused": false,
+          "readyState": 4,
+          "networkState": 2,
+          "mediaErrorCode": null,
+          "ended": false,
+          "observedAtMs": 1793984944363
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "seconds": 18.077271,
+      "commands": {
+        "addEventListener": 4,
+        "unMute": 2,
+        "loadVideoById": 1,
+        "playVideo": 7,
+        "pauseVideo": 6,
+        "seekTo": 1
+      },
+      "duration": 634.601,
+      "paused": false,
+      "readyState": 4,
+      "networkState": 2,
+      "mediaErrorCode": null,
+      "ended": false,
+      "observedAtMs": 1793984945870.2002
+    },
+    {
+      "seconds": 17.748543395,
+      "commands": {
+        "addEventListener": 4,
+        "unMute": 2,
+        "loadVideoById": 1,
+        "playVideo": 7,
+        "seekTo": 7,
+        "pauseVideo": 6
+      },
+      "duration": 634.601,
+      "paused": false,
+      "readyState": 4,
+      "networkState": 2,
+      "mediaErrorCode": null,
+      "ended": false,
+      "observedAtMs": 1793984945869
+    }
+  ],
+  "diagnostics": [
+    {
+      "phase": "playing",
+      "counts": {
+        "load": 1,
+        "play": 7,
+        "pause": 6,
+        "seek": 1
+      },
+      "trace": [
+        {
+          "at": 1577.0999999977648,
+          "revision": 0,
+          "epoch": -1,
+          "phase": "idle",
+          "reason": "awaiting-server-clock"
+        },
+        {
+          "at": 4189.199999999255,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "authoritative-resource-change",
+          "action": "load",
+          "seconds": 0.0207998046875
+        },
+        {
+          "at": 4226.89999999851,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "awaiting-play-acknowledgement"
+        },
+        {
+          "at": 4227,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 4332.800000000745,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "awaiting-play-acknowledgement"
+        },
+        {
+          "at": 4371.5,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "explicit-local-listening-gesture",
+          "action": "play"
+        },
+        {
+          "at": 4573.300000000745,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "awaiting-play-acknowledgement"
+        },
+        {
+          "at": 5585.099999997765,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 5585.099999997765,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 7729.5,
+          "revision": 2,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 7729.5,
+          "revision": 2,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-paused-position",
+          "action": "seek",
+          "seconds": 3.544
+        },
+        {
+          "at": 7776.800000000745,
+          "revision": 3,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 7778.599999997765,
+          "revision": 3,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 8046.39999999851,
+          "revision": 3,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 8046.39999999851,
+          "revision": 3,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 10220.5,
+          "revision": 4,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 10271,
+          "revision": 5,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 10272.599999997765,
+          "revision": 5,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 10536.5,
+          "revision": 5,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 10536.5,
+          "revision": 5,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 12709.800000000745,
+          "revision": 6,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 12753.39999999851,
+          "revision": 7,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 12755.199999999255,
+          "revision": 7,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 13013.699999999255,
+          "revision": 7,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 13013.699999999255,
+          "revision": 7,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 15198.300000000745,
+          "revision": 8,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 15234.300000000745,
+          "revision": 9,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 15235.89999999851,
+          "revision": 9,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 15499.5,
+          "revision": 9,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 15499.5,
+          "revision": 9,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 17671.599999997765,
+          "revision": 10,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 17705.800000000745,
+          "revision": 11,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 17707.300000000745,
+          "revision": 11,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 17968.300000000745,
+          "revision": 11,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 17968.300000000745,
+          "revision": 11,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 20139.300000000745,
+          "revision": 12,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 20174,
+          "revision": 13,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 20175.5,
+          "revision": 13,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 20435.800000000745,
+          "revision": 13,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 20435.800000000745,
+          "revision": 13,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        }
+      ]
+    },
+    {
+      "phase": "playing",
+      "counts": {
+        "load": 1,
+        "play": 7,
+        "seek": 7,
+        "pause": 6
+      },
+      "trace": [
+        {
+          "at": 714,
+          "revision": 0,
+          "epoch": -1,
+          "phase": "idle",
+          "reason": "awaiting-server-clock"
+        },
+        {
+          "at": 1861,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "authoritative-resource-change",
+          "action": "load",
+          "seconds": 0.021
+        },
+        {
+          "at": 1890,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "awaiting-play-acknowledgement"
+        },
+        {
+          "at": 1890,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 2000,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "awaiting-play-acknowledgement"
+        },
+        {
+          "at": 2041,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "explicit-local-listening-gesture",
+          "action": "play"
+        },
+        {
+          "at": 2236,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "awaiting-play-acknowledgement"
+        },
+        {
+          "at": 2716,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "loading",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 2716,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 4718,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "stable-content-joins-authoritative-timeline",
+          "action": "seek",
+          "seconds": 2.878
+        },
+        {
+          "at": 4718,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 4727,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 5244,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "seek-acknowledged"
+        },
+        {
+          "at": 5244,
+          "revision": 1,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 5399,
+          "revision": 2,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 5399,
+          "revision": 2,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-paused-position",
+          "action": "seek",
+          "seconds": 3.544
+        },
+        {
+          "at": 5446,
+          "revision": 3,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 5450,
+          "revision": 3,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 5954,
+          "revision": 3,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 5954,
+          "revision": 3,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 7891,
+          "revision": 4,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 7891,
+          "revision": 4,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-paused-position",
+          "action": "seek",
+          "seconds": 5.988
+        },
+        {
+          "at": 7941,
+          "revision": 5,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 7943,
+          "revision": 5,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 8449,
+          "revision": 5,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 8449,
+          "revision": 5,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 10379,
+          "revision": 6,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 10379,
+          "revision": 6,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-paused-position",
+          "action": "seek",
+          "seconds": 8.428
+        },
+        {
+          "at": 10424,
+          "revision": 7,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 10426,
+          "revision": 7,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 10931,
+          "revision": 7,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 10931,
+          "revision": 7,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 12867,
+          "revision": 8,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 12867,
+          "revision": 8,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-paused-position",
+          "action": "seek",
+          "seconds": 10.869
+        },
+        {
+          "at": 12904,
+          "revision": 9,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 12906,
+          "revision": 9,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 13411,
+          "revision": 9,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 13411,
+          "revision": 9,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 15341,
+          "revision": 10,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 15341,
+          "revision": 10,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-paused-position",
+          "action": "seek",
+          "seconds": 13.307
+        },
+        {
+          "at": 15376,
+          "revision": 11,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 15378,
+          "revision": 11,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 15883,
+          "revision": 11,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 15883,
+          "revision": 11,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        },
+        {
+          "at": 17808,
+          "revision": 12,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-pause",
+          "action": "pause"
+        },
+        {
+          "at": 17808,
+          "revision": 12,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-paused-position",
+          "action": "seek",
+          "seconds": 15.738
+        },
+        {
+          "at": 17844,
+          "revision": 13,
+          "epoch": 1,
+          "phase": "paused",
+          "reason": "authoritative-resume",
+          "action": "play"
+        },
+        {
+          "at": 17846,
+          "revision": 13,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "buffering-no-media-command"
+        },
+        {
+          "at": 18349,
+          "revision": 13,
+          "epoch": 1,
+          "phase": "buffering",
+          "reason": "play-request-acknowledged-by-content-progress"
+        },
+        {
+          "at": 18349,
+          "revision": 13,
+          "epoch": 1,
+          "phase": "playing",
+          "reason": "continuous-content-observed"
+        }
+      ]
+    }
+  ],
+  "canonical": {
+    "isPlaying": true,
+    "positionMs": 15738,
+    "playbackRevision": 13,
+    "trackEpoch": 1
+  },
+  "scope": "Real YouTube Chromium host and WebKit listener on one Mac, emulator-only room and explicit duration fixture. Not physical iPhone or acoustic latency."
+}
