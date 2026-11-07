@@ -36,21 +36,15 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .room-avatars > span:nth-child(3) { background: #5e3d46; }
 .room-avatars > span:nth-child(4) { background: #42405e; }
 .room-grid { grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr); gap: 5vw; align-items: start; }
-.listening-stage-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; font-size: 12px; color: var(--muted); margin-bottom: 14px; }
-.listening-stage-heading > span:first-child { display: flex; gap: 8px; align-items: center; color: var(--accent); }
 .room-page .video-frame { min-height: 200px; }
 .room-page .track-details { margin-top: 20px; border: 0; padding-bottom: 0; }
 .room-page .now-playing-title { font-size: clamp(22px, 2.2vw, 30px); line-height: 1.4; margin-bottom: 10px; }
-.device-listening-state { display: flex; align-items: center; gap: 9px; margin-top: 22px; padding: 16px 0; border-top: 1px solid #a78d9c45; color: var(--muted); font-size: 12px; }
-.device-listening-state > span:last-of-type { margin-left: auto; }
 .listening-stage > .resync { font-size: 12px; padding: 0; min-height: 44px; color: var(--muted); }
 .listening-sidebar > .room-section { border-top: 0; padding-top: 0; }
 .queue-heading { border-bottom: 1px solid #a78d9c60; margin-bottom: 0; padding-bottom: 14px; }
-.queue-heading h2 { margin-bottom: 7px; font-size: 18px; font-weight: 500; }
-.queue-description { font-size: 12px; color: var(--muted); margin: 18px 0; }
-.queue-search-entry { display: flex; gap: 10px; width: 100%; border: 1px solid #a78d9c70; border-radius: 4px; min-height: 46px; margin-bottom: 16px; font-size: 12px; }
+.queue-heading h2 { margin: 0; font-size: 18px; font-weight: 500; }
+.queue-search-entry { display: flex; gap: 10px; width: 100%; border: 1px solid #a78d9c70; border-radius: 4px; min-height: 46px; margin: 16px 0 0; font-size: 12px; }
 .listening-sidebar > .room-section > .queue-list { max-height: 65svh; overflow-y: auto; scrollbar-color: #8f778d #211a2e; scrollbar-width: thin; }
-.queue-divider { color: var(--muted); font-size: 12px; padding: 24px 0 6px; }
 .room-page .queue-row { min-height: 88px; gap: 12px; padding: 12px 0; }
 .room-page .queue-row.current { background: transparent; }
 .room-page .queue-art { width: 64px; height: 48px; border-radius: 3px; }
@@ -61,8 +55,6 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .transport-art { flex-shrink: 0; width: 64px; height: 48px; border-radius: 3px; object-fit: cover; }
 .transport .transport-title { max-width: 100%; }
 .transport .transport-title > span { font-size: 13px; }
-.transport .transport-title small { font-size: 11px; }
-.transport .transport-status { max-width: none; justify-self: end; font-size: 12px; }
 .transport .transport-listen { justify-self: end; }
 .room-members-dialog { width: calc(100vw - 32px); max-width: 640px; max-height: min(85svh, 800px); overflow-y: auto; border: 1px solid #a78d9c70; border-radius: 12px; padding: 32px; background: var(--paper); }
 .room-members-dialog .room-section { margin-bottom: 0; }
@@ -88,17 +80,13 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
   .room-members-trigger { font-size: 11px; gap: 8px; }
   .room-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .room-page .track-details { margin-top: 14px; }
-  .device-listening-state { font-size: 11px; padding-block: 12px; margin-top: 16px; flex-wrap: wrap; }
-  .device-listening-state > span:last-of-type { font-size: 11px; }
   .room-page .queue-row { min-height: 78px; }
   .listening-sidebar > .room-section > .queue-list { max-height: none; overflow: visible; }
   .room-page .queue-art { width: 56px; height: 42px; }
   .transport { grid-template-columns: minmax(0, 1fr); padding: 12px 6vw max(12px, env(safe-area-inset-bottom)); gap: 8px; }
   .transport-track { width: 100%; }
   .transport .transport-title { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .transport .transport-title small { flex-shrink: 0; margin: 0; }
   .transport-buttons { gap: 14px; justify-self: center; }
-  .transport .transport-status { display: none; }
   .transport .transport-listen { justify-self: stretch; }
   .room-members-dialog { top: auto; bottom: 0; left: 0; width: 100%; max-height: 88svh; transform: none; border-radius: 16px 16px 0 0; padding: 32px 24px max(24px, env(safe-area-inset-bottom)); }
 }

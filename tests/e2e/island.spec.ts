@@ -469,9 +469,9 @@ test('a disconnected friend catches up with canonical playback after reconnectin
     await login(page, guest);
     await page.goto(`/island/${id}`);
     await expect(page.getByTestId('test-player')).toBeVisible();
-    await expect(page.getByText(/已連線 · 2 位成員/)).toBeVisible();
+    await expect(page.getByRole('button', { name: '查看 2 位已加入成員' })).toBeVisible();
     await context.setOffline(true);
-    await expect(page.getByText(/離線 · 2 位成員/)).toBeVisible();
+    await expect(page.getByText('離線', { exact: true })).toBeVisible();
     expect((await post(request, `/api/islands/${id}/commands`, owner, {
       type: 'add', song: { videoId: 'ddddddddddd', title: '離線期間加入的新歌' }, commandId: crypto.randomUUID(),
     })).status()).toBe(200);
@@ -481,9 +481,10 @@ test('a disconnected friend catches up with canonical playback after reconnectin
     })).status()).toBe(200);
     await expect(page.getByTestId('test-player')).toHaveAttribute('data-video', '');
     await context.setOffline(false);
+    await expect(page.getByText('離線', { exact: true })).toHaveCount(0);
     await expect(page.getByTestId('test-player')).toHaveAttribute('data-video', 'ddddddddddd');
     await expect(page.getByTestId('test-player')).toHaveAttribute('data-playing', 'true');
-    await expect(page.getByText(/已連線 · 2 位成員/)).toBeVisible();
+    await expect(page.getByRole('button', { name: '查看 2 位已加入成員' })).toBeVisible();
     await page.reload();
     await expect(page.getByTestId('test-player')).toHaveAttribute('data-video', 'ddddddddddd');
     await expect(page.getByTestId('test-player')).toHaveAttribute('data-playing', 'true');
