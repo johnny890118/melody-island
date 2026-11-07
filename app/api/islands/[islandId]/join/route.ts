@@ -18,12 +18,14 @@ export async function POST(request: Request, { params }: RouteContext) {
     const { db } = adminServices();
     const roomRef = db.doc(`islands/${islandId}`);
     const secretRef = db.doc(`islandSecrets/${islandId}`);
-    const secret = await secretRef.get();
-    if (!(await verifyPassword(islandPassword, secret.data()?.passwordHash)))
+    const passwordHash = (await secretRef.get()).data()?.passwordHash;
+    if (!(await verifyPassword(islandPassword, passwordHash)))
       throw new SessionError('島嶼 ID 或密碼不正確。', 403);
     await db.runTransaction(
       async (transaction) => {
-        const room = await transaction.get(roomRef);
+        const [room, secret] = await transaction.getAll(roomRef, secretRef);
+        if (secret.data()?.passwordHash !== passwordHash)
+          throw new SessionError('島嶼 ID 或密碼不正確。', 403);
         const data = requireRoom(room);
         if (data.memberUids.includes(actor.uid)) return;
         if (data.memberCount >= 20) throw new SessionError('這座島嶼已達 20 位成員上限。', 409);

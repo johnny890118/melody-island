@@ -190,10 +190,16 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   await expect(a.getByRole('button', { name: '加歌', exact: true })).toBeFocused();
   await a.screenshot({ path: '.impeccable/review/room-short-viewport.png' });
   const mountedPlayer = await a.getByTestId('test-player').elementHandle();
-  const membersButton = a.getByRole('button', { name: /查看.*位已加入成員/ });
+  const membersButton = a.getByRole('button', { name: '更多', exact: true });
   await membersButton.click();
-  await a.getByRole('checkbox', { name: '切換上一首／下一首' }).focus();
-  await expectClear(a.getByRole('checkbox', { name: '切換上一首／下一首' }));
+  await a.getByRole('button', { name: /成員與權限/ }).click();
+  const skipPermission = a.getByRole('checkbox', { name: '切換上一首／下一首' });
+  await skipPermission.focus();
+  await expect(skipPermission).toBeFocused();
+  await expect(skipPermission).toBeInViewport();
+  // The modal overlays the transport. Check that the focused control actually receives hits.
+  await skipPermission.click({ trial: true });
+  await expect(a.getByRole('button', { name: '關閉視窗' })).toBeInViewport();
   await a.screenshot({ path: '.impeccable/review/room-mobile-management-focus.png' });
   await a.keyboard.press('Escape');
   await expect(membersButton).toBeFocused();
@@ -469,7 +475,12 @@ test('a disconnected friend catches up with canonical playback after reconnectin
     await login(page, guest);
     await page.goto(`/island/${id}`);
     await expect(page.getByTestId('test-player')).toBeVisible();
-    await expect(page.getByRole('button', { name: '查看 2 位已加入成員' })).toBeVisible();
+    const expectBothMembers = async () => {
+      await page.getByRole('button', { name: '更多', exact: true }).click();
+      await expect(page.getByRole('button', { name: '成員與權限 2 位', exact: true })).toBeVisible();
+      await page.keyboard.press('Escape');
+    };
+    await expectBothMembers();
     await context.setOffline(true);
     await expect(page.getByText('離線', { exact: true })).toBeVisible();
     expect((await post(request, `/api/islands/${id}/commands`, owner, {
@@ -484,7 +495,7 @@ test('a disconnected friend catches up with canonical playback after reconnectin
     await expect(page.getByText('離線', { exact: true })).toHaveCount(0);
     await expect(page.getByTestId('test-player')).toHaveAttribute('data-video', 'ddddddddddd');
     await expect(page.getByTestId('test-player')).toHaveAttribute('data-playing', 'true');
-    await expect(page.getByRole('button', { name: '查看 2 位已加入成員' })).toBeVisible();
+    await expectBothMembers();
     await page.reload();
     await expect(page.getByTestId('test-player')).toHaveAttribute('data-video', 'ddddddddddd');
     await expect(page.getByTestId('test-player')).toHaveAttribute('data-playing', 'true');
@@ -534,7 +545,8 @@ test('starting local listening never rewrites the shared room timeline', async (
   await listen.click();
   // The mock emits no playing acknowledgement, so the activation prompt stays available.
   await expect(listen).toBeVisible();
-  await page.getByRole('button', { name: '重新同步播放' }).click();
+  await page.getByRole('button', { name: '更多', exact: true }).click();
+  await page.getByRole('button', { name: /重新同步播放/ }).click();
   const after = parseRoom((await room.get()).data());
   expect(after.version).toBe(before.version);
   expect(after.playbackUpdatedAt).toBe(before.playbackUpdatedAt);
@@ -554,4 +566,40 @@ test('starting local listening never rewrites the shared room timeline', async (
   await page.getByRole('button', { name: '我的島嶼', exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/island/${data.id}$`));
   await expect(page.getByRole('heading', { name: '我的島嶼入口', exact: true })).toBeVisible();
+});
+
+test('only the owner can rotate the join password without interrupting members', async ({ request, page }) => {
+  const owner = await identity(request);
+  const member = await identity(request);
+  const visitor = await identity(request);
+  const oldPassword = 'old-join-password';
+  const newPassword = 'new-join-password';
+  const created = await post(request, '/api/islands', owner, {
+    islandName: '邀請測試',
+    islandPassword: oldPassword,
+  });
+  expect(created.status()).toBe(201);
+  const { id } = await created.json();
+  const path = `/api/islands/${id}`;
+  expect((await post(request, `${path}/join`, member, { islandPassword: oldPassword })).status()).toBe(200);
+  expect((await post(request, `${path}/password`, member, { islandPassword: newPassword })).status()).toBe(403);
+  const room = adminDb().doc(`islands/${id}`);
+  const before = (await room.get()).data();
+
+  await login(page, owner);
+  await page.goto(`/island/${id}`);
+  await page.getByRole('button', { name: '更多', exact: true }).click();
+  await page.getByRole('button', { name: '房間資訊', exact: true }).click();
+  await expect(page.getByText(id, { exact: true })).toBeVisible();
+  await page.screenshot({ path: '.impeccable/review/room-info-desktop.png' });
+  await page.setViewportSize({ width: 375, height: 667 });
+  await expect(page.getByRole('dialog')).toBeInViewport();
+  await expect(page.getByRole('button', { name: '重設密碼' })).toBeInViewport();
+  await page.screenshot({ path: '.impeccable/review/room-info-mobile.png' });
+  await page.getByLabel('新登島密碼').fill(newPassword);
+  await page.getByRole('button', { name: '重設密碼' }).click();
+  await expect(page.getByText('密碼已更新。')).toBeVisible();
+  expect((await room.get()).data()).toEqual(before);
+  expect((await post(request, `${path}/join`, visitor, { islandPassword: oldPassword })).status()).toBe(403);
+  expect((await post(request, `${path}/join`, visitor, { islandPassword: newPassword })).status()).toBe(200);
 });

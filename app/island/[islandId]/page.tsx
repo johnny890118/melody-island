@@ -12,7 +12,9 @@ import Image from 'next/image';
 import { doc, onSnapshot } from 'firebase/firestore';
 import {
   Copy,
-  Check,
+  Ellipsis,
+  Info,
+  Link2,
   Play,
   Pause,
   SkipBack,
@@ -61,15 +63,18 @@ export default function IslandPage() {
   const [results, setResults] = useState<Song[]>([]);
   const [searching, setSearching] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState('');
   const [muted, setMuted] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
   const [playerAttempt, setPlayerAttempt] = useState(0);
   const [blocked, setBlocked] = useState(false);
   const [listening, setListening] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [membersOpen, setMembersOpen] = useState(false);
-  const membersTrigger = useRef<HTMLButtonElement>(null);
+  const [roomPanel, setRoomPanel] = useState<'menu' | 'info' | 'members' | null>(null);
+  const panelTitle = useRef<HTMLHeadingElement>(null);
+  const [passwordStatus, setPasswordStatus] = useState<{ text: string; failed?: boolean }>({ text: '' });
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const moreTrigger = useRef<HTMLButtonElement>(null);
   const searchTrigger = useRef<HTMLButtonElement>(null);
   const searchReturnFocus = useRef<HTMLButtonElement>(null);
   const openSearch = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -307,15 +312,38 @@ export default function IslandPage() {
       setBusy(false);
     }
   };
-  const copy = async () => {
+  useEffect(() => {
+    if (roomPanel) panelTitle.current?.focus();
+  }, [roomPanel]);
+
+  const resetPassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (resettingPassword || !owner) return;
+    const form = event.currentTarget;
+    setResettingPassword(true);
+    setPasswordStatus({ text: '' });
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/island/${islandId}`);
-      setCopied(true);
-      clearTimeout(copyTimer.current);
-      copyTimer.current = setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setMessage('複製失敗，請從網址列複製邀請連結。');
+      await api<{ id: string }>(`/api/islands/${islandId}/password`, {
+        islandPassword: new FormData(form).get('islandPassword'),
+      });
+      form.reset();
+      setPasswordStatus({ text: '密碼已更新。' });
+    } catch (error) {
+      setPasswordStatus({ text: errorMessage(error), failed: true });
+    } finally {
+      setResettingPassword(false);
     }
+  };
+  const copy = async (kind: 'id' | 'invite') => {
+    clearTimeout(copyTimer.current);
+    try {
+      await navigator.clipboard.writeText(kind === 'id' ? islandId : `${window.location.origin}/island/${islandId}`);
+      setCopied(kind === 'id' ? '已複製島嶼 ID' : '已複製邀請連結');
+    } catch {
+      setCopied(kind === 'id' ? '複製失敗，請手動選取島嶼 ID。' : '複製失敗，請從網址列複製邀請連結。');
+      return;
+    }
+    copyTimer.current = setTimeout(() => setCopied(''), 3000);
   };
   if (gate !== 'ready' || !session)
     return (
@@ -386,16 +414,13 @@ export default function IslandPage() {
             <p role="status">{connection === 'offline' ? '離線' : '正在重新連線'}</p>
           )}
         </div>
-        <div className="room-social">
-          <Button ref={membersTrigger} variant="ghost" className="room-members-trigger" onClick={() => setMembersOpen(true)} aria-label={`查看 ${members.length} 位已加入成員`}>
-            <span className="room-avatars" aria-hidden="true">{members.slice(0, 4).map(member => <span key={member.uid}>{Array.from(member.displayName.trim())[0] || '友'}</span>)}</span>
-            <span>{members.length} 位已加入</span><Users size={16} />
-          </Button>
-          <Button variant="ghost" className="room-invite" onClick={copy}>
-            {copied ? <Check size={15} /> : <Copy size={15} />}
-            {copied ? '邀請連結已複製' : '邀請朋友登島'}
-          </Button>
-        </div>
+        <Button ref={moreTrigger} variant="ghost" className="room-invite" aria-haspopup="dialog" onClick={() => {
+          setCopied('');
+          setPasswordStatus({ text: '' });
+          setRoomPanel('menu');
+        }}>
+          <Ellipsis size={18} />更多
+        </Button>
       </div>
       {busy && (
         <p role="status" className="quiet-notice">
@@ -466,9 +491,6 @@ export default function IslandPage() {
             </Button>
           )}
           </div>
-          <Button variant="ghost" className="resync" onClick={() => player.current?.sync()}>
-            重新同步播放
-          </Button>
         </section>
         <aside className="listening-sidebar" aria-label="共用歌單">
           <section className="room-section">
@@ -587,80 +609,111 @@ export default function IslandPage() {
             </ul>
             </DialogContent>
           </Dialog>
-          <Dialog open={membersOpen} onOpenChange={setMembersOpen}>
-            <DialogContent className="room-members-dialog" onCloseAutoFocus={event => { event.preventDefault(); membersTrigger.current?.focus(); }}>
-            <DialogTitle>島嶼成員與權限</DialogTitle>
-            <DialogDescription>一起停靠在這裡。顯示已加入成員，不代表即時在線。</DialogDescription>
-            {message && <p role="alert" className="form-error">{message}</p>}
-            {busy && <p role="status" className="quiet-notice">正在更新成員設定…</p>}
-            <section className="room-section">
-              <h2>島上的聽友</h2>
-              <div className="members-line">
-                {members.map((member) => (
-                  <span key={member.uid}>
-                    {member.displayName}
-                    {member.uid === session.ownerUid ? ' · 島主' : ''}
-                    {member.uid === uid ? '（你）' : ''}
-                    {owner && member.uid !== uid && (
-                      <span className="member-actions">
-                        <Button
-                          variant="ghost"
-                          disabled={busy}
-                          onClick={() => manageMember({ type: 'transfer', targetUid: member.uid })}
-                        >
-                          交接島主
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          disabled={busy}
-                          onClick={() => manageMember({ type: 'kick', targetUid: member.uid })}
-                        >
-                          移出
-                        </Button>
-                      </span>
-                    )}
-                  </span>
-                ))}
+          <Dialog open={roomPanel !== null} onOpenChange={open => { if (!open) setRoomPanel(null); }}>
+            <DialogContent className={`room-members-dialog ${roomPanel === 'members' ? '' : 'room-menu-dialog'}`} onCloseAutoFocus={event => { event.preventDefault(); moreTrigger.current?.focus(); }}>
+              <div className="room-panel-heading">
+                <DialogTitle ref={panelTitle} tabIndex={-1}>
+                  {roomPanel === 'info' ? '房間資訊' : roomPanel === 'members' ? '島嶼成員與權限' : '房間選單'}
+                </DialogTitle>
+                {roomPanel !== 'menu' && <Button variant="ghost" className="room-menu-back" onClick={() => setRoomPanel('menu')}>返回更多</Button>}
               </div>
-              <p className="quiet-notice">顯示已加入的成員；不代表即時在線狀態。</p>
-              {owner && (
-                <fieldset className="permission-options">
-                  <legend><Settings2 size={16} />訪客權限</legend>
-                  {Object.entries({
-                    guestsCanControlPlayback: '控制播放與暫停',
-                    guestsCanEditQueue: '新增與移除歌曲',
-                    guestsCanSkip: '切換上一首／下一首',
-                  }).map(([key, label]) => (
-                    <label key={key}>
-                      <Checkbox
-                        checked={permissions[key as keyof Permissions]}
-                        disabled={busy}
-                        onCheckedChange={(checked) =>
-                          command({
-                            type: 'permissions',
-                            permissions: {
-                              ...permissions,
-                              [key as keyof Permissions]: checked === true,
-                            },
-                          })
-                        }
-                      />
-                      {label}
-                    </label>
-                  ))}
-                </fieldset>
-              )}
-              {!owner && (
-                <Button
-                  variant="ghost"
-                  className="resync"
-                  disabled={busy}
-                  onClick={() => manageMember({ type: 'leave' })}
-                >
-                  離開這座島嶼
-                </Button>
-              )}
-            </section>
+              <DialogDescription className={roomPanel === 'members' ? '' : 'sr-only'}>
+                {roomPanel === 'members' ? '顯示已加入成員，不代表即時在線。' : session.name}
+              </DialogDescription>
+              {roomPanel === 'menu' && <div className="room-menu-actions">
+                <Button variant="ghost" onClick={() => setRoomPanel('info')}><Info size={17} />房間資訊</Button>
+                <Button variant="ghost" onClick={() => setRoomPanel('members')}><Users size={17} />成員與權限 <span>{members.length} 位</span></Button>
+                <Button variant="ghost" onClick={() => void copy('invite')}><Link2 size={17} />複製邀請連結</Button>
+                <Button variant="ghost" disabled={!playerReady} onClick={() => {
+                  player.current?.sync();
+                  setRoomPanel(null);
+                }}><RefreshCw size={17} />重新同步播放 <span>僅此裝置</span></Button>
+              </div>}
+              {roomPanel === 'info' && <>
+                <dl className="room-info">
+                  <dt>島嶼名稱</dt><dd>{session.name}</dd>
+                  <dt>島嶼 ID</dt><dd><code>{islandId}</code><Button variant="ghost" onClick={() => void copy('id')}><Copy size={16} />複製 ID</Button></dd>
+                </dl>
+                {owner && <form className="room-password-form" onSubmit={resetPassword}>
+                  <label htmlFor="room-new-password">新登島密碼</label>
+                  <p id="room-password-help">8–128 字。只影響之後加入的聽友。</p>
+                  <Input id="room-new-password" name="islandPassword" type="password" autoComplete="new-password"
+                    aria-describedby="room-password-help" minLength={8} maxLength={128} required disabled={resettingPassword} />
+                  <Button type="submit" disabled={resettingPassword}>{resettingPassword ? '更新中…' : '重設密碼'}</Button>
+                  {passwordStatus.text && <p role={passwordStatus.failed ? 'alert' : 'status'}>{passwordStatus.text}</p>}
+                </form>}
+              </>}
+              <span role="status" className={copied ? 'room-copy-status' : 'sr-only'}>{copied}</span>
+              {roomPanel === 'members' && <>
+                {message && <p role="alert" className="form-error">{message}</p>}
+                {busy && <p role="status" className="quiet-notice">正在更新成員設定…</p>}
+                <section className="room-section" aria-label="島上的聽友">
+                  <div className="members-line">
+                    {members.map((member) => (
+                      <span key={member.uid}>
+                        {member.displayName}
+                        {member.uid === session.ownerUid ? ' · 島主' : ''}
+                        {member.uid === uid ? '（你）' : ''}
+                        {owner && member.uid !== uid && (
+                          <span className="member-actions">
+                            <Button
+                              variant="ghost"
+                              disabled={busy}
+                              onClick={() => manageMember({ type: 'transfer', targetUid: member.uid })}
+                            >
+                              交接島主
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              disabled={busy}
+                              onClick={() => manageMember({ type: 'kick', targetUid: member.uid })}
+                            >
+                              移出
+                            </Button>
+                          </span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                  {owner && (
+                    <fieldset className="permission-options">
+                      <legend><Settings2 size={16} />訪客權限</legend>
+                      {Object.entries({
+                        guestsCanControlPlayback: '控制播放與暫停',
+                        guestsCanEditQueue: '新增與移除歌曲',
+                        guestsCanSkip: '切換上一首／下一首',
+                      }).map(([key, label]) => (
+                        <label key={key}>
+                          <Checkbox
+                            checked={permissions[key as keyof Permissions]}
+                            disabled={busy}
+                            onCheckedChange={(checked) =>
+                              command({
+                                type: 'permissions',
+                                permissions: {
+                                  ...permissions,
+                                  [key as keyof Permissions]: checked === true,
+                                },
+                              })
+                            }
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </fieldset>
+                  )}
+                  {!owner && (
+                    <Button
+                      variant="ghost"
+                      className="resync"
+                      disabled={busy}
+                      onClick={() => manageMember({ type: 'leave' })}
+                    >
+                      離開這座島嶼
+                    </Button>
+                  )}
+                </section>
+              </>}
             </DialogContent>
           </Dialog>
         </aside>

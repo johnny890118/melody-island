@@ -28,13 +28,6 @@
 body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, transparent 55%), #100e18; }
 .room-heading { align-items: center; margin-bottom: 30px; }
 .room-heading h1 { font-size: 36px; line-height: 1.25; }
-.room-social { display: flex; align-items: center; gap: 24px; flex-shrink: 0; }
-.room-members-trigger { display: flex; gap: 10px; min-height: 44px; font-size: 12px; color: var(--muted); }
-.room-avatars { display: flex; padding-right: 6px; }
-.room-avatars > span { display: inline-flex; justify-content: center; align-items: center; width: 30px; height: 30px; margin-right: -6px; border: 2px solid #171321; border-radius: 50%; background: #574359; color: #ffe6ce; font-size: 11px; }
-.room-avatars > span:nth-child(2) { background: #364749; }
-.room-avatars > span:nth-child(3) { background: #5e3d46; }
-.room-avatars > span:nth-child(4) { background: #42405e; }
 .room-grid { grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr); gap: 5vw; align-items: start; }
 .room-page .video-frame { min-height: 200px; }
 .room-page .track-details { margin-top: 20px; border: 0; padding-bottom: 0; }
@@ -57,15 +50,13 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .transport .transport-title > span { font-size: 13px; }
 .transport .transport-listen { justify-self: end; }
 .room-members-dialog { width: calc(100vw - 32px); max-width: 640px; max-height: min(85svh, 800px); overflow-y: auto; border: 1px solid #a78d9c70; border-radius: 12px; padding: 32px; background: var(--paper); }
-.room-members-dialog .room-section { margin-bottom: 0; }
-.room-members-dialog .members-line > span { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-block: 16px; }
+.room-members-dialog .room-section { margin-bottom: 0; padding-top: 0; }
+.room-members-dialog .members-line > span { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-block: 10px; }
 .room-members-dialog .member-actions { display: flex; gap: 10px; }
 .room-members-dialog .member-actions button { padding: 10px; min-height: 44px; }
 .room-members-dialog legend { display: flex; align-items: center; gap: 9px; padding-bottom: 10px; }
 .room-members-dialog .permission-options label { min-height: 44px; }
 @media (max-width: 1000px) {
-  .room-social { gap: 12px; }
-  .room-avatars { display: none; }
   .room-grid { gap: 28px; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); }
   .transport-art { display: none; }
 }
@@ -75,9 +66,7 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
   .room-heading h1 { font-family: Manrope, 'PingFang TC', sans-serif; font-size: 25px; }
   .room-heading > div:first-child { min-width: 0; }
   .room-heading p { font-size: 11px; line-height: 1.7; }
-  .room-social { flex-direction: column; gap: 0; align-items: flex-end; }
   .room-invite { min-height: 44px; font-size: 11px; padding: 10px; }
-  .room-members-trigger { font-size: 11px; gap: 8px; }
   .room-grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .room-page .track-details { margin-top: 14px; }
   .room-page .queue-row { min-height: 78px; }
@@ -98,3 +87,20 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 /* An explicit width lets the 200px player minimum letterbox on narrow screens
    instead of deriving a 355px minimum width from the 16:9 aspect ratio. */
 .room-page .video-frame { width: 100%; min-width: 0; }
+
+.room-menu-dialog { max-width: 460px; }
+.room-menu-actions, .room-info, .room-password-form { display: grid; gap: 8px; }
+.room-menu-actions button { justify-content: flex-start; min-height: 48px; gap: 12px; }
+.room-menu-actions button span { margin-inline-start: auto; color: var(--muted); font-size: 12px; }
+.room-panel-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding-inline-end: 30px; }
+.room-menu-back { min-height: 44px; }
+.room-info dt, .room-password-form p { color: var(--muted); font-size: 13px; }
+.room-info dd { display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow-wrap: anywhere; }
+.room-info dd button { min-height: 44px; }
+.room-password-form { border-top: 1px solid #a78d9c70; padding-top: 16px; }
+.room-password-form input, .room-password-form button { min-height: 44px; }
+.room-password-form button { justify-self: start; }
+.room-copy-status { font-size: 13px; }
+@media (max-width: 760px) {
+  .room-menu-dialog { max-width: none; }
+}
