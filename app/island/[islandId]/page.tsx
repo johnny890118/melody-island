@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { doc, onSnapshot } from 'firebase/firestore';
 import {
   Copy,
+  ArrowLeft,
   Ellipsis,
   Info,
   Link2,
@@ -612,10 +613,14 @@ export default function IslandPage() {
           <Dialog open={roomPanel !== null} onOpenChange={open => { if (!open) setRoomPanel(null); }}>
             <DialogContent className={`room-members-dialog ${roomPanel === 'members' ? '' : 'room-menu-dialog'}`} onCloseAutoFocus={event => { event.preventDefault(); moreTrigger.current?.focus(); }}>
               <div className="room-panel-heading">
+                {roomPanel && roomPanel !== 'menu' && (
+                  <Button variant="ghost" size="icon" className="room-menu-back" aria-label="返回更多" onClick={() => setRoomPanel('menu')}>
+                    <ArrowLeft size={16} />
+                  </Button>
+                )}
                 <DialogTitle ref={panelTitle} tabIndex={-1}>
                   {roomPanel === 'info' ? '房間資訊' : roomPanel === 'members' ? '島嶼成員與權限' : '房間選單'}
                 </DialogTitle>
-                {roomPanel !== 'menu' && <Button variant="ghost" className="room-menu-back" onClick={() => setRoomPanel('menu')}>返回更多</Button>}
               </div>
               <DialogDescription className={roomPanel === 'members' ? '' : 'sr-only'}>
                 {roomPanel === 'members' ? '顯示已加入成員，不代表即時在線。' : session.name}
