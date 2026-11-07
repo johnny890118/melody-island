@@ -54,8 +54,12 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .room-members-dialog .members-line > span { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-block: 10px; }
 .room-members-dialog .member-actions { display: flex; gap: 10px; }
 .room-members-dialog .member-actions button { padding: 10px; min-height: 44px; }
-.room-members-dialog legend { display: flex; align-items: center; gap: 9px; padding-bottom: 10px; }
-.room-members-dialog .permission-options label { min-height: 44px; }
+.member-role { min-width: 36px; padding: 2px 5px; border: 1px solid var(--rule); border-radius: 4px; text-align: center; }
+.member-role-owner { color: var(--accent); border-color: currentColor; }
+.member-name { color: var(--ink); overflow-wrap: anywhere; }
+.room-members-dialog .permission-options { gap: 2px; }
+.room-members-dialog legend { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; }
+.room-members-dialog .permission-options label { width: fit-content; }
 @media (max-width: 1000px) {
   .room-grid { gap: 28px; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr); }
   .transport-art { display: none; }
@@ -98,7 +102,8 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .room-members-dialog > button:last-child { inset-block-start: 12px; inset-inline-end: 16px; }
 .room-info dt, .room-password-form p { color: var(--muted); font-size: 13px; }
 .room-info dd { display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow-wrap: anywhere; }
-.room-info dd button { min-height: 44px; }
+.room-info .room-info-id { justify-content: flex-start; gap: 4px; }
+.room-info-id button { width: 28px; height: 28px; flex-shrink: 0; }
 .room-password-form { border-top: 1px solid #a78d9c70; padding-top: 16px; }
 .room-password-form input, .room-password-form button { min-height: 44px; }
 .room-password-form button { justify-self: start; }

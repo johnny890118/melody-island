@@ -94,7 +94,7 @@ export function parseRoom(value: unknown): Room {
   for (const [key, raw] of Object.entries(record(data.members))) {
     const member = record(raw);
     if (member.role !== 'owner' && member.role !== 'guest')
-      throw new SessionError('成員資料不完整。');
+      throw new SessionError('島民資料不完整。');
     members[key] = {
       uid: text(member.uid),
       role: member.role,
@@ -160,5 +160,5 @@ export function parseMemberCommand(value: unknown): import('./types').MemberComm
     /^[a-zA-Z0-9_-]{1,128}$/.test(data.targetUid)
   )
     return { type: data.type, targetUid: data.targetUid };
-  throw new SessionError('成員操作不正確。');
+  throw new SessionError('島民操作不正確。');
 }

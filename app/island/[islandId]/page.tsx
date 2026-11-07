@@ -59,7 +59,9 @@ export default function IslandPage() {
   const router = useRouter();
   const [session, setSession] = useState<Room | null>(null);
   const [uid, setUid] = useState('');
-  const members = Object.values(session?.members || {});
+  const members = Object.values(session?.members || {}).sort(
+    (a, b) => Number(b.uid === session?.ownerUid) - Number(a.uid === session?.ownerUid),
+  );
   const [gate, setGate] = useState('loading');
   const [connection, setConnection] = useState('connecting');
   const [message, setMessage] = useState('');
@@ -368,7 +370,7 @@ export default function IslandPage() {
           {gate === 'join'
             ? '輸入島嶼密碼，加入這段旋律。'
             : gate === 'legacy'
-              ? '為了保護房間與成員，舊版島嶼需要完成安全遷移。請聯絡島主。'
+              ? '為了保護房間與島民，舊版島嶼需要完成安全遷移。請聯絡島主。'
               : gate === 'loading'
                 ? '正在確認你的連線與加入資格。'
                 : '請確認邀請連結，或稍後重新嘗試。'}
@@ -629,15 +631,13 @@ export default function IslandPage() {
                   </Button>
                 )}
                 <DialogTitle ref={panelTitle} tabIndex={-1}>
-                  {roomPanel === 'info' ? '房間資訊' : roomPanel === 'members' ? '島嶼成員與權限' : '房間選單'}
+                  {roomPanel === 'info' ? '島嶼資訊' : roomPanel === 'members' ? '島民與權限' : '房間選單'}
                 </DialogTitle>
               </div>
-              <DialogDescription className={roomPanel === 'members' ? '' : 'sr-only'}>
-                {roomPanel === 'members' ? '顯示已加入成員，不代表即時在線。' : session.name}
-              </DialogDescription>
+              <DialogDescription className="sr-only">{session.name}</DialogDescription>
               {roomPanel === 'menu' && <div className="room-menu-actions">
-                <Button variant="ghost" onClick={() => setRoomPanel('info')}><Info size={17} />房間資訊</Button>
-                <Button variant="ghost" onClick={() => setRoomPanel('members')}><Users size={17} />成員與權限 <span>{members.length} 位</span></Button>
+                <Button variant="ghost" onClick={() => setRoomPanel('info')}><Info size={17} />島嶼資訊</Button>
+                <Button variant="ghost" onClick={() => setRoomPanel('members')}><Users size={17} />島民與權限 <span>{members.length} 位</span></Button>
                 <Button variant="ghost" onClick={() => void copy('invite')}><Link2 size={17} />複製邀請連結</Button>
                 <Button variant="ghost" disabled={!playerReady} onClick={() => {
                   player.current?.sync();
@@ -647,7 +647,13 @@ export default function IslandPage() {
               {roomPanel === 'info' && <>
                 <dl className="room-info">
                   <dt>島嶼名稱</dt><dd>{session.name}</dd>
-                  <dt>島嶼 ID</dt><dd><code>{islandId}</code><Button variant="ghost" onClick={() => void copy('id')}><Copy size={16} />複製 ID</Button></dd>
+                  <dt>島嶼 ID</dt>
+                  <dd className="room-info-id">
+                    <code>{islandId}</code>
+                    <Button variant="ghost" size="icon" aria-label="複製島嶼 ID" onClick={() => void copy('id')}>
+                      <Copy size={16} />
+                    </Button>
+                  </dd>
                 </dl>
                 {owner && <form className="room-password-form" onSubmit={resetPassword}>
                   <label htmlFor="room-new-password">新登島密碼</label>
@@ -661,14 +667,15 @@ export default function IslandPage() {
               <span role="status" className="sr-only">{copyToast?.text}</span>
               {roomPanel === 'members' && <>
                 {message && <p role="alert" className="form-error">{message}</p>}
-                {busy && <p role="status" className="quiet-notice">正在更新成員設定…</p>}
-                <section className="room-section" aria-label="島上的聽友">
+                {busy && <p role="status" className="quiet-notice">正在更新島民設定…</p>}
+                <section className="room-section" aria-label="島民名單">
                   <div className="members-line">
                     {members.map((member) => (
                       <span key={member.uid}>
-                        {member.displayName}
-                        {member.uid === session.ownerUid ? ' · 島主' : ''}
-                        {member.uid === uid ? '（你）' : ''}
+                        <span className={member.uid === session.ownerUid ? 'member-role member-role-owner' : 'member-role'}>
+                          {member.uid === session.ownerUid ? '島主' : '島民'}
+                        </span>
+                        <span className="member-name">{member.displayName}{member.uid === uid ? '（你）' : ''}</span>
                         {owner && member.uid !== uid && (
                           <span className="member-actions">
                             <Button

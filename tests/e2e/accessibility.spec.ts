@@ -102,7 +102,7 @@ test('room, permissions, long titles and join gate pass automated accessibility 
   await page.keyboard.press('Escape');
   await expect(queueSearch).toBeFocused();
   await page.getByRole('button', { name: '更多', exact: true }).click();
-  await page.getByRole('button', { name: /成員與權限/ }).click();
+  await page.getByRole('button', { name: /島民與權限/ }).click();
   await accessible(page);
   const overflow = await page.evaluate(() => ({ width: innerWidth, document: document.documentElement.scrollWidth,
     elements: Array.from(document.querySelectorAll('body *')).filter(e => e.getBoundingClientRect().right > innerWidth + 1).map(e => ({ tag: e.tagName, class: e.className, right: e.getBoundingClientRect().right })).slice(0, 12) }));

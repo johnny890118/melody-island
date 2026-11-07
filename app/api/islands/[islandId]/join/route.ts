@@ -28,7 +28,7 @@ export async function POST(request: Request, { params }: RouteContext) {
           throw new SessionError('島嶼 ID 或密碼不正確。', 403);
         const data = requireRoom(room);
         if (data.memberUids.includes(actor.uid)) return;
-        if (data.memberCount >= 20) throw new SessionError('這座島嶼已達 20 位成員上限。', 409);
+        if (data.memberCount >= 20) throw new SessionError('這座島嶼已達 20 位島民上限。', 409);
         transaction.update(roomRef, {
           memberCount: data.memberCount + 1,
           memberUids: [...data.memberUids, actor.uid],

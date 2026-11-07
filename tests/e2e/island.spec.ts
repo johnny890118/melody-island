@@ -192,7 +192,7 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   const mountedPlayer = await a.getByTestId('test-player').elementHandle();
   const membersButton = a.getByRole('button', { name: '更多', exact: true });
   await membersButton.click();
-  await a.getByRole('button', { name: /成員與權限/ }).click();
+  await a.getByRole('button', { name: /島民與權限/ }).click();
   const skipPermission = a.getByRole('checkbox', { name: '切換上一首／下一首' });
   await skipPermission.focus();
   await expect(skipPermission).toBeFocused();
@@ -477,7 +477,7 @@ test('a disconnected friend catches up with canonical playback after reconnectin
     await expect(page.getByTestId('test-player')).toBeVisible();
     const expectBothMembers = async () => {
       await page.getByRole('button', { name: '更多', exact: true }).click();
-      await expect(page.getByRole('button', { name: '成員與權限 2 位', exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: '島民與權限 2 位', exact: true })).toBeVisible();
       await page.keyboard.press('Escape');
     };
     await expectBothMembers();
@@ -589,7 +589,7 @@ test('only the owner can rotate the join password without interrupting members',
   await login(page, owner);
   await page.goto(`/island/${id}`);
   await page.getByRole('button', { name: '更多', exact: true }).click();
-  await page.getByRole('button', { name: '房間資訊', exact: true }).click();
+  await page.getByRole('button', { name: '島嶼資訊', exact: true }).click();
   await expect(page.getByText(id, { exact: true })).toBeVisible();
   await page.screenshot({ path: '.impeccable/review/room-info-desktop.png' });
   await page.setViewportSize({ width: 375, height: 667 });

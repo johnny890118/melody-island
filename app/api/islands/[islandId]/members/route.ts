@@ -22,10 +22,10 @@ export async function POST(request: Request, { params }: RouteContext) {
         if (!data.memberUids.includes(actor.uid))
           throw new SessionError('你尚未加入這座島嶼。', 403);
         if (type !== 'leave' && data.ownerUid !== actor.uid)
-          throw new SessionError('只有島主可以管理成員。', 403);
-        if (!data.memberUids.includes(target)) throw new SessionError('成員已離開島嶼。', 409);
+          throw new SessionError('只有島主可以管理島民。', 403);
+        if (!data.memberUids.includes(target)) throw new SessionError('島民已離開島嶼。', 409);
         if (type === 'transfer') {
-          if (target === actor.uid) throw new SessionError('請選擇其他成員。');
+          if (target === actor.uid) throw new SessionError('請選擇其他島民。');
           transaction.update(ref, {
             ownerUid: target,
             members: {
@@ -36,7 +36,7 @@ export async function POST(request: Request, { params }: RouteContext) {
           });
         } else {
           if (data.ownerUid === target)
-            throw new SessionError('離開前，請先把島主交給另一位成員。', 409);
+            throw new SessionError('離開前，請先把島主交給另一位島民。', 409);
           const members = { ...data.members };
           delete members[target];
           transaction.update(ref, {
