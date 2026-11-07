@@ -26,7 +26,10 @@
 /* Approved A: listening deck. Room authority and player lifecycle stay unchanged. */
 .room-page { max-width: 1440px; padding: 32px 5vw 190px; }
 body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, transparent 55%), #100e18; }
-.room-heading { align-items: center; margin-bottom: 30px; }
+.room-heading { align-items: center; min-height: 44px; padding-inline-end: 96px; margin-bottom: 30px; }
+.room-more-anchor { position: sticky; top: max(12px, env(safe-area-inset-top)); z-index: 35; height: 0; }
+.room-more-anchor .room-invite { position: absolute; inset-inline-end: 0; min-height: 44px; background: var(--paper); }
+.room-more-anchor .room-invite:hover { background: var(--muted-surface, #261e32); }
 .room-heading h1 { font-size: 36px; line-height: 1.25; }
 .room-grid { grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr); gap: 5vw; align-items: start; }
 .room-page .video-frame { min-height: 200px; }
@@ -69,7 +72,7 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 }
 @media (max-width: 760px) {
   .room-page { padding: 22px 6vw 180px; }
-  .room-heading { flex-direction: row; align-items: flex-start; gap: 12px; margin-bottom: 22px; }
+  .room-heading { flex-direction: row; padding-inline-end: 84px; margin-bottom: 22px; }
   .room-heading h1 { font-family: Manrope, 'PingFang TC', sans-serif; font-size: 25px; }
   .room-heading > div:first-child { min-width: 0; }
   .room-heading p { font-size: 11px; line-height: 1.7; }

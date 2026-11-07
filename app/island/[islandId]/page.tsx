@@ -412,6 +412,14 @@ export default function IslandPage() {
         </div>,
         document.body,
       )}
+      <div className="room-more-anchor">
+        <Button ref={moreTrigger} variant="ghost" className="room-invite" aria-haspopup="dialog" onClick={() => {
+          setPasswordStatus({ text: '' });
+          setRoomPanel('menu');
+        }}>
+          <Ellipsis size={18} />更多
+        </Button>
+      </div>
       <div className="room-heading">
         <div>
           <h1>{session.name}</h1>
@@ -419,12 +427,6 @@ export default function IslandPage() {
             <p role="status">{connection === 'offline' ? '離線' : '正在重新連線'}</p>
           )}
         </div>
-        <Button ref={moreTrigger} variant="ghost" className="room-invite" aria-haspopup="dialog" onClick={() => {
-          setPasswordStatus({ text: '' });
-          setRoomPanel('menu');
-        }}>
-          <Ellipsis size={18} />更多
-        </Button>
       </div>
       {busy && (
         <p role="status" className="quiet-notice">
