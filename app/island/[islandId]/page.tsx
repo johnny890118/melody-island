@@ -82,11 +82,6 @@ export default function IslandPage() {
   const [resettingPassword, setResettingPassword] = useState(false);
   const moreTrigger = useRef<HTMLButtonElement>(null);
   const searchTrigger = useRef<HTMLButtonElement>(null);
-  const searchReturnFocus = useRef<HTMLButtonElement>(null);
-  const openSearch = (event: React.MouseEvent<HTMLButtonElement>) => {
-    searchReturnFocus.current = event.currentTarget;
-    setSearchOpen(true);
-  };
   const [searchError, setSearchError] = useState('');
   const [searched, setSearched] = useState(false);
   const [roomClock] = useState(() => new RoomClock());
@@ -408,10 +403,6 @@ export default function IslandPage() {
     );
   const current = session.playlist.find((song) => song.videoId === session.currentVideo);
   const needsListening = session.isPlaying && (blocked || !listening);
-  const currentIndex = session.playlist.findIndex(song => song.videoId === session.currentVideo);
-  const upcoming = session.shuffle ? session.playlist.filter(song => song.videoId !== session.currentVideo) : session.playlist.slice(currentIndex + 1);
-  const remaining = session.playlist.filter(song => !upcoming.some(next => next.videoId === song.videoId));
-  const orderedQueue = [...upcoming, ...remaining];
   return (
     <main className="room-page" id="main-content">
       {copyToast && createPortal(
@@ -507,21 +498,20 @@ export default function IslandPage() {
         </section>
         <aside className="listening-sidebar" aria-label="共用歌單">
           <section className="room-section">
-            <div className="queue-heading">
-              <h2>歌單</h2>
-              <Button ref={searchTrigger} variant="ghost" className="add-song-button" disabled={!canEdit} onClick={openSearch}><Plus size={17} />加歌</Button>
-            </div>
+            <Button ref={searchTrigger} variant="ghost" className="queue-search-entry" disabled={!canEdit} onClick={() => setSearchOpen(true)}>
+              <Search size={16} />搜尋歌曲
+            </Button>
+            <div className="queue-heading"><h2>歌單</h2></div>
             {!canEdit && <p className="quiet-notice">島主尚未開放加歌。</p>}
             {!session.playlist.length ? (
               <p className="room-empty">
                 島上還很安靜。
                 <br />
                 搜尋一首喜歡的歌，邀請大家一起聽。
-                {canEdit && <Button variant="ghost" className="add-song-button" onClick={openSearch}>加入第一首歌<Plus size={16} /></Button>}
               </p>
             ) : (
               <ol className="queue-list">
-                {orderedQueue.map((song, index) => (
+                {session.playlist.map((song, index) => (
                   <li
                     key={song.videoId}
                     className={`queue-row ${song.videoId === session.currentVideo ? 'current' : ''}`}
@@ -538,11 +528,12 @@ export default function IslandPage() {
                       variant="ghost"
                       className="queue-song"
                       aria-label={song.title}
+                      aria-current={song.videoId === session.currentVideo ? 'true' : undefined}
                       disabled={!canControl || busy}
                       onClick={() => command({ type: 'select', videoId: song.videoId })}
                     >
                       <span>{song.title}</span>
-                      {song.videoId === session.currentVideo && <span className="playing-label">{session.isPlaying ? '播放中' : '目前曲目'}</span>}
+                      {song.videoId === session.currentVideo && session.isPlaying && <span className="playing-label">播放中</span>}
                     </Button>
                     <Button
                       variant="ghost"
@@ -558,10 +549,9 @@ export default function IslandPage() {
                 ))}
               </ol>
             )}
-            <Button variant="ghost" className="queue-search-entry" disabled={!canEdit} onClick={openSearch}><Search size={16} />搜尋 YouTube 加入歌單</Button>
           </section>
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-            <DialogContent className="song-search-dialog" aria-describedby="song-search-description" onCloseAutoFocus={(event) => { event.preventDefault(); (searchReturnFocus.current ?? searchTrigger.current)?.focus(); }}>
+            <DialogContent className="song-search-dialog" aria-describedby="song-search-description" onCloseAutoFocus={(event) => { event.preventDefault(); searchTrigger.current?.focus(); }}>
             <DialogTitle>找一段旋律</DialogTitle>
             <DialogDescription id="song-search-description">找到喜歡的歌，放進大家的下一段旋律。</DialogDescription>
             <form onSubmit={search} className="room-search">

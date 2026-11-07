@@ -43,6 +43,26 @@ export function assertRoomId(id: unknown): string {
     throw new SessionError('島嶼 ID 格式不正確。');
   return id;
 }
+// Give each track a fixed rank for this shuffle session. Adding a track
+// does not reorder the existing tracks, and stepping backward reverses a skip.
+function shuffleRank(videoId: string, seed: number): number {
+  let hash = 2166136261;
+  for (const character of `${seed}:${videoId}`) {
+    hash = Math.imul(hash ^ character.charCodeAt(0), 16777619);
+  }
+  hash = Math.imul(hash ^ (hash >>> 16), 0x85ebca6b);
+  return (hash ^ (hash >>> 13)) >>> 0;
+}
+
+export function playbackOrder(data: Room) {
+  if (!data.shuffle) return data.playlist;
+  const seed = data.shuffleSeed ?? 0;
+  return data.playlist
+    .map(song => ({ song, rank: shuffleRank(song.videoId, seed) }))
+    .sort((a, b) => a.rank - b.rank)
+    .map(({ song }) => song);
+}
+
 export function applyCommand(
   data: Room,
   command: RoomCommand,
@@ -121,7 +141,7 @@ export function applyCommand(
   }
   if (kind === 'play' || kind === 'pause') {
     if ((kind === 'play') === data.isPlaying) return {};
-    const current = data.currentVideo || playlist[0]?.videoId || '';
+    const current = data.currentVideo || playbackOrder(data)[0]?.videoId || '';
     if (!current) throw new SessionError('先加入一首歌曲吧。');
     const durationMs = playlist.find(song => song.videoId === current)?.durationMs;
     if (kind === 'play' && (!data.currentVideo || (durationMs && data.positionMs >= durationMs))) {
@@ -159,10 +179,11 @@ export function applyCommand(
         throw new SessionError('權威時間線尚未到達這首歌的結尾。', 409);
     }
     if (!playlist.length) return {};
-    const current = playlist.findIndex((item) => item.videoId === data.currentVideo);
+    const order = playbackOrder(data);
+    const current = order.findIndex((item) => item.videoId === data.currentVideo);
     if (kind === 'ended' || kind === 'advance') {
       let index = current;
-      let duration = playlist[index].durationMs ?? 0;
+      let duration = order[index].durationMs ?? 0;
       let deadline = data.playbackUpdatedAt + duration - data.positionMs;
       // Bounded catch-up after suspension; anchors remain scheduled deadlines,
       // not request-arrival times, so loading/network delays never accumulate.
@@ -171,26 +192,25 @@ export function applyCommand(
           Object.assign(patch, { isPlaying: false, positionMs: duration, playbackUpdatedAt: deadline });
           break;
         }
-        index = data.shuffle
-          ? (index + 1 + ((version + step) % (playlist.length - 1))) % playlist.length
-          : index + 1;
-        changeTrack(playlist[index].videoId, deadline, step + 1);
-        duration = playlist[index].durationMs ?? 0;
+        index = (index + 1) % order.length;
+        changeTrack(order[index].videoId, deadline, step + 1);
+        duration = order[index].durationMs ?? 0;
         if (!duration || deadline + duration > now) break;
         deadline += duration;
       }
     } else {
-    let index = (current + (kind === 'prev' ? -1 : 1) + playlist.length) % playlist.length;
-    if (data.shuffle && playlist.length > 1) {
-      // Deterministic across transaction retries; state version is the shared shuffle seed.
-      index = (Math.max(current, 0) + 1 + (version % (playlist.length - 1))) % playlist.length;
-    }
-    changeTrack(playlist[index].videoId);
+      const direction = kind === 'prev' ? -1 : 1;
+      const index = current < 0
+        ? (kind === 'prev' ? order.length - 1 : 0)
+        : (current + direction + order.length) % order.length;
+      changeTrack(order[index].videoId);
     }
   }
   if (kind === 'mode') {
     if (typeof command.shuffle !== 'boolean') throw new SessionError('播放模式不正確。');
+    if (command.shuffle === data.shuffle) return {};
     patch.shuffle = command.shuffle;
+    if (command.shuffle) patch.shuffleSeed = version + 1;
   }
   if (kind === 'permissions') {
     if (!owner) throw new SessionError('只有島主可以變更權限。', 403);

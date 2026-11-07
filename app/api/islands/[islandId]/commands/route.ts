@@ -4,7 +4,7 @@ import type { RouteContext } from '@/lib/types';
 import { requireRoom } from '@/lib/server/room';
 import { adminServices } from '@/lib/server/firebase';
 import { authenticate, failure, rateLimit, readBody } from '@/lib/server/http';
-import { applyCommand, assertRoomId, SessionError } from '@/lib/session';
+import { applyCommand, assertRoomId, playbackOrder, SessionError } from '@/lib/session';
 import { contentDuration } from '@/lib/server/media';
 import { createHash } from 'node:crypto';
 export const runtime = 'nodejs';
@@ -45,7 +45,9 @@ export async function POST(request: Request, { params }: RouteContext) {
           throw new SessionError('你目前沒有這項操作權限。', 403);
         // Repeated play remains a no-op independent of provider availability.
         // A first legacy resume must know if its frozen position is terminal.
-        const song = current.playlist.find(item => item.videoId === (current.currentVideo || current.playlist[0]?.videoId));
+        const song = current.currentVideo
+          ? current.playlist.find(item => item.videoId === current.currentVideo)
+          : playbackOrder(current)[0];
         if (!current.isPlaying && song && song.durationMs === undefined) {
           admittedVideo = song.videoId;
           admittedDuration = await contentDuration(song.videoId);

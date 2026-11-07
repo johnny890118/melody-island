@@ -36,7 +36,7 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .listening-sidebar > .room-section { border-top: 0; padding-top: 0; }
 .queue-heading { border-bottom: 1px solid #a78d9c60; margin-bottom: 0; padding-bottom: 14px; }
 .queue-heading h2 { margin: 0; font-size: 18px; font-weight: 500; }
-.queue-search-entry { display: flex; gap: 10px; width: 100%; border: 1px solid #a78d9c70; border-radius: 4px; min-height: 46px; margin: 16px 0 0; font-size: 12px; }
+.queue-search-entry { display: flex; gap: 10px; width: 100%; border: 1px solid #a78d9c70; border-radius: 4px; min-height: 46px; margin: 0 0 16px; font-size: 12px; }
 .listening-sidebar > .room-section > .queue-list { max-height: 65svh; overflow-y: auto; scrollbar-color: #8f778d #211a2e; scrollbar-width: thin; }
 .room-page .queue-row { min-height: 88px; gap: 12px; padding: 12px 0; }
 .room-page .queue-row.current { background: transparent; }

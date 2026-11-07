@@ -85,7 +85,7 @@ test('room, permissions, long titles and join gate pass automated accessibility 
   await page.goto(`/island/${id}`);
   await expect(page.getByTestId('test-player')).toBeVisible();
   await accessible(page);
-  const addSong = page.getByRole('button', { name: '加歌', exact: true });
+  const addSong = page.getByRole('button', { name: '搜尋歌曲', exact: true });
   await addSong.click();
   await expect(page.getByRole('textbox', { name: '搜尋歌曲或歌手' })).toBeFocused();
   await page.route('**/api/search?**', (route) => route.fulfill({ json: { items: [] } }));
@@ -96,11 +96,6 @@ test('room, permissions, long titles and join gate pass automated accessibility 
   await page.screenshot({ path: `.impeccable/review/song-search-${browserName}.png` });
   await page.keyboard.press('Escape');
   await expect(addSong).toBeFocused();
-  const queueSearch = page.getByRole('button', { name: '搜尋 YouTube 加入歌單', exact: true });
-  await queueSearch.click();
-  await expect(page.getByRole('dialog')).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(queueSearch).toBeFocused();
   await page.getByRole('button', { name: '更多', exact: true }).click();
   await page.getByRole('button', { name: /島民與權限/ }).click();
   await accessible(page);

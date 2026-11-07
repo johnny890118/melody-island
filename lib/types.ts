@@ -39,6 +39,7 @@ export interface Room extends Playback {
   playlist: Song[];
   permissions: Permissions;
   shuffle: boolean;
+  shuffleSeed?: number;
   version: number;
   updatedAt: number;
   lastChangedBy?: string;

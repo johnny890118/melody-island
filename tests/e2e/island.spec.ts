@@ -139,6 +139,23 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   await expect(b.getByRole('heading', { name: '一起聽海', exact: true })).toBeVisible();
   await a.getByRole('button', { name: '播放', exact: true }).click();
   await expect(b.getByTestId('test-player')).toHaveAttribute('data-playing', 'true');
+  const guestPlayer = b.getByTestId('test-player');
+  const queueTitles = songIds.map(videoId => `Song ${videoId}`);
+  await a.getByRole('button', { name: '上一首', exact: true }).click();
+  await expect(guestPlayer).toHaveAttribute('data-video', songIds[2]);
+  await expect(b.locator('.queue-song > span:first-child')).toHaveText(queueTitles);
+  await a.getByRole('button', { name: '下一首', exact: true }).click();
+  await expect(guestPlayer).toHaveAttribute('data-video', songIds[0]);
+  await expect(b.locator('.queue-song > span:first-child')).toHaveText(queueTitles);
+  const shuffle = a.getByRole('button', { name: '隨機播放' });
+  await shuffle.click();
+  await expect(shuffle).toHaveAttribute('aria-pressed', 'true');
+  await a.getByRole('button', { name: '下一首', exact: true }).click();
+  await expect(guestPlayer).not.toHaveAttribute('data-video', songIds[0]);
+  await a.getByRole('button', { name: '上一首', exact: true }).click();
+  await expect(guestPlayer).toHaveAttribute('data-video', songIds[0]);
+  await shuffle.click();
+  await expect(shuffle).toHaveAttribute('aria-pressed', 'false');
   await b.getByRole('button', { name: '暫停', exact: true }).click();
   await expect(a.getByTestId('test-player')).toHaveAttribute('data-playing', 'false');
   await b.reload();
@@ -165,7 +182,7 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   await a.screenshot({ path: '.impeccable/review/room-mobile.png', fullPage: true });
   await a.screenshot({ path: '.impeccable/review/room-mobile-viewport.png' });
   await a.setViewportSize({ width: 390, height: 600 });
-  await a.getByRole('button', { name: '加歌', exact: true }).click();
+  await a.getByRole('button', { name: '搜尋歌曲', exact: true }).click();
   const searchInput = a.getByRole('textbox', { name: '搜尋歌曲或歌手' });
   await searchInput.focus();
   const transportTop = async () => {
@@ -187,7 +204,7 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   await expectClear(a.getByRole('button', { name: '搜尋', exact: true }));
   await a.screenshot({ path: '.impeccable/review/room-mobile-focused.png' });
   await a.keyboard.press('Escape');
-  await expect(a.getByRole('button', { name: '加歌', exact: true })).toBeFocused();
+  await expect(a.getByRole('button', { name: '搜尋歌曲', exact: true })).toBeFocused();
   await a.screenshot({ path: '.impeccable/review/room-short-viewport.png' });
   const mountedPlayer = await a.getByTestId('test-player').elementHandle();
   const membersButton = a.getByRole('button', { name: '更多', exact: true });
@@ -443,7 +460,7 @@ test('search keeps the latest result when an earlier request is interrupted', as
       }),
     );
     await page.goto(`/island/${id}`);
-    await page.getByRole('button', { name: '加歌', exact: true }).click();
+    await page.getByRole('button', { name: '搜尋歌曲', exact: true }).click();
     const input = page.getByRole('textbox', { name: '搜尋歌曲或歌手' });
     await input.fill('old');
     await input.press('Enter');

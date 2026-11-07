@@ -885,8 +885,6 @@ body:has(.room-page) { background: radial-gradient(ellipse at 82% 0%, #33233b, #
 .queue-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .queue-heading h2 { margin-bottom: 5px; font-size: 18px; }
 .queue-count { float: none; font-variant-numeric: tabular-nums; }
-.add-song-button { min-height: 44px; gap: 7px; color: var(--accent); padding: 10px 8px; flex-shrink: 0; }
-.room-empty .add-song-button { display: flex; margin-top: 18px; }
 .room-section { border-color: #a78d9c60; }
 .queue-row { gap: 10px; padding: 16px 0; border-color: #a78d9c45; }
 .queue-position { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; min-width: 18px; }

@@ -123,6 +123,7 @@ export function parseRoom(value: unknown): Room {
     playlist,
     permissions: parsePermissions(data.permissions),
     shuffle: boolean(data.shuffle),
+    ...(data.shuffleSeed !== undefined ? { shuffleSeed: counter(data.shuffleSeed) } : {}),
     version: counter(data.version),
     updatedAt: numeric(data.updatedAt),
     currentVideo: text(data.currentVideo),

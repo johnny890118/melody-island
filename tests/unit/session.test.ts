@@ -270,3 +270,27 @@ describe('server-authoritative deadline protocol', () => {
     expect(patch).toMatchObject({ isPlaying: true, positionMs: 0, playbackUpdatedAt: 100000, trackEpoch: 1 });
   });
 });
+
+describe('playlist navigation', () => {
+  it('wraps manual skips without reordering the saved playlist', () => {
+    const next = applyCommand(room({ currentVideo: ids[2] }), command('next'), actor);
+    expect(next.currentVideo).toBe(ids[0]);
+    expect(next.playlist).toBeUndefined();
+    expect(applyCommand(room(), command('prev'), actor).currentVideo).toBe(ids[2]);
+  });
+
+  it('walks a shared shuffle cycle without repeats and reverses a skip', () => {
+    let state = room({ shuffle: true, shuffleSeed: 15 });
+    const step = (type: 'next' | 'prev') => {
+      state = { ...state, ...applyCommand(state, command(type, { expectedVersion: state.version }), actor) };
+      return state.currentVideo;
+    };
+    const next = step('next');
+    expect(next).not.toBe(ids[0]);
+    expect(step('prev')).toBe(ids[0]);
+    expect(step('next')).toBe(next);
+    expect(new Set([ids[0], next, step('next')]).size).toBe(ids.length);
+    expect(step('next')).toBe(ids[0]);
+    expect(state.playlist.map(song => song.videoId)).toEqual(ids);
+  });
+});
