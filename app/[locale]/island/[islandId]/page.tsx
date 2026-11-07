@@ -50,6 +50,7 @@ import type {
   Song,
 } from '@/lib/types';
 import { parseRoom } from '@/lib/validation';
+import { displayYouTubeTitle } from '@/lib/youtube-title';
 import { errorMessage } from '@/lib/errors';
 import { api, ensureUser } from '@/lib/api';
 import { DEFAULT_PERMISSIONS } from '@/lib/session';
@@ -470,7 +471,7 @@ export default function IslandPage() {
           />
           <div className="track-details">
           <h2 className="now-playing-title">
-            {current?.title || (session.playlist.length ? t('歌單準備好了。') : t('讓第一首歌登島。'))}
+            {displayYouTubeTitle(current?.title ?? '') || (session.playlist.length ? t('歌單準備好了。') : t('讓第一首歌登島。'))}
           </h2>
           {!current && (
             <p className="quiet-notice">
@@ -524,19 +525,19 @@ export default function IslandPage() {
                     <Button
                       variant="ghost"
                       className="queue-song"
-                      aria-label={song.title}
+                      aria-label={displayYouTubeTitle(song.title)}
                       aria-current={song.videoId === session.currentVideo ? 'true' : undefined}
                       disabled={!canControl || busy}
                       onClick={() => command({ type: 'select', videoId: song.videoId })}
                     >
-                      <span>{song.title}</span>
+                      <span>{displayYouTubeTitle(song.title)}</span>
                       {song.videoId === session.currentVideo && session.isPlaying && <span className="playing-label">{t('播放中')}</span>}
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="icon-button"
-                      aria-label={t('移除 {song}', { song: song.title })}
+                      aria-label={t('移除 {song}', { song: displayYouTubeTitle(song.title) })}
                       disabled={!canEdit || busy}
                       onClick={() => command({ type: 'remove', videoId: song.videoId })}
                     >
@@ -589,12 +590,12 @@ export default function IslandPage() {
               {results.map((song) => (
                 <li className="queue-row" key={song.videoId}>
                   <Image className="queue-art" src={song.thumbnail} width={60} height={40} alt="" />
-                  <span className="queue-song">{song.title}</span>
+                  <span className="queue-song">{displayYouTubeTitle(song.title)}</span>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="icon-button"
-                    aria-label={t('加入 {song}', { song: song.title })}
+                    aria-label={t('加入 {song}', { song: displayYouTubeTitle(song.title) })}
                     disabled={
                       !canEdit ||
                       busy ||
@@ -748,7 +749,7 @@ export default function IslandPage() {
         >
           <Ellipsis size={20} />
         </Button>
-        <div className="transport-track">{current && <Image src={current.thumbnail} width={64} height={48} alt="" className="transport-art" />}<div className="transport-title"><span>{current?.title || (session.playlist.length ? t('歌單準備好了') : t('等待音樂登島'))}</span></div></div>
+        <div className="transport-track">{current && <Image src={current.thumbnail} width={64} height={48} alt="" className="transport-art" />}<div className="transport-title"><span>{displayYouTubeTitle(current?.title ?? '') || (session.playlist.length ? t('歌單準備好了') : t('等待音樂登島'))}</span></div></div>
         <div className="transport-buttons">
           <Button
             variant="ghost"
