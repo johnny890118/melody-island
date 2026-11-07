@@ -628,10 +628,10 @@ export default function IslandPage() {
                     <ArrowLeft size={16} />
                   </Button>
                 )}
+                <DialogTitle ref={panelTitle} tabIndex={-1}>
+                  {roomPanel === 'info' ? '房間資訊' : roomPanel === 'members' ? '島嶼成員與權限' : '房間選單'}
+                </DialogTitle>
               </div>
-              <DialogTitle ref={panelTitle} tabIndex={-1}>
-                {roomPanel === 'info' ? '房間資訊' : roomPanel === 'members' ? '島嶼成員與權限' : '房間選單'}
-              </DialogTitle>
               <DialogDescription className={roomPanel === 'members' ? '' : 'sr-only'}>
                 {roomPanel === 'members' ? '顯示已加入成員，不代表即時在線。' : session.name}
               </DialogDescription>

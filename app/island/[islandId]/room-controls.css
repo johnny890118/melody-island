@@ -92,8 +92,9 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .room-menu-actions, .room-info, .room-password-form { display: grid; gap: 8px; }
 .room-menu-actions button { justify-content: flex-start; min-height: 48px; gap: 12px; }
 .room-menu-actions button span { margin-inline-start: auto; color: var(--muted); font-size: 12px; }
-.room-panel-heading { display: flex; align-items: center; min-height: 44px; }
-.room-menu-back { width: 44px; height: 44px; flex-shrink: 0; }
+.room-panel-heading { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; min-height: 44px; }
+.room-panel-heading h2 { grid-area: 1 / 2; text-align: center; }
+.room-menu-back { grid-area: 1 / 1; width: 44px; height: 44px; }
 .room-members-dialog > button:last-child { inset-block-start: 12px; inset-inline-end: 16px; }
 .room-info dt, .room-password-form p { color: var(--muted); font-size: 13px; }
 .room-info dd { display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow-wrap: anywhere; }
