@@ -453,7 +453,7 @@ export default function IslandPage() {
           </h2>
           <p className="quiet-notice">
             {current
-              ? 'YouTube · Official Music Video'
+              ? 'YouTube 共聽 · 各裝置的音量可獨立調整'
               : session.playlist.length
                 ? '按下播放，一起開始聽。'
                 : '搜尋喜歡的歌，加入大家的播放佇列。'}
