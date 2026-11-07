@@ -113,5 +113,5 @@ export default function YouTubeFrame(props: PlayerEvents) {
     };
   }, []);
 
-  return <div ref={host} />;
+  return <div ref={host} inert className="pointer-events-none" />;
 }

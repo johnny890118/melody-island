@@ -30,6 +30,8 @@ it('creates one iframe after the Strict Mode probe and destroys it only on actua
   await act(async () => {});
   expect(create).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ controls: 0, disablekb: 1, fs: 0 }));
   expect(view.container.querySelectorAll('iframe')).toHaveLength(1);
+  const iframe = view.container.querySelector('iframe');
+  expect(iframe?.closest('[inert]')?.classList.contains('pointer-events-none')).toBe(true);
   expect(destroy).not.toHaveBeenCalled();
   view.unmount();
   expect(destroy).toHaveBeenCalledOnce();
