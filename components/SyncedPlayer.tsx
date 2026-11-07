@@ -1,5 +1,6 @@
 'use client';
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { useLocale } from '@/components/LocaleProvider';
 import YouTubeFrame from './YouTubeFrame';
 import type { Playback, PlayerHandle, PlayerTarget, Room } from '@/lib/types';
 import { RadioPlayer, type MediaObservation, type RadioAction, type RadioTrigger } from '@/lib/radio-player';
@@ -26,6 +27,7 @@ function observe(target: PlayerTarget, fallbackVideo: string): MediaObservation 
   } catch { return { state: -1, seconds: NaN, duration: NaN, videoId: '' }; }
 }
 const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function SyncedPlayer(props, ref) {
+  const { t } = useLocale();
   const latest = useRef(props); latest.current = props;
   const player = useRef<PlayerTarget | null>(null);
   const policy = useRef(new RadioPlayer());
@@ -118,7 +120,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     setReady(true); latest.current.onReady();
     return () => { player.current = null; };
   }, [testPlayer]);
-  if (testPlayer) return <div className="video-frame" data-testid="test-player" data-video={props.session.currentVideo} data-playing={props.session.isPlaying}><div className="test-player-label">模擬播放器 · E2E 測試資料</div></div>;
+  if (testPlayer) return <div className="video-frame" data-testid="test-player" data-video={props.session.currentVideo} data-playing={props.session.isPlaying}><div className="test-player-label">{t('模擬播放器 · E2E 測試資料')}</div></div>;
   return <div className="video-frame" aria-busy={!ready}><YouTubeFrame
     onReady={({ target }) => {
       if (player.current && player.current !== target) policy.current = new RadioPlayer();
@@ -128,7 +130,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     onError={(event) => {
       const code = Number.isFinite(event?.data) ? event?.data ?? 0 : 0;
       policy.current.providerError(code, performance.now());
-      latest.current.onError(`YouTube 播放器無法使用${code ? `（${code}）` : ''}，請按重試播放器或選擇其他歌曲。`);
+      latest.current.onError(t('YouTube 播放器無法使用{code}，請按重試播放器或選擇其他歌曲。', { code: code ? ` (${code})` : '' }));
     }}
     onStateChange={({ target }) => {
       if (target !== player.current) return;

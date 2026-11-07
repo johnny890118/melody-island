@@ -623,13 +623,6 @@ body:has(.home-page) .site-header {
   background: var(--accent);
   margin-right: 7px;
 }
-.members-line {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  font-size: 12px;
-  color: var(--muted);
-}
 .permission-options {
   display: flex;
   flex-direction: column;
@@ -718,7 +711,7 @@ body:has(.home-page) .site-header {
   .hero-title > p { font-size: 13px; margin-top: 18px; }
   .island-stage { height: clamp(300px, 42svh, 400px); margin-inline: -4vw; }
   .scene-tools { bottom: -4px; right: 4vw; gap: 8px; }
-  .scene-tools > span { font-size: 10px; margin-right: 0; }
+  .scene-tools > span { font-size: 12px; margin-right: 0; }
   .scene-tools button { padding-inline: 10px; }
   .home-actions { width: 100%; }
   .home-action-list { gap: 10px; }
@@ -761,11 +754,6 @@ body:has(.home-page) .site-header {
   min-height: 44px;
   text-decoration: underline;
 }
-.members-line > span {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-}
 
 .test-player-label {
   height: 100%;
@@ -787,32 +775,6 @@ summary {
 input::placeholder {
   color: var(--muted);
   opacity: 1;
-}
-.room-management {
-  margin-top: 32px;
-  border-top: 1px solid var(--rule);
-  padding-top: 18px;
-}
-.room-management > summary {
-  font-size: 13px;
-  cursor: pointer;
-  min-height: 44px;
-  display: list-item;
-  list-style-position: inside;
-}
-.room-management .room-section {
-  border-top: 0;
-  padding-top: 16px;
-}
-.members-line {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-.members-line > span {
-  border-bottom: 1px solid var(--rule);
-  padding: 10px 0;
-  min-height: 44px;
 }
 .member-actions {
   margin-left: auto;
@@ -898,3 +860,12 @@ body:has(.room-page) { background: radial-gradient(ellipse at 82% 0%, #33233b, #
   .queue-art { width: 48px; height: 34px; }
   .song-search-dialog { top: auto; bottom: 0; left: 0; width: 100%; max-height: 88svh; transform: none; padding: 32px 24px max(24px, env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; }
 }
+
+.site-nav { display: flex; align-items: center; gap: 10px; }
+.locale-link { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; font-size: 12px; }
+.public-about { width: min(680px, 100% - 40px); margin: 48px auto; line-height: 1.7; }
+.public-about h1 { font-size: clamp(28px, 5vw, 40px); margin-bottom: 16px; }
+.public-about h2 { font-size: 18px; margin: 24px 0 6px; }
+.public-about p { color: var(--muted); }
+.public-about a { display: inline-flex; margin-top: 24px; text-decoration: underline; }
+.home-about-link { display: inline-flex; align-items: center; min-height: 32px; margin-top: 4px; font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }

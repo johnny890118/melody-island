@@ -214,16 +214,13 @@ export function applyCommand(
   }
   if (kind === 'permissions') {
     if (!owner) throw new SessionError('只有島主可以變更權限。', 403);
-    if (
-      !command.permissions ||
-      Object.keys(command.permissions).length !== 3 ||
-      (Object.keys(DEFAULT_PERMISSIONS) as (keyof Permissions)[]).some(
-        (key) => typeof command.permissions[key] !== 'boolean',
-      )
-    )
-      throw new SessionError('權限設定不完整。');
-    patch.permissions = command.permissions;
-    if (!command.permissions.guestsCanSkip && data.leaderUid !== data.ownerUid)
+    if ('permissions' in command && command.expectedVersion !== version)
+      throw new SessionError('權限設定已更新，請重新整理後再試。', 409);
+    const nextPermissions = 'permission' in command
+      ? { ...permissions, [command.permission]: command.enabled }
+      : command.permissions;
+    patch.permissions = nextPermissions;
+    if (!nextPermissions.guestsCanSkip && data.leaderUid !== data.ownerUid)
       Object.assign(patch, { leaderUid: '', leaderClientId: '', leaseExpiresAt: 0 });
   }
   if (kind === 'lease') {

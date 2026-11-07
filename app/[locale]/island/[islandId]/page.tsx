@@ -1,4 +1,6 @@
 'use client';
+import { useLocale } from '@/components/LocaleProvider';
+import { localizedPath } from '@/lib/locales';
 import './room-controls.css';
 import { RoomClock } from '@/lib/clock';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -55,6 +57,7 @@ import CustomDialog from '@/components/CustomDialog';
 import SyncedPlayer from '@/components/SyncedPlayer';
 
 export default function IslandPage() {
+  const { t, locale } = useLocale();
   const { islandId } = useParams<{ islandId: string }>();
   const router = useRouter();
   const [session, setSession] = useState<Room | null>(null);
@@ -162,7 +165,7 @@ export default function IslandPage() {
     async (intent: RoomCommand, quiet = false) => {
       if (!quiet && pending.current) return;
       if (!navigator.onLine) {
-        if (!quiet) setMessage('目前離線，重新連線後再操作。');
+        if (!quiet) setMessage(t('目前離線，重新連線後再操作。'));
         return;
       }
       if (!quiet) {
@@ -181,7 +184,7 @@ export default function IslandPage() {
         if (!quiet)
           setMessage(
             error instanceof Error && error.name === 'TimeoutError'
-              ? '連線逾時，請確認目前狀態後再試。'
+              ? t('連線逾時，請確認目前狀態後再試。')
               : errorMessage(error),
           );
       } finally {
@@ -191,7 +194,7 @@ export default function IslandPage() {
         }
       }
     },
-    [islandId],
+    [islandId, t],
   );
   useEffect(() => {
     if (gate !== 'ready') return;
@@ -224,7 +227,7 @@ export default function IslandPage() {
           roomClock.calibrate(best.serverNow, best.sentAt, best.receivedAt);
           setClockReady(true);
         } else if (!cancelled && !Number.isFinite(roomClock.uncertaintyMs)) {
-          setMessage('無法確認房間時間，請重新整理或檢查網路。');
+          setMessage(t('無法確認房間時間，請重新整理或檢查網路。'));
         }
       } finally {
         clearTimeout(timeout);
@@ -250,7 +253,7 @@ export default function IslandPage() {
       window.removeEventListener('offline', offline);
       document.removeEventListener('visibilitychange', visible);
     };
-  }, [gate, roomClock]);
+  }, [gate, roomClock, t]);
   const admittedDuration = session?.playlist.find(song => song.videoId === session.currentVideo)?.durationMs;
   useEffect(() => {
     if (gate !== 'ready' || !session?.currentVideo || admittedDuration) return;
@@ -261,11 +264,11 @@ export default function IslandPage() {
       if (!result || typeof result !== 'object' || !('videoId' in result) || result.videoId !== videoId ||
         !('trackEpoch' in result) || result.trackEpoch !== trackEpoch || !('durationMs' in result) ||
         typeof result.durationMs !== 'number' || !Number.isFinite(result.durationMs) || result.durationMs <= 0)
-        throw new Error('無法確認影片長度；請重試或選擇其他歌曲。');
+        throw new Error(t('無法確認影片長度；請重試或選擇其他歌曲。'));
       if (!controller.signal.aborted) setLegacyDuration({ videoId, trackEpoch, durationMs: result.durationMs });
     }).catch(error => { if (!controller.signal.aborted) setMessage(errorMessage(error)); });
     return () => controller.abort();
-  }, [gate, islandId, session?.currentVideo, session?.trackEpoch, admittedDuration]);
+  }, [gate, islandId, session?.currentVideo, session?.trackEpoch, admittedDuration, t]);
   const search = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!query.trim()) return;
@@ -305,7 +308,7 @@ export default function IslandPage() {
     setMessage('');
     try {
       await api<{ ok: boolean }>(`/api/islands/${islandId}/members`, action);
-      if (action.type === 'leave') router.push('/');
+      if (action.type === 'leave') router.push(localizedPath(locale, '/'));
     } catch (error) {
       setMessage(errorMessage(error));
     } finally {
@@ -328,7 +331,7 @@ export default function IslandPage() {
         islandPassword: new FormData(form).get('islandPassword'),
       });
       form.reset();
-      setPasswordStatus({ text: '密碼已更新。' });
+      setPasswordStatus({ text: t('密碼已更新。') });
     } catch (error) {
       setPasswordStatus({ text: errorMessage(error), failed: true });
     } finally {
@@ -338,10 +341,10 @@ export default function IslandPage() {
   const copy = async (kind: 'id' | 'invite') => {
     clearTimeout(copyTimer.current);
     try {
-      await navigator.clipboard.writeText(kind === 'id' ? islandId : `${window.location.origin}/island/${islandId}`);
-      setCopyToast({ text: kind === 'id' ? '已複製島嶼 ID' : '已複製邀請連結' });
+      await navigator.clipboard.writeText(kind === 'id' ? islandId : new URL(localizedPath(locale, `/island/${islandId}`), window.location.origin).href);
+      setCopyToast({ text: kind === 'id' ? t('已複製島嶼 ID') : t('已複製邀請連結') });
     } catch {
-      setCopyToast({ text: kind === 'id' ? '複製失敗，請手動選取島嶼 ID。' : '複製失敗，請從網址列複製邀請連結。', failed: true });
+      setCopyToast({ text: kind === 'id' ? t('複製失敗，請手動選取島嶼 ID。') : t('複製失敗，請從網址列複製邀請連結。'), failed: true });
       copyTimer.current = setTimeout(() => setCopyToast(null), 5000);
       return;
     }
@@ -352,35 +355,35 @@ export default function IslandPage() {
       <main className="room-gate" id="main-content">
         <h1>
           {gate === 'loading'
-            ? '正在靠近島嶼…'
+            ? t('正在靠近島嶼…')
             : gate === 'join'
-              ? '朋友在島上等你'
+              ? t('朋友在島上等你')
               : gate === 'legacy'
-                ? '這座島嶼需要更新'
+                ? t('這座島嶼需要更新')
                 : gate === 'missing'
-                  ? '找不到這座島嶼'
-                  : '暫時無法連上島嶼'}
+                  ? t('找不到這座島嶼')
+                  : t('暫時無法連上島嶼')}
         </h1>
         <p>
           {gate === 'join'
-            ? '輸入島嶼密碼，加入這段旋律。'
+            ? t('輸入島嶼密碼，加入這段旋律。')
             : gate === 'legacy'
-              ? '為了保護房間與島民，舊版島嶼需要完成安全遷移。請聯絡島主。'
+              ? t('為了保護房間與島民，舊版島嶼需要完成安全遷移。請聯絡島主。')
               : gate === 'loading'
-                ? '正在確認你的連線與加入資格。'
-                : '請確認邀請連結，或稍後重新嘗試。'}
+                ? t('正在確認你的連線與加入資格。')
+                : t('請確認邀請連結，或稍後重新嘗試。')}
         </p>
         {gate === 'join' && (
           <CustomDialog
-            title="一起登島"
-            description={`島嶼 ID：${islandId}`}
-            inputs={[{ label: 'islandPassword', placeholder: '島嶼密碼', type: 'password' }]}
+            title={t('一起登島')}
+            description={t('島嶼 ID {id}', { id: islandId })}
+            inputs={[{ label: 'islandPassword', placeholder: t('島嶼密碼'), type: 'password' }]}
             onConfirm={async (values) => {
               await api(`/api/islands/${islandId}/join`, values);
               setRetry((value) => value + 1);
             }}
-            triggerLabel="輸入密碼加入"
-            confirmLabel="加入島嶼"
+            triggerLabel={t('輸入密碼加入')}
+            confirmLabel={t('加入島嶼')}
           />
         )}
         {gate === 'error' && (
@@ -389,13 +392,13 @@ export default function IslandPage() {
             className="action-button"
             onClick={() => setRetry((value) => value + 1)}
           >
-            重新連線
+            {t('重新連線')}
             <RefreshCw size={16} />
           </Button>
         )}
         {gate !== 'loading' && (
-          <Link href="/" className="action-button">
-            回到首頁
+          <Link href={localizedPath(locale, '/')} className="action-button">
+            {t('回到首頁')}
             <ArrowUpRight size={16} />
           </Link>
         )}
@@ -408,7 +411,7 @@ export default function IslandPage() {
       {copyToast && createPortal(
         <div className="room-copy-toast" aria-hidden="true">
           {copyToast.failed ? <CircleAlert size={17} /> : <Check size={17} />}
-          <span>{copyToast.text}</span>
+          <span>{t(copyToast.text)}</span>
         </div>,
         document.body,
       )}
@@ -416,22 +419,22 @@ export default function IslandPage() {
         <div>
           <h1>{session.name}</h1>
           {connection !== 'synced' && (
-            <p role="status">{connection === 'offline' ? '離線' : '正在重新連線'}</p>
+            <p role="status">{connection === 'offline' ? t('離線') : t('正在重新連線')}</p>
           )}
         </div>
       </div>
       {busy && (
         <p role="status" className="quiet-notice">
-          正在更新島嶼…
+          {t('正在更新島嶼…')}
         </p>
       )}
       {message && (
         <p role="alert" className="room-message">
-          {message}
+          {t(message)}
         </p>
       )}
       <div className="room-grid">
-        <section className="listening-stage" aria-label="正在共聽">
+        <section className="listening-stage" aria-label={t('正在共聽')}>
           <SyncedPlayer
             key={playerAttempt}
             ref={player}
@@ -467,16 +470,16 @@ export default function IslandPage() {
           />
           <div className="track-details">
           <h2 className="now-playing-title">
-            {current?.title || (session.playlist.length ? '歌單準備好了。' : '讓第一首歌登島。')}
+            {current?.title || (session.playlist.length ? t('歌單準備好了。') : t('讓第一首歌登島。'))}
           </h2>
           {!current && (
             <p className="quiet-notice">
-              {session.playlist.length ? '按下播放，一起開始聽。' : '搜尋喜歡的歌，加入大家的播放佇列。'}
+              {session.playlist.length ? t('按下播放，一起開始聽。') : t('搜尋喜歡的歌，加入大家的播放佇列。')}
             </p>
           )}
           {needsListening && (
             <div className="listening-prompt" id="listening-help">
-              <p>此裝置尚未開啟聲音，請按下方「開始聆聽」。</p>
+              <p>{t('此裝置尚未開啟聲音，請按下方「開始聆聽」。')}</p>
             </div>
           )}
           {!playerReady && (
@@ -485,23 +488,23 @@ export default function IslandPage() {
               className="resync"
               onClick={() => setPlayerAttempt((value) => value + 1)}
             >
-              重試播放器
+              {t('重試播放器')}
             </Button>
           )}
           </div>
         </section>
-        <aside className="listening-sidebar" aria-label="共用歌單">
+        <aside className="listening-sidebar" aria-label={t('共用歌單')}>
           <section className="room-section">
             <Button ref={searchTrigger} variant="ghost" className="queue-search-entry" disabled={!canEdit} onClick={() => setSearchOpen(true)}>
-              <Search size={16} />搜尋歌曲
+              <Search size={16} />{t('搜尋歌曲')}
             </Button>
-            <div className="queue-heading"><h2>歌單</h2></div>
-            {!canEdit && <p className="quiet-notice">島主尚未開放加歌。</p>}
+            <div className="queue-heading"><h2>{t('歌單')}</h2></div>
+            {!canEdit && <p className="quiet-notice">{t('島主尚未開放加歌。')}</p>}
             {!session.playlist.length ? (
               <p className="room-empty">
-                島上還很安靜。
+                {t('島上還很安靜。')}
                 <br />
-                搜尋一首喜歡的歌，邀請大家一起聽。
+                {t('搜尋一首喜歡的歌，邀請大家一起聽。')}
               </p>
             ) : (
               <ol className="queue-list">
@@ -527,13 +530,13 @@ export default function IslandPage() {
                       onClick={() => command({ type: 'select', videoId: song.videoId })}
                     >
                       <span>{song.title}</span>
-                      {song.videoId === session.currentVideo && session.isPlaying && <span className="playing-label">播放中</span>}
+                      {song.videoId === session.currentVideo && session.isPlaying && <span className="playing-label">{t('播放中')}</span>}
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
                       className="icon-button"
-                      aria-label={`移除 ${song.title}`}
+                      aria-label={t('移除 {song}', { song: song.title })}
                       disabled={!canEdit || busy}
                       onClick={() => command({ type: 'remove', videoId: song.videoId })}
                     >
@@ -546,12 +549,12 @@ export default function IslandPage() {
           </section>
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
             <DialogContent className="song-search-dialog" aria-describedby="song-search-description" onCloseAutoFocus={(event) => { event.preventDefault(); searchTrigger.current?.focus(); }}>
-            <DialogTitle>找一段旋律</DialogTitle>
-            <DialogDescription id="song-search-description">找到喜歡的歌，放進大家的下一段旋律。</DialogDescription>
+            <DialogTitle>{t('找一段旋律')}</DialogTitle>
+            <DialogDescription id="song-search-description">{t('找到喜歡的歌，放進大家的下一段旋律。')}</DialogDescription>
             <form onSubmit={search} className="room-search">
               <Input
-                aria-label="搜尋歌曲或歌手"
-                placeholder="搜尋歌曲或歌手"
+                aria-label={t('搜尋歌曲或歌手')}
+                placeholder={t('搜尋歌曲或歌手')}
                 maxLength={100}
                 value={query}
                 onChange={(event) => {
@@ -568,7 +571,7 @@ export default function IslandPage() {
                 size="icon"
                 className="icon-button"
                 type="submit"
-                aria-label="搜尋"
+                aria-label={t('搜尋')}
                 disabled={searching}
               >
                 <Search size={18} />
@@ -576,12 +579,12 @@ export default function IslandPage() {
             </form>
             {searching && (
               <p role="status" className="quiet-notice">
-                正在尋找音樂…
+                {t('正在尋找音樂…')}
               </p>
             )}
-            {searchError && <p role="alert" className="form-error">{searchError}</p>}
-            {message && <p role="status" className="quiet-notice">{message}</p>}
-            {searched && !searching && !results.length && <p className="room-empty" role="status">找不到這首歌，試試歌手名稱或其他關鍵字。</p>}
+            {searchError && <p role="alert" className="form-error">{t(searchError)}</p>}
+            {message && <p role="status" className="quiet-notice">{t(message)}</p>}
+            {searched && !searching && !results.length && <p className="room-empty" role="status">{t('找不到這首歌，試試歌手名稱或其他關鍵字。')}</p>}
             <ul className="queue-list">
               {results.map((song) => (
                 <li className="queue-row" key={song.videoId}>
@@ -591,7 +594,7 @@ export default function IslandPage() {
                     variant="ghost"
                     size="icon"
                     className="icon-button"
-                    aria-label={`加入 ${song.title}`}
+                    aria-label={t('加入 {song}', { song: song.title })}
                     disabled={
                       !canEdit ||
                       busy ||
@@ -610,62 +613,62 @@ export default function IslandPage() {
             <DialogContent className={`room-members-dialog ${roomPanel === 'members' ? '' : 'room-menu-dialog'}`} onCloseAutoFocus={event => { event.preventDefault(); moreTrigger.current?.focus(); }}>
               <div className="room-panel-heading">
                 {roomPanel && roomPanel !== 'menu' && (
-                  <Button variant="ghost" size="icon" className="room-menu-back" aria-label="返回更多" onClick={() => setRoomPanel('menu')}>
+                  <Button variant="ghost" size="icon" className="room-menu-back" aria-label={t('返回更多')} onClick={() => setRoomPanel('menu')}>
                     <ArrowLeft size={16} />
                   </Button>
                 )}
                 <DialogTitle ref={panelTitle} tabIndex={-1}>
-                  {roomPanel === 'info' ? '島嶼資訊' : roomPanel === 'members' ? '島民與權限' : '房間選單'}
+                  {roomPanel === 'info' ? t('島嶼資訊') : roomPanel === 'members' ? t('島民與權限') : t('房間選單')}
                 </DialogTitle>
               </div>
               <DialogDescription className="sr-only">{session.name}</DialogDescription>
               {roomPanel === 'menu' && <div className="room-menu-actions">
-                <Button variant="ghost" onClick={() => setRoomPanel('info')}><Info size={17} />島嶼資訊</Button>
-                <Button variant="ghost" onClick={() => setRoomPanel('members')}><Users size={17} />島民與權限 <span>{members.length} 位</span></Button>
-                <Button variant="ghost" onClick={() => void copy('invite')}><Link2 size={17} />複製邀請連結</Button>
+                <Button variant="ghost" onClick={() => setRoomPanel('info')}><Info size={17} />{t('島嶼資訊')}</Button>
+                <Button variant="ghost" onClick={() => setRoomPanel('members')}><Users size={17} />{t('島民與權限')} <span>{t('{count} 位', { count: members.length })}</span></Button>
+                <Button variant="ghost" onClick={() => void copy('invite')}><Link2 size={17} />{t('複製邀請連結')}</Button>
                 <Button variant="ghost" disabled={!playerReady} onClick={() => {
                   player.current?.sync();
                   setRoomPanel(null);
-                }}><RefreshCw size={17} />重新同步播放 <span>僅此裝置</span></Button>
+                }}><RefreshCw size={17} />{t('重新同步播放')} <span>{t('僅此裝置')}</span></Button>
               </div>}
               {roomPanel === 'info' && <>
                 <dl className="room-info">
-                  <dt>島嶼名稱</dt><dd>{session.name}</dd>
-                  <dt>島嶼 ID</dt>
+                  <dt>{t('島嶼名稱')}</dt><dd>{session.name}</dd>
+                  <dt>{t('島嶼 ID')}</dt>
                   <dd className="room-info-id">
                     <code>{islandId}</code>
-                    <Button variant="ghost" size="icon" aria-label="複製島嶼 ID" onClick={() => void copy('id')}>
+                    <Button variant="ghost" size="icon" aria-label={t('複製島嶼 ID')} onClick={() => void copy('id')}>
                       <Copy size={16} />
                     </Button>
                   </dd>
                 </dl>
                 {owner && <form className="room-password-form" onSubmit={resetPassword}>
-                  <label htmlFor="room-new-password">新登島密碼</label>
-                  <p id="room-password-help">8–128 字。只影響之後加入的聽友。</p>
+                  <label htmlFor="room-new-password">{t('新登島密碼')}</label>
+                  <p id="room-password-help">{t('8–128 字。只影響之後加入的聽友。')}</p>
                   <Input id="room-new-password" name="islandPassword" type="password" autoComplete="new-password"
                     aria-describedby="room-password-help" minLength={8} maxLength={128} required disabled={resettingPassword} />
-                  <Button type="submit" disabled={resettingPassword}>{resettingPassword ? '更新中…' : '重設密碼'}</Button>
-                  {passwordStatus.text && <p role={passwordStatus.failed ? 'alert' : 'status'}>{passwordStatus.text}</p>}
+                  <Button type="submit" disabled={resettingPassword}>{resettingPassword ? t('更新中…') : t('重設密碼')}</Button>
+                  {passwordStatus.text && <p role={passwordStatus.failed ? 'alert' : 'status'}>{t(passwordStatus.text)}</p>}
                 </form>}
               </>}
-              <span role="status" className="sr-only">{copyToast?.text}</span>
+              <span role="status" className="sr-only">{t(copyToast?.text ?? '')}</span>
               {roomPanel === 'members' && <>
-                {message && <p role="alert" className="form-error">{message}</p>}
-                {busy && <p role="status" className="quiet-notice">正在更新島民設定…</p>}
-                <section className="room-section" aria-label="島民名單">
+                {message && <p role="alert" className="form-error">{t(message)}</p>}
+                {busy && <p role="status" className="quiet-notice">{t('正在更新島民設定…')}</p>}
+                <section className="room-section" aria-label={t('島民名單')}>
                   {islandOwner && (
                     <div className="member-group">
-                      <h3>島主</h3>
-                      <p className="member-name">{islandOwner.displayName}{islandOwner.uid === uid ? '（你）' : ''}</p>
+                      <h3>{t('島主')}</h3>
+                      <p className="member-name">{islandOwner.displayName}{islandOwner.uid === uid ? t('（你）') : ''}</p>
                     </div>
                   )}
                   <div className="member-group">
-                    <h3>島民</h3>
+                    <h3>{t('島民')}</h3>
                     {residents.length ? (
                       <ul className="resident-list">
                         {residents.map((member) => (
                           <li key={member.uid}>
-                            <span className="member-name">{member.displayName}{member.uid === uid ? '（你）' : ''}</span>
+                            <span className="member-name">{member.displayName}{member.uid === uid ? t('（你）') : ''}</span>
                             {owner && member.uid !== uid && (
                               <span className="member-actions">
                                 <Button
@@ -673,29 +676,29 @@ export default function IslandPage() {
                                   disabled={busy}
                                   onClick={() => manageMember({ type: 'transfer', targetUid: member.uid })}
                                 >
-                                  交接島主
+                                  {t('交接島主')}
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   disabled={busy}
                                   onClick={() => manageMember({ type: 'kick', targetUid: member.uid })}
                                 >
-                                  移出
+                                  {t('移出')}
                                 </Button>
                               </span>
                             )}
                           </li>
                         ))}
                       </ul>
-                    ) : <p className="quiet-notice">目前還沒有島民。</p>}
+                    ) : <p className="quiet-notice">{t('目前還沒有島民。')}</p>}
                   </div>
                   {owner && (
                     <fieldset className="permission-options">
-                      <legend><Settings2 size={16} />訪客權限</legend>
+                      <legend><Settings2 size={16} />{t('訪客權限')}</legend>
                       {Object.entries({
-                        guestsCanControlPlayback: '控制播放與暫停',
-                        guestsCanEditQueue: '新增與移除歌曲',
-                        guestsCanSkip: '切換上一首／下一首',
+                        guestsCanControlPlayback: t('控制播放與暫停'),
+                        guestsCanEditQueue: t('新增與移除歌曲'),
+                        guestsCanSkip: t('切換上一首／下一首'),
                       }).map(([key, label]) => (
                         <label key={key}>
                           <Checkbox
@@ -704,10 +707,8 @@ export default function IslandPage() {
                             onCheckedChange={(checked) =>
                               command({
                                 type: 'permissions',
-                                permissions: {
-                                  ...permissions,
-                                  [key as keyof Permissions]: checked === true,
-                                },
+                                permission: key as keyof Permissions,
+                                enabled: checked === true,
                               })
                             }
                           />
@@ -723,7 +724,7 @@ export default function IslandPage() {
                       disabled={busy}
                       onClick={() => manageMember({ type: 'leave' })}
                     >
-                      離開這座島嶼
+                      {t('離開這座島嶼')}
                     </Button>
                   )}
                 </section>
@@ -732,13 +733,13 @@ export default function IslandPage() {
           </Dialog>
         </aside>
       </div>
-      <div className="transport" aria-label="播放控制">
+      <div className="transport" aria-label={t('播放控制')}>
         <Button
           ref={moreTrigger}
           variant="ghost"
           size="icon"
           className="room-more-button"
-          aria-label="更多"
+          aria-label={t('更多')}
           aria-haspopup="dialog"
           onClick={() => {
             setPasswordStatus({ text: '' });
@@ -747,13 +748,13 @@ export default function IslandPage() {
         >
           <Ellipsis size={20} />
         </Button>
-        <div className="transport-track">{current && <Image src={current.thumbnail} width={64} height={48} alt="" className="transport-art" />}<div className="transport-title"><span>{current?.title || (session.playlist.length ? '歌單準備好了' : '等待音樂登島')}</span></div></div>
+        <div className="transport-track">{current && <Image src={current.thumbnail} width={64} height={48} alt="" className="transport-art" />}<div className="transport-title"><span>{current?.title || (session.playlist.length ? t('歌單準備好了') : t('等待音樂登島'))}</span></div></div>
         <div className="transport-buttons">
           <Button
             variant="ghost"
             size="icon"
             className="icon-button"
-            aria-label="隨機播放"
+            aria-label={t('隨機播放')}
             aria-pressed={session.shuffle}
             disabled={!canControl || busy}
             onClick={() => command({ type: 'mode', shuffle: !session.shuffle })}
@@ -764,7 +765,7 @@ export default function IslandPage() {
             variant="ghost"
             size="icon"
             className="icon-button"
-            aria-label="上一首"
+            aria-label={t('上一首')}
             disabled={!canSkip || busy || !session.playlist.length}
             onClick={() => command({ type: 'prev' })}
           >
@@ -774,8 +775,8 @@ export default function IslandPage() {
             variant="ghost"
             size="icon"
             className="icon-button transport-play"
-            aria-label={session.isPlaying ? '暫停' : '播放'}
-            title={session.isPlaying ? '暫停全房播放' : '開始全房播放'}
+            aria-label={session.isPlaying ? t('暫停') : t('播放')}
+            title={session.isPlaying ? t('暫停全房播放') : t('開始全房播放')}
             disabled={!canControl || busy || !clockReady || !session.playlist.length}
             onClick={() => command({ type: session.isPlaying ? 'pause' : 'play' })}
           >
@@ -785,7 +786,7 @@ export default function IslandPage() {
             variant="ghost"
             size="icon"
             className="icon-button"
-            aria-label="下一首"
+            aria-label={t('下一首')}
             disabled={!canSkip || busy || !session.playlist.length}
             onClick={() => command({ type: 'next' })}
           >
@@ -795,8 +796,8 @@ export default function IslandPage() {
             variant="ghost"
             size="icon"
             className="icon-button"
-            aria-label={muted ? '取消靜音' : '靜音'}
-            title="只影響這台裝置的聲音"
+            aria-label={muted ? t('取消靜音') : t('靜音')}
+            title={t('只影響這台裝置的聲音')}
             aria-pressed={muted}
             onClick={() => {
               player.current?.toggleMute();
@@ -814,7 +815,7 @@ export default function IslandPage() {
             disabled={!playerReady || !clockReady}
             onClick={() => { player.current?.enableAudio(); setMuted(false); }}
           >
-            開始聆聽 <Volume2 size={16} />
+            {t('開始聆聽')} <Volume2 size={16} />
           </Button>
         )}
       </div>

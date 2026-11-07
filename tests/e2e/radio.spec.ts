@@ -56,7 +56,7 @@ test('manual permissions survive owner handover while automatic deadlines do not
   const fixture = await setup(request);
   const guest = await identity(request);
   expect((await post(request, `/api/islands/${fixture.id}/join`, guest, { islandPassword: 'radio-fixture-123' })).status()).toBe(200);
-  expect((await post(request, `/api/islands/${fixture.id}/commands`, fixture.owner, { type: 'permissions', permissions: {
+  expect((await post(request, `/api/islands/${fixture.id}/commands`, fixture.owner, { type: 'permissions', expectedVersion: (await fixture.room()).version, permissions: {
     ...DEFAULT_PERMISSIONS, guestsCanSkip: false, guestsCanControlPlayback: false,
   }, commandId: crypto.randomUUID() })).status()).toBe(200);
   const state = await fixture.room();
@@ -123,4 +123,28 @@ test('first resume of a terminal legacy position admits duration and explicitly 
   })).status()).toBe(200);
   expect(await fixture.room()).toMatchObject({ isPlaying: true, positionMs: 0, trackEpoch: (paused.trackEpoch ?? 0) + 1 });
   expect((await fixture.room()).playlist[0].durationMs).toBe(60000);
+});
+
+test('concurrent owner permission toggles preserve both changes', async ({ request }) => {
+  const fixture = await setup(request);
+  const initial = await fixture.room();
+  const path = `/api/islands/${fixture.id}/commands`;
+  const results = await Promise.all(
+    (['guestsCanSkip', 'guestsCanEditQueue'] as const).map(permission =>
+      post(request, path, fixture.owner, {
+        type: 'permissions', permission, enabled: false, expectedVersion: initial.version,
+        commandId: crypto.randomUUID(),
+      }),
+    ),
+  );
+  expect(results.map(result => result.status())).toEqual([200, 200]);
+  expect((await fixture.room()).permissions).toEqual({
+    guestsCanControlPlayback: true, guestsCanSkip: false, guestsCanEditQueue: false,
+  });
+  const stale = await post(request, path, fixture.owner, {
+    type: 'permissions', permissions: initial.permissions, expectedVersion: initial.version,
+    commandId: crypto.randomUUID(),
+  });
+  expect(stale.status()).toBe(409);
+  expect((await fixture.room()).permissions.guestsCanSkip).toBe(false);
 });

@@ -74,8 +74,17 @@ export function parseCommand(value: unknown): RoomCommand {
     case 'mode':
       if (typeof data.shuffle !== 'boolean') throw new SessionError('播放模式不正確。');
       return { ...meta, type: 'mode', shuffle: data.shuffle };
-    case 'permissions':
-      return { ...meta, type: 'permissions', permissions: parsePermissions(data.permissions) };
+    case 'permissions': {
+      if (data.permission === undefined && data.enabled === undefined)
+        return { ...meta, type: 'permissions', permissions: parsePermissions(data.permissions) };
+      const permission = data.permission;
+      if (
+        data.permissions !== undefined ||
+        (permission !== 'guestsCanControlPlayback' && permission !== 'guestsCanEditQueue' && permission !== 'guestsCanSkip') ||
+        typeof data.enabled !== 'boolean'
+      ) throw new SessionError('權限設定不正確。');
+      return { ...meta, type: 'permissions', permission, enabled: data.enabled };
+    }
     default:
       throw new SessionError('不支援的操作。');
   }

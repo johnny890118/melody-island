@@ -305,6 +305,7 @@ test('leadership expires safely, guests cannot forge the leader, and permissions
   };
   const changed = await post(request, `/api/islands/${id}/commands`, owner, {
     type: 'permissions',
+    expectedVersion: parseRoom((await adminDb().doc(`islands/${id}`).get()).data()).version,
     permissions,
     commandId: crypto.randomUUID(),
   });

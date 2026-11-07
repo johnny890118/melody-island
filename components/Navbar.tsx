@@ -1,12 +1,19 @@
 'use client';
+import { useLocale } from '@/components/LocaleProvider';
+import { localizedPath } from '@/lib/locales';
 import { Button } from '@/components/ui/button';
 import React, { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { fetchUser, logout, startGoogleLogin } from '@/store/authSlice';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { AudioLines, ArrowUpRight, LogOut } from 'lucide-react';
 
 export default function Navbar() {
+  const { t, locale } = useLocale();
+  const pathname = usePathname();
+  const alternate = locale === 'en' ? 'zh-Hant' : 'en';
+  const currentPath = pathname.replace(/^\/(en|zh-Hant)(?=\/|$)/, '') || '/';
   const { user, status } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   const [error, setError] = useState('');
@@ -14,9 +21,9 @@ export default function Navbar() {
   useEffect(() => {
     void dispatch(fetchUser()).then((result) => {
       if (fetchUser.rejected.match(result))
-        setError(result.payload?.message || '登入狀態無法讀取，請重新整理後再試。');
+        setError(result.payload?.message || t('登入狀態無法讀取，請重新整理後再試。'));
     });
-  }, [dispatch]);
+  }, [dispatch, t]);
   const login = async () => {
     if (status === 'loading') return;
     setPending(true);
@@ -24,20 +31,23 @@ export default function Navbar() {
     try {
       const result = await dispatch(startGoogleLogin());
       if (startGoogleLogin.rejected.match(result) && !result.meta.condition)
-        setError(result.payload ?? '登入暫時無法使用，請稍後再試。');
+        setError(result.payload ?? t('登入暫時無法使用，請稍後再試。'));
     } finally {
       setPending(false);
     }
   };
   return (
     <header className="site-header">
-      <Link href="/" className="wordmark" aria-label="Melody Island 首頁">
+      <Link href={localizedPath(locale, '/')} className="wordmark" aria-label={t('Melody Island 首頁')}>
         <AudioLines size={25} strokeWidth={1.6} />
         <span lang="en">
           Melody <span className="wordmark-island">Island</span>
         </span>
       </Link>
-      <nav aria-label="主要導覽">
+      <nav aria-label={t('主要導覽')} className="site-nav">
+        <Link href={localizedPath(alternate, currentPath)} hrefLang={alternate} lang={alternate} aria-label={alternate === 'en' ? 'English' : '繁體中文'} className="locale-link">
+          {alternate === 'en' ? 'EN' : '繁中'}
+        </Link>
         {user && !user.isAnonymous ? (
           <Button
             variant="ghost"
@@ -45,7 +55,7 @@ export default function Navbar() {
             disabled={status === 'loading'}
             onClick={() => dispatch(logout())}
           >
-            登出 <LogOut size={15} aria-hidden="true" />
+            {t('登出')} <LogOut size={15} aria-hidden="true" />
           </Button>
         ) : (
           <Button
@@ -54,14 +64,14 @@ export default function Navbar() {
             disabled={pending || status === 'loading'}
             onClick={login}
           >
-            {pending ? '正在前往登入…' : '登入'}
+            {pending ? t('正在前往登入…') : t('登入')}
             <ArrowUpRight size={16} aria-hidden="true" />
           </Button>
         )}
       </nav>
       {error && (
         <p className="nav-error" role="alert">
-          {error}
+          {t(error)}
         </p>
       )}
     </header>

@@ -126,3 +126,35 @@ test('failed model loading leaves room access usable and clears the loading stat
     fullPage: true,
   });
 });
+
+test('English navigation and joining keep the selected language on narrow screens', async ({ page, request }) => {
+  const owner = await identity(request);
+  const created = await post(request, '/api/islands', owner, {
+    islandName: 'English listening test', islandPassword: 'demo-private-password',
+  });
+  expect(created.status()).toBe(201);
+  const { id } = await created.json();
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-Hant');
+  await page.getByRole('link', { name: 'English', exact: true }).click();
+  await expect(page).toHaveURL(/\/en$/);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Join an island' }).click();
+  await page.getByLabel('Island ID', { exact: true }).fill(id);
+  await page.getByLabel('Island password', { exact: true }).fill('wrong-password');
+  await page.getByRole('button', { name: 'Join the island' }).click();
+  await expect(page.getByRole('alert')).toHaveText('The island ID or password is incorrect.');
+  await page.getByLabel('Island password', { exact: true }).fill('demo-private-password');
+  await page.getByRole('button', { name: 'Join the island' }).click();
+  await expect(page).toHaveURL(new RegExp(`/en/island/${id}$`));
+  await expect(page.getByRole('button', { name: 'Find songs' })).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+  await accessible(page);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  await page.getByRole('link', { name: '繁體中文' }).click();
+  await expect(page).toHaveURL(new RegExp(`/island/${id}$`));
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-Hant');
+  await expect(page.getByRole('button', { name: '搜尋歌曲' })).toBeVisible();
+});

@@ -7,6 +7,7 @@ const firebaseAuthHost = firebaseProjectId ? `${firebaseProjectId}.firebaseapp.c
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  poweredByHeader: false,
   async headers() {
     return [
       {
@@ -45,11 +46,18 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    const localizedRoutes = [
+      { source: '/', destination: '/zh-Hant' },
+      { source: '/island/:islandId', destination: '/zh-Hant/island/:islandId' },
+      { source: '/about', destination: '/zh-Hant/about' },
+      { source: '/design-review', destination: '/zh-Hant/design-review' },
+    ];
     if (
       process.env.NEXT_PUBLIC_USE_EMULATORS === 'true' &&
       process.env.NEXT_PUBLIC_AUTH_REDIRECT === 'true'
     ) {
       return [
+        ...localizedRoutes,
         {
           source: '/emulator/auth/:path*',
           destination: 'http://127.0.0.1:9099/emulator/auth/:path*',
@@ -64,17 +72,18 @@ const nextConfig: NextConfig = {
         },
       ];
     }
-    if (!firebaseAuthHost) return [];
-
     return [
-      {
-        source: '/__/firebase/:file',
-        destination: '/api/firebase/:file',
-      },
-      {
-        source: '/__/auth/:path*',
-        destination: `https://${firebaseAuthHost}/__/auth/:path*`,
-      },
+      ...localizedRoutes,
+      ...(firebaseAuthHost ? [
+        {
+          source: '/__/firebase/:file',
+          destination: '/api/firebase/:file',
+        },
+        {
+          source: '/__/auth/:path*',
+          destination: `https://${firebaseAuthHost}/__/auth/:path*`,
+        },
+      ] : []),
     ];
   },
 };

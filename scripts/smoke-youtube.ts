@@ -3,7 +3,6 @@
 import { chromium, webkit, request as playwrightRequest, expect } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { adminDb, identity, login, post, localOrigin } from '../tests/e2e/helpers';
-import { DEFAULT_PERMISSIONS } from '../lib/session';
 import { measureTimeline, sample, waitForPlayback, observePlayerCommands, measureRecovery } from './youtube-timeline';
 const timeline = process.env.MELODY_REAL_TIMELINE === 'true';
 const transition = timeline && process.env.MELODY_REAL_TRANSITION === 'true';
@@ -66,7 +65,7 @@ try {
       // Restrict manual guest skip; a v3 guest can still relay a server-verified expiry.
       const permissions = await post(api, `/api/islands/${id}/commands`, owner, {
         type: 'permissions',
-        permissions: { ...DEFAULT_PERMISSIONS, guestsCanSkip: false },
+        permission: 'guestsCanSkip', enabled: false,
         commandId: crypto.randomUUID(),
       });
       if (!permissions.ok()) throw new Error('Could not configure owner-only manual skip.');

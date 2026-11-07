@@ -62,6 +62,7 @@ export type RoomCommand = CommandMetadata &
     | { type: 'advance'; videoId: string; trackEpoch?: number }
     | { type: 'lease'; clientId: string }
     | { type: 'mode'; shuffle: boolean }
+    | { type: 'permissions'; permission: keyof Permissions; enabled: boolean }
     | { type: 'permissions'; permissions: Permissions }
   );
 export type MemberCommand = { type: 'leave' } | { type: 'kick' | 'transfer'; targetUid: string };

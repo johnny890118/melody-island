@@ -1,4 +1,5 @@
 'use client';
+import { useLocale } from '@/components/LocaleProvider';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import type { ReactNode } from 'react';
@@ -20,7 +21,7 @@ import Bird from './models/Bird';
 import { ACESFilmicToneMapping, MathUtils, PerspectiveCamera } from 'three';
 
 class SceneBoundary extends Component<
-  { children: ReactNode; optional?: boolean },
+  { children: ReactNode; optional?: boolean; fallback?: ReactNode },
   { failed: boolean }
 > {
   state = { failed: false };
@@ -29,14 +30,7 @@ class SceneBoundary extends Component<
   }
   render() {
     if (this.state.failed && this.props.optional) return null;
-    return this.state.failed ? (
-      <div className="scene-fallback" role="status">
-        <p>島嶼暫時無法顯示</p>
-        <span>你仍可以建立或加入共聽房間。</span>
-      </div>
-    ) : (
-      this.props.children
-    );
+    return this.state.failed ? this.props.fallback : this.props.children;
   }
 }
 function FitPortrait() {
@@ -54,6 +48,7 @@ function FitPortrait() {
   return null;
 }
 export default function Hero() {
+  const { t } = useLocale();
   const stage = useRef<HTMLElement>(null);
   const controls = useRef<OrbitControlsImpl | null>(null);
   const [readyKey, setReadyKey] = useState(-1);
@@ -94,7 +89,7 @@ export default function Hero() {
       ref={stage}
       className="island-stage"
       data-render-mode={renderMode}
-      aria-label="互動 3D 島嶼"
+      aria-label={t('互動 3D 島嶼')}
       data-island-ready={readyKey === sceneKey}
       data-bird-ready={birdReadyKey === sceneKey}
       onKeyDown={(event) => {
@@ -111,7 +106,11 @@ export default function Hero() {
         }
       }}
     >
-      <SceneBoundary key={sceneKey}>
+      <SceneBoundary key={sceneKey} fallback={
+        <div className="scene-fallback" role="status">
+          <p>{t('島嶼暫時無法顯示')}</p><span>{t('你仍可以建立或加入共聽房間。')}</span>
+        </div>
+      }>
         <Canvas
           className="island-canvas"
           dpr={[1, 1.5]}
@@ -123,9 +122,9 @@ export default function Hero() {
             toneMapping: ACESFilmicToneMapping,
             toneMappingExposure: 0.94,
           }}
-          fallback={<div className="scene-fallback">此裝置不支援 WebGL；你仍可以加入共聽。</div>}
+          fallback={<div className="scene-fallback">{t('此裝置不支援 WebGL；你仍可以加入共聽。')}</div>}
           onCreated={({ gl }) => {
-            gl.domElement.setAttribute('aria-label', '拖曳旋轉島嶼，方向鍵旋轉');
+            gl.domElement.setAttribute('aria-label', t('拖曳旋轉島嶼，方向鍵旋轉'));
             gl.domElement.setAttribute('tabindex', '0');
           }}
         >
@@ -137,7 +136,7 @@ export default function Hero() {
             fallback={
               <Html center>
                 <div className="scene-progress" role="status">
-                  正在準備島嶼…
+                  {t('正在準備島嶼…')}
                 </div>
               </Html>
             }
@@ -166,23 +165,23 @@ export default function Hero() {
       </SceneBoundary>
       <div className="scene-tools">
         <span>
-          <MoveHorizontal size={15} /> 拖曳旋轉
+          <MoveHorizontal size={15} /> {t('拖曳旋轉')}
         </span>
         {!reduced && (
           <Button
             variant="ghost"
             size="icon"
-            aria-label={rotating ? '暫停場景動畫' : '播放場景動畫'}
+            aria-label={rotating ? t('暫停場景動畫') : t('播放場景動畫')}
             onClick={() => setRotating((value) => !value)}
           >
             {rotating ? <Pause size={16} /> : <Play size={16} />}
-            <span className="scene-motion-label">{rotating ? '暫停場景' : '播放場景'}</span>
+            <span className="scene-motion-label">{rotating ? t('暫停場景') : t('播放場景')}</span>
           </Button>
         )}
         <Button
           variant="ghost"
           size="icon"
-          aria-label="重設島嶼視角"
+          aria-label={t('重設島嶼視角')}
           onClick={() => {
             if (controls.current) controls.current.reset();
             else setSceneKey((key) => key + 1);
@@ -192,28 +191,28 @@ export default function Hero() {
         </Button>
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="3D 模型來源">
+            <Button variant="ghost" size="icon" aria-label={t('3D 模型來源')}>
               <Info size={16} />
             </Button>
           </DialogTrigger>
           <DialogContent className="island-dialog" aria-describedby={undefined}>
-            <DialogTitle>3D 模型來源</DialogTitle>
+            <DialogTitle>{t('3D 模型來源')}</DialogTitle>
             <a href="https://svs.gsfc.nasa.gov/4720/" target="_blank" rel="noreferrer">
-              月球材質：NASA’s Scientific Visualization Studio
+              {t('月球材質：NASA’s Scientific Visualization Studio')}
             </a>
             <a
               href="https://sketchfab.com/3d-models/foxs-islands-163b68e09fcc47618450150be7785907"
               target="_blank"
               rel="noreferrer"
             >
-              島嶼：nimzu · CC BY 4.0
+              {t('島嶼：nimzu · CC BY 4.0')}
             </a>
             <a
               href="https://sketchfab.com/3d-models/phoenix-bird-844ba0cf144a413ea92c779f18912042"
               target="_blank"
               rel="noreferrer"
             >
-              鳳凰：NORBERTO-3D · CC BY 4.0
+              {t('鳳凰：NORBERTO-3D · CC BY 4.0')}
             </a>
           </DialogContent>
         </Dialog>

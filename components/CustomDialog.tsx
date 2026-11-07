@@ -1,4 +1,5 @@
 'use client';
+import { useLocale } from '@/components/LocaleProvider';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import React, { useId, useRef, useState } from 'react';
@@ -35,6 +36,7 @@ export default function CustomDialog({
   disabled = false,
   initialValues = {},
 }: CustomDialogProps) {
+  const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const [values, setValues] = useState(initialValues);
   const [pending, setPending] = useState(false);
@@ -52,7 +54,7 @@ export default function CustomDialog({
       setOpen(false);
       setValues(initialValues);
     } catch (cause) {
-      setError(errorMessage(cause, '暫時無法完成，請再試一次。'));
+      setError(errorMessage(cause, t('暫時無法完成，請再試一次。')));
     } finally {
       busy.current = false;
       setPending(false);
@@ -98,7 +100,7 @@ export default function CustomDialog({
           ))}
           {error && (
             <p role="alert" className="form-error">
-              {error}
+              {t(error)}
             </p>
           )}
           <Button
@@ -107,7 +109,7 @@ export default function CustomDialog({
             disabled={pending}
             type="submit"
           >
-            {pending ? '正在處理…' : confirmLabel}
+            {pending ? t('正在處理…') : confirmLabel}
             {pending ? <LoaderCircle size={18} className="spin" /> : <ArrowUpRight size={18} />}
           </Button>
         </form>
