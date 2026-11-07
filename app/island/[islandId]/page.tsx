@@ -412,14 +412,6 @@ export default function IslandPage() {
         </div>,
         document.body,
       )}
-      <div className="room-more-anchor">
-        <Button ref={moreTrigger} variant="ghost" className="room-invite" aria-haspopup="dialog" onClick={() => {
-          setPasswordStatus({ text: '' });
-          setRoomPanel('menu');
-        }}>
-          <Ellipsis size={18} />更多
-        </Button>
-      </div>
       <div className="room-heading">
         <div>
           <h1>{session.name}</h1>
@@ -741,6 +733,20 @@ export default function IslandPage() {
         </aside>
       </div>
       <div className="transport" aria-label="播放控制">
+        <Button
+          ref={moreTrigger}
+          variant="ghost"
+          size="icon"
+          className="room-more-button"
+          aria-label="更多"
+          aria-haspopup="dialog"
+          onClick={() => {
+            setPasswordStatus({ text: '' });
+            setRoomPanel('menu');
+          }}
+        >
+          <Ellipsis size={20} />
+        </Button>
         <div className="transport-track">{current && <Image src={current.thumbnail} width={64} height={48} alt="" className="transport-art" />}<div className="transport-title"><span>{current?.title || (session.playlist.length ? '歌單準備好了' : '等待音樂登島')}</span></div></div>
         <div className="transport-buttons">
           <Button

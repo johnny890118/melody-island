@@ -472,14 +472,6 @@ body:has(.home-page) .site-header {
   font-size: 12px;
   color: var(--muted);
 }
-.room-invite {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  border-bottom: 1px solid var(--rule);
-  padding: 12px 0;
-  font-size: 12px;
-}
 .room-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr);
@@ -877,7 +869,6 @@ body:has(.room-page) .site-header { height: 82px; border-color: #a78d9c30; }
 body:has(.room-page) { background: radial-gradient(ellipse at 82% 0%, #33233b, #171321 54%, #100e19); }
 .room-heading h1 { letter-spacing: -0.025em; overflow-wrap: anywhere; }
 .room-heading p { margin-bottom: 0; }
-.room-invite { border: 1px solid #a78d9c70; padding: 12px 16px; border-radius: 4px; }
 .listening-stage, .listening-sidebar { min-width: 0; }
 .track-details { margin-top: 24px; padding-bottom: 16px; border-bottom: 1px solid #a78d9c45; }
 .shared-playback-state { color: var(--accent); font-size: 12px; margin: 0 0 8px; }
