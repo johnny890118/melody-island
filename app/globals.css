@@ -268,7 +268,7 @@ body:has(.home-page) .site-header {
   font-weight: 500;
 }
 .hero-title > p {
-  text-align: center;
+  text-align: left;
   margin: 28px 0 0;
   font-size: 14px;
   line-height: 1.7;

@@ -14,6 +14,8 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
   await expect(header.getByRole('link', { name: 'Melody Island 首頁' })).toBeVisible();
   await expect(header.getByRole('button', { name: '登入', exact: true })).toBeEnabled();
   await expect(page.getByText(/Moon Pass|掠月航線/i)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '開闢島嶼', exact: true })).toBeVisible();
+  expect(await page.locator('.hero-title p').evaluate(element => getComputedStyle(element).textAlign)).toBe('left');
   await expect(page.locator('canvas')).toBeVisible();
   await expect(page.getByText('正在準備島嶼', { exact: false })).toHaveCount(0, { timeout: 30000 });
   const stage = page.getByRole('region', { name: '互動 3D 島嶼' });
@@ -74,7 +76,7 @@ test('homepage preserves real 3D at desktop and mobile, with accessible join for
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
   await expect(stage).toHaveAttribute('data-render-mode', 'demand');
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole('button', { name: '加入朋友的島嶼' }).click();
+  await page.getByRole('button', { name: '加入島嶼' }).click();
   await expect(page.getByLabel('島嶼 ID', { exact: true })).toBeVisible();
   await expect(page.getByLabel('島嶼密碼', { exact: true })).toBeVisible();
 });
@@ -89,7 +91,7 @@ test('a failed bird download leaves the 3D island and boarding controls availabl
   const stage = page.getByRole('region', { name: '互動 3D 島嶼' });
   await expect(stage).toHaveAttribute('data-island-ready', 'true');
   await expect(stage.locator('canvas')).toBeVisible();
-  await page.getByRole('button', { name: '加入朋友的島嶼' }).click();
+  await page.getByRole('button', { name: '加入島嶼' }).click();
   await expect(page.getByLabel('島嶼 ID', { exact: true })).toBeVisible();
 });
 
@@ -186,10 +188,16 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   await a.screenshot({ path: '.impeccable/review/room-mobile-focused.png' });
   await a.keyboard.press('Escape');
   await expect(a.getByRole('button', { name: '加歌', exact: true })).toBeFocused();
-  await a.locator('.room-management > summary').click();
+  await a.screenshot({ path: '.impeccable/review/room-short-viewport.png' });
+  const mountedPlayer = await a.getByTestId('test-player').elementHandle();
+  const membersButton = a.getByRole('button', { name: /查看.*位已加入成員/ });
+  await membersButton.click();
   await a.getByRole('checkbox', { name: '切換上一首／下一首' }).focus();
   await expectClear(a.getByRole('checkbox', { name: '切換上一首／下一首' }));
   await a.screenshot({ path: '.impeccable/review/room-mobile-management-focus.png' });
+  await a.keyboard.press('Escape');
+  await expect(membersButton).toBeFocused();
+  expect(await mountedPlayer?.evaluate(element => element === document.querySelector('[data-testid="test-player"]'))).toBe(true);
   await first.close();
   await second.close();
 });
@@ -531,4 +539,18 @@ test('starting local listening never rewrites the shared room timeline', async (
   expect(after.playbackUpdatedAt).toBe(before.playbackUpdatedAt);
   expect(after.positionMs).toBe(before.positionMs);
   expect(playbackWrites).toEqual([]);
+});
+
+ test('an existing owner returns through My Island while guest joining stays available', async ({ page, request }) => {
+  const owner = await identity(request);
+  const response = await post(request, '/api/islands', owner, { islandName: '我的島嶼入口', islandPassword: 'home-action-123' });
+  expect(response.status()).toBe(201);
+  const data: unknown = await response.json();
+  if (!data || typeof data !== 'object' || !('id' in data) || typeof data.id !== 'string') throw Error('Invalid room fixture');
+  await login(page, owner);
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: '加入島嶼', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '我的島嶼', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/island/${data.id}$`));
+  await expect(page.getByRole('heading', { name: '我的島嶼入口', exact: true })).toBeVisible();
 });

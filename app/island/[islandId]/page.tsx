@@ -25,6 +25,9 @@ import {
   Plus,
   ArrowUpRight,
   RefreshCw,
+  Users,
+  Headphones,
+  Settings2,
 } from 'lucide-react';
 import { db } from '@/app/config/firebase';
 import type { FormEvent } from 'react';
@@ -66,7 +69,14 @@ export default function IslandPage() {
   const [blocked, setBlocked] = useState(false);
   const [listening, setListening] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [membersOpen, setMembersOpen] = useState(false);
+  const membersTrigger = useRef<HTMLButtonElement>(null);
   const searchTrigger = useRef<HTMLButtonElement>(null);
+  const searchReturnFocus = useRef<HTMLButtonElement>(null);
+  const openSearch = (event: React.MouseEvent<HTMLButtonElement>) => {
+    searchReturnFocus.current = event.currentTarget;
+    setSearchOpen(true);
+  };
   const [searchError, setSearchError] = useState('');
   const [searched, setSearched] = useState(false);
   const [roomClock] = useState(() => new RoomClock());
@@ -364,6 +374,10 @@ export default function IslandPage() {
     );
   const current = session.playlist.find((song) => song.videoId === session.currentVideo);
   const needsListening = session.isPlaying && (blocked || !listening);
+  const currentIndex = session.playlist.findIndex(song => song.videoId === session.currentVideo);
+  const upcoming = session.shuffle ? session.playlist.filter(song => song.videoId !== session.currentVideo) : session.playlist.slice(currentIndex + 1);
+  const remaining = session.playlist.filter(song => !upcoming.some(next => next.videoId === song.videoId));
+  const orderedQueue = [...upcoming, ...remaining];
   const status =
     connection === 'synced' ? '已連線' : connection === 'offline' ? '離線' : '正在重新連線';
   return (
@@ -376,10 +390,16 @@ export default function IslandPage() {
             {status} · {members.length} 位成員 · {owner ? '你是島主' : '一起共聽'}
           </p>
         </div>
-        <Button variant="ghost" className="room-invite" onClick={copy}>
-          {copied ? <Check size={15} /> : <Copy size={15} />}
-          {copied ? '邀請連結已複製' : '邀請朋友登島'}
-        </Button>
+        <div className="room-social">
+          <Button ref={membersTrigger} variant="ghost" className="room-members-trigger" onClick={() => setMembersOpen(true)} aria-label={`查看 ${members.length} 位已加入成員`}>
+            <span className="room-avatars" aria-hidden="true">{members.slice(0, 4).map(member => <span key={member.uid}>{Array.from(member.displayName.trim())[0] || '友'}</span>)}</span>
+            <span>{members.length} 位已加入</span><Users size={16} />
+          </Button>
+          <Button variant="ghost" className="room-invite" onClick={copy}>
+            {copied ? <Check size={15} /> : <Copy size={15} />}
+            {copied ? '邀請連結已複製' : '邀請朋友登島'}
+          </Button>
+        </div>
       </div>
       {busy && (
         <p role="status" className="quiet-notice">
@@ -393,6 +413,7 @@ export default function IslandPage() {
       )}
       <div className="room-grid">
         <section className="listening-stage" aria-label="正在共聽">
+          <div className="listening-stage-heading"><span><Headphones size={16} />{session.isPlaying ? '正在共聽' : '全房已暫停'}</span><span>YouTube</span></div>
           <SyncedPlayer
             key={playerAttempt}
             ref={player}
@@ -427,13 +448,12 @@ export default function IslandPage() {
             }}
           />
           <div className="track-details">
-          <p className="shared-playback-state">{session.isPlaying ? '島上正在播放' : '島上已暫停'}</p>
           <h2 className="now-playing-title">
             {current?.title || (session.playlist.length ? '歌單準備好了。' : '讓第一首歌登島。')}
           </h2>
           <p className="quiet-notice">
             {current
-              ? 'YouTube 共聽 · 各裝置的音量可獨立調整'
+              ? 'YouTube · Official Music Video'
               : session.playlist.length
                 ? '按下播放，一起開始聽。'
                 : '搜尋喜歡的歌，加入大家的播放佇列。'}
@@ -453,6 +473,7 @@ export default function IslandPage() {
             </Button>
           )}
           </div>
+          <div className="device-listening-state"><Headphones size={15} /><span>{!playerReady ? '正在準備本機播放器' : needsListening ? '此裝置等待啟用聲音' : muted ? '此裝置已靜音' : listening ? '本機聲音已啟用' : '等待開始播放'}</span><span>音量只影響這台裝置</span></div>
           <Button variant="ghost" className="resync" onClick={() => player.current?.sync()}>
             重新同步播放
           </Button>
@@ -460,20 +481,23 @@ export default function IslandPage() {
         <aside className="listening-sidebar" aria-label="共用歌單">
           <section className="room-section">
             <div className="queue-heading">
-              <div><h2>接下來聽什麼</h2><span className="queue-count">{session.playlist.length} / 100 首</span></div>
-              <Button ref={searchTrigger} variant="ghost" className="add-song-button" disabled={!canEdit} onClick={() => setSearchOpen(true)}><Plus size={17} />加歌</Button>
+              <div><h2>接下來</h2><span className="queue-count">共用歌單 · {session.playlist.length} / 100 首</span></div>
+              <Button ref={searchTrigger} variant="ghost" className="add-song-button" disabled={!canEdit} onClick={openSearch}><Plus size={17} />加歌</Button>
             </div>
+            <p className="queue-description">{session.shuffle ? '隨機播放已開啟，下一首從歌單中選出。' : '一起選，下一首想聽的歌。'}</p>
             {!canEdit && <p className="quiet-notice">島主尚未開放加歌。</p>}
             {!session.playlist.length ? (
               <p className="room-empty">
                 島上還很安靜。
                 <br />
                 搜尋一首喜歡的歌，邀請大家一起聽。
-                {canEdit && <Button variant="ghost" className="add-song-button" onClick={() => setSearchOpen(true)}>加入第一首歌<Plus size={16} /></Button>}
+                {canEdit && <Button variant="ghost" className="add-song-button" onClick={openSearch}>加入第一首歌<Plus size={16} /></Button>}
               </p>
             ) : (
               <ol className="queue-list">
-                {session.playlist.map((song, index) => (
+                {orderedQueue.map((song, index) => (
+                  <React.Fragment key={song.videoId}>
+                  {index === upcoming.length && <li className="queue-divider">{upcoming.length ? '其他曲目' : current ? '目前與其他曲目' : '歌單已準備好'}</li>}
                   <li
                     key={song.videoId}
                     className={`queue-row ${song.videoId === session.currentVideo ? 'current' : ''}`}
@@ -507,12 +531,14 @@ export default function IslandPage() {
                       <Trash2 size={15} />
                     </Button>
                   </li>
+                  </React.Fragment>
                 ))}
               </ol>
             )}
+            <Button variant="ghost" className="queue-search-entry" disabled={!canEdit} onClick={openSearch}><Search size={16} />搜尋 YouTube 加入歌單</Button>
           </section>
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-            <DialogContent className="song-search-dialog" aria-describedby="song-search-description" onCloseAutoFocus={(event) => { event.preventDefault(); searchTrigger.current?.focus(); }}>
+            <DialogContent className="song-search-dialog" aria-describedby="song-search-description" onCloseAutoFocus={(event) => { event.preventDefault(); (searchReturnFocus.current ?? searchTrigger.current)?.focus(); }}>
             <DialogTitle>找一段旋律</DialogTitle>
             <DialogDescription id="song-search-description">找到喜歡的歌，放進大家的下一段旋律。</DialogDescription>
             <form onSubmit={search} className="room-search">
@@ -573,8 +599,12 @@ export default function IslandPage() {
             </ul>
             </DialogContent>
           </Dialog>
-          <details className="room-management">
-            <summary>島嶼成員與權限</summary>{' '}
+          <Dialog open={membersOpen} onOpenChange={setMembersOpen}>
+            <DialogContent className="room-members-dialog" onCloseAutoFocus={event => { event.preventDefault(); membersTrigger.current?.focus(); }}>
+            <DialogTitle>島嶼成員與權限</DialogTitle>
+            <DialogDescription>一起停靠在這裡。顯示已加入成員，不代表即時在線。</DialogDescription>
+            {message && <p role="alert" className="form-error">{message}</p>}
+            {busy && <p role="status" className="quiet-notice">正在更新成員設定…</p>}
             <section className="room-section">
               <h2>島上的聽友</h2>
               <div className="members-line">
@@ -607,7 +637,7 @@ export default function IslandPage() {
               <p className="quiet-notice">顯示已加入的成員；不代表即時在線狀態。</p>
               {owner && (
                 <fieldset className="permission-options">
-                  <legend>訪客權限</legend>
+                  <legend><Settings2 size={16} />訪客權限</legend>
                   {Object.entries({
                     guestsCanControlPlayback: '控制播放與暫停',
                     guestsCanEditQueue: '新增與移除歌曲',
@@ -643,11 +673,12 @@ export default function IslandPage() {
                 </Button>
               )}
             </section>
-          </details>
+            </DialogContent>
+          </Dialog>
         </aside>
       </div>
       <div className="transport" aria-label="播放控制">
-        <div className="transport-title"><span>{current?.title || '等待音樂登島'}</span><small>{session.isPlaying ? '全房播放中' : '全房已暫停'}</small></div>
+        <div className="transport-track">{current && <Image src={current.thumbnail} width={64} height={48} alt="" className="transport-art" />}<div className="transport-title"><span>{current?.title || (session.playlist.length ? '歌單準備好了' : '等待音樂登島')}</span><small>{session.isPlaying ? '全房播放中' : '全房已暫停'}</small></div></div>
         <div className="transport-buttons">
           <Button
             variant="ghost"

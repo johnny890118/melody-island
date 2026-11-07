@@ -93,7 +93,7 @@ export default function HomePage() {
                 { label: 'islandPassword', placeholder: '島嶼密碼', type: 'password' },
               ]}
               onConfirm={join}
-              triggerLabel="加入朋友的島嶼"
+              triggerLabel="加入島嶼"
               confirmLabel="一起登島"
             />
             {!user || user.isAnonymous ? (
@@ -103,7 +103,7 @@ export default function HomePage() {
                 disabled={!ready || loggingIn || status === 'loading'}
                 onClick={loginToCreate}
               >
-                {loggingIn ? '正在登入…' : '登入並建立島嶼'}
+                {loggingIn ? '正在登入…' : '開闢島嶼'}
                 <ArrowUpRight size={18} />
               </Button>
             ) : ownIsland ? (
@@ -112,12 +112,12 @@ export default function HomePage() {
                 className="action-button"
                 onClick={() => router.push(`/island/${ownIsland}`)}
               >
-                回到我的島嶼
+                我的島嶼
                 <ArrowUpRight size={18} />
               </Button>
             ) : (
               <CustomDialog
-                title="建立你的島嶼"
+                title="開闢你的島嶼"
                 description="取個名字，設定密碼，再邀請朋友一起聽。"
                 inputs={[
                   { label: 'islandName', placeholder: '島嶼名稱', maxLength: 40 },
@@ -129,8 +129,8 @@ export default function HomePage() {
                   },
                 ]}
                 onConfirm={create}
-                triggerLabel={user && !user.isAnonymous ? '建立島嶼' : '登入後建立島嶼'}
-                confirmLabel="建立島嶼"
+                triggerLabel="開闢島嶼"
+                confirmLabel="開闢島嶼"
                 disabled={!ready || !user || user.isAnonymous}
               />
             )}

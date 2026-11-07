@@ -14,7 +14,7 @@ test('Google emulator sign-in can cancel, retry, persist on reload and sign out'
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   const login = page.getByRole('button', { name: '登入', exact: true });
-  const create = page.getByRole('button', { name: '登入並建立島嶼' });
+  const create = page.getByRole('button', { name: '開闢島嶼' });
   const abandoned = await openLogin(page, login);
   await expect(create).toBeDisabled();
   await abandoned.close();
@@ -27,7 +27,7 @@ test('Google emulator sign-in can cancel, retry, persist on reload and sign out'
   await popup.getByRole('button', { name: 'Sign in with Google.com' }).click();
   const logout = page.getByRole('button', { name: '登出' });
   await expect(logout).toBeEnabled({ timeout: 20000 });
-  await expect(page.getByRole('button', { name: '建立島嶼', exact: true })).toBeEnabled();
+  await expect(page.getByRole('button', { name: '開闢島嶼', exact: true })).toBeEnabled();
   await page.reload();
   await expect(logout).toBeEnabled();
   await logout.click();
@@ -50,7 +50,7 @@ test.describe('redirect flow', () => {
     await page.waitForURL((url) => url.origin === 'http://127.0.0.1:3100' && url.pathname === '/');
     const logout = page.getByRole('button', { name: '登出', exact: true });
     await expect(logout).toBeEnabled({ timeout: 20000 });
-    await expect(page.getByRole('button', { name: '建立島嶼', exact: true })).toBeEnabled();
+    await expect(page.getByRole('button', { name: '開闢島嶼', exact: true })).toBeEnabled();
     await page.reload();
     await expect(logout).toBeEnabled();
     await logout.click();

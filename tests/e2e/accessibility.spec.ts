@@ -38,7 +38,7 @@ test('home and join dialog support keyboard, reduced motion and narrow screens',
     browserName === 'webkit' && process.platform === 'darwin' ? 'Alt+Tab' : 'Tab',
   );
   await expect(page.getByRole('link', { name: '跳至主要內容' })).toBeFocused();
-  const trigger = page.getByRole('button', { name: '加入朋友的島嶼' });
+  const trigger = page.getByRole('button', { name: '加入島嶼' });
   await trigger.click();
   await expect(page.getByLabel('島嶼 ID', { exact: true })).toBeFocused();
   await accessible(page);
@@ -50,7 +50,9 @@ test('home and join dialog support keyboard, reduced motion and narrow screens',
   }
   await page.keyboard.press('Escape');
   await expect(trigger).toBeFocused();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const overflow = await page.evaluate(() => ({ width: innerWidth, document: document.documentElement.scrollWidth,
+    elements: Array.from(document.querySelectorAll('body *')).filter(e => e.getBoundingClientRect().right > innerWidth + 1).map(e => ({ tag: e.tagName, class: e.className, right: e.getBoundingClientRect().right })).slice(0, 12) }));
+  expect(overflow.document, JSON.stringify(overflow)).toBeLessThanOrEqual(overflow.width);
   await page.screenshot({
     path: `.impeccable/review/home-narrow-reduced-${browserName}.png`,
     fullPage: true,
@@ -94,9 +96,16 @@ test('room, permissions, long titles and join gate pass automated accessibility 
   await page.screenshot({ path: `.impeccable/review/song-search-${browserName}.png` });
   await page.keyboard.press('Escape');
   await expect(addSong).toBeFocused();
-  await page.locator('summary').click();
+  const queueSearch = page.getByRole('button', { name: '搜尋 YouTube 加入歌單', exact: true });
+  await queueSearch.click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(queueSearch).toBeFocused();
+  await page.getByRole('button', { name: /查看.*位已加入成員/ }).click();
   await accessible(page);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const overflow = await page.evaluate(() => ({ width: innerWidth, document: document.documentElement.scrollWidth,
+    elements: Array.from(document.querySelectorAll('body *')).filter(e => e.getBoundingClientRect().right > innerWidth + 1).map(e => ({ tag: e.tagName, class: e.className, right: e.getBoundingClientRect().right })).slice(0, 12) }));
+  expect(overflow.document, JSON.stringify(overflow)).toBeLessThanOrEqual(overflow.width);
   await page.screenshot({
     path: `.impeccable/review/room-narrow-long-${browserName}.png`,
     fullPage: true,
@@ -113,7 +122,7 @@ test('failed model loading leaves room access usable and clears the loading stat
   await page.goto('/');
   await expect(page.getByText('島嶼暫時無法顯示')).toBeVisible();
   await expect(page.getByText('正在準備島嶼', { exact: false })).toHaveCount(0);
-  await page.getByRole('button', { name: '加入朋友的島嶼' }).click();
+  await page.getByRole('button', { name: '加入島嶼' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await accessible(page);
   await page.screenshot({
