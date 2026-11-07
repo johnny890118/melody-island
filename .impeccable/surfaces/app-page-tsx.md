@@ -18,3 +18,5 @@ FIRST VIEWPORT: Complete island in the middle/right foreground, distant shaded m
 FORM: Code-led real WebGL continuation of seed:6de4952aba70d7ee. Owner selected proposal A on 2026-11-05; docs/design/lunar-approach-concept.png is the illustrated composition reference, not a shipping plate or exact model/brand authority. The proposal explicitly preserves actual GLBs, shared controls and player behavior.
 
 FINISH: Browser inspect desktop/mobile and short viewports, isolated independent finish review, document actual outcomes and evidence. Preserve synchronization controller and server APIs. No production Firebase or main merge.
+
+Owner clarification2026-11-07: retain this incumbent homepage, not the later A/B/C homepage prototypes. Only left-align the existing tagline and use「加入島嶼」with「開闢島嶼」or「我的島嶼」according to login/ownership state. Room A approval is separate and does not authorize a homepage scene replacement.
