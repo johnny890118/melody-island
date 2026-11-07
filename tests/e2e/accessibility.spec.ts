@@ -150,7 +150,16 @@ test('English navigation and joining keep the selected language on narrow screen
   await page.getByRole('button', { name: 'Join the island' }).click();
   await expect(page).toHaveURL(new RegExp(`/en/island/${id}$`));
   await expect(page.getByRole('button', { name: 'Find songs' })).toBeVisible();
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+  // A streamed route transition can briefly retain both identical robots tags.
+  // Require at least one directive and reject any contradictory tag.
+  await expect.poll(async () => {
+    const directives = await page.locator('meta[name="robots"]').evaluateAll((tags) =>
+      tags.map((tag) => (tag.getAttribute('content') ?? '').split(',').map((item) => item.trim())),
+    );
+    return directives.length > 0 && directives.every((items) =>
+      items.includes('noindex') && items.includes('nofollow') && !items.includes('index') && !items.includes('follow'),
+    );
+  }).toBe(true);
   await accessible(page);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.getByRole('link', { name: '繁體中文' }).click();
