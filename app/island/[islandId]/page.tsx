@@ -59,9 +59,9 @@ export default function IslandPage() {
   const router = useRouter();
   const [session, setSession] = useState<Room | null>(null);
   const [uid, setUid] = useState('');
-  const members = Object.values(session?.members || {}).sort(
-    (a, b) => Number(b.uid === session?.ownerUid) - Number(a.uid === session?.ownerUid),
-  );
+  const members = Object.values(session?.members || {});
+  const islandOwner = members.find((member) => member.uid === session?.ownerUid);
+  const residents = members.filter((member) => member.uid !== session?.ownerUid);
   const [gate, setGate] = useState('loading');
   const [connection, setConnection] = useState('connecting');
   const [message, setMessage] = useState('');
@@ -669,33 +669,41 @@ export default function IslandPage() {
                 {message && <p role="alert" className="form-error">{message}</p>}
                 {busy && <p role="status" className="quiet-notice">正在更新島民設定…</p>}
                 <section className="room-section" aria-label="島民名單">
-                  <div className="members-line">
-                    {members.map((member) => (
-                      <span key={member.uid}>
-                        <span className={member.uid === session.ownerUid ? 'member-role member-role-owner' : 'member-role'}>
-                          {member.uid === session.ownerUid ? '島主' : '島民'}
-                        </span>
-                        <span className="member-name">{member.displayName}{member.uid === uid ? '（你）' : ''}</span>
-                        {owner && member.uid !== uid && (
-                          <span className="member-actions">
-                            <Button
-                              variant="ghost"
-                              disabled={busy}
-                              onClick={() => manageMember({ type: 'transfer', targetUid: member.uid })}
-                            >
-                              交接島主
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              disabled={busy}
-                              onClick={() => manageMember({ type: 'kick', targetUid: member.uid })}
-                            >
-                              移出
-                            </Button>
-                          </span>
-                        )}
-                      </span>
-                    ))}
+                  {islandOwner && (
+                    <div className="member-group">
+                      <h3>島主</h3>
+                      <p className="member-name">{islandOwner.displayName}{islandOwner.uid === uid ? '（你）' : ''}</p>
+                    </div>
+                  )}
+                  <div className="member-group">
+                    <h3>島民</h3>
+                    {residents.length ? (
+                      <ul className="resident-list">
+                        {residents.map((member) => (
+                          <li key={member.uid}>
+                            <span className="member-name">{member.displayName}{member.uid === uid ? '（你）' : ''}</span>
+                            {owner && member.uid !== uid && (
+                              <span className="member-actions">
+                                <Button
+                                  variant="ghost"
+                                  disabled={busy}
+                                  onClick={() => manageMember({ type: 'transfer', targetUid: member.uid })}
+                                >
+                                  交接島主
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  disabled={busy}
+                                  onClick={() => manageMember({ type: 'kick', targetUid: member.uid })}
+                                >
+                                  移出
+                                </Button>
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : <p className="quiet-notice">目前還沒有島民。</p>}
                   </div>
                   {owner && (
                     <fieldset className="permission-options">

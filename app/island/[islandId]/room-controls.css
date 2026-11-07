@@ -51,11 +51,14 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 .transport .transport-listen { justify-self: end; }
 .room-members-dialog { width: calc(100vw - 32px); max-width: 640px; max-height: min(85svh, 800px); overflow-y: auto; border: 1px solid #a78d9c70; border-radius: 12px; padding: 12px 16px 16px; background: var(--paper); }
 .room-members-dialog .room-section { margin-bottom: 0; padding-top: 0; }
-.room-members-dialog .members-line > span { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding-block: 10px; }
+.member-group { padding-block: 10px; border-bottom: 1px solid var(--rule); }
+.member-group h3 { margin: 0 0 6px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.member-group p { margin: 0; }
+.resident-list { list-style: none; padding: 0; margin: 0; }
+.resident-list li { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-height: 32px; }
+.resident-list li + li { border-top: 1px solid var(--rule); }
 .room-members-dialog .member-actions { display: flex; gap: 10px; }
 .room-members-dialog .member-actions button { padding: 10px; min-height: 44px; }
-.member-role { min-width: 36px; padding: 2px 5px; border: 1px solid var(--rule); border-radius: 4px; text-align: center; }
-.member-role-owner { color: var(--accent); border-color: currentColor; }
 .member-name { color: var(--ink); overflow-wrap: anywhere; }
 .room-members-dialog .permission-options { gap: 2px; }
 .room-members-dialog legend { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; }
