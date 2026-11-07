@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -13,6 +14,8 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import {
   Copy,
   ArrowLeft,
+  Check,
+  CircleAlert,
   Ellipsis,
   Info,
   Link2,
@@ -64,7 +67,7 @@ export default function IslandPage() {
   const [results, setResults] = useState<Song[]>([]);
   const [searching, setSearching] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState('');
+  const [copyToast, setCopyToast] = useState<{ text: string; failed?: boolean } | null>(null);
   const [muted, setMuted] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
   const [playerAttempt, setPlayerAttempt] = useState(0);
@@ -339,12 +342,13 @@ export default function IslandPage() {
     clearTimeout(copyTimer.current);
     try {
       await navigator.clipboard.writeText(kind === 'id' ? islandId : `${window.location.origin}/island/${islandId}`);
-      setCopied(kind === 'id' ? '已複製島嶼 ID' : '已複製邀請連結');
+      setCopyToast({ text: kind === 'id' ? '已複製島嶼 ID' : '已複製邀請連結' });
     } catch {
-      setCopied(kind === 'id' ? '複製失敗，請手動選取島嶼 ID。' : '複製失敗，請從網址列複製邀請連結。');
+      setCopyToast({ text: kind === 'id' ? '複製失敗，請手動選取島嶼 ID。' : '複製失敗，請從網址列複製邀請連結。', failed: true });
+      copyTimer.current = setTimeout(() => setCopyToast(null), 5000);
       return;
     }
-    copyTimer.current = setTimeout(() => setCopied(''), 3000);
+    copyTimer.current = setTimeout(() => setCopyToast(null), 3000);
   };
   if (gate !== 'ready' || !session)
     return (
@@ -408,6 +412,13 @@ export default function IslandPage() {
   const orderedQueue = [...upcoming, ...remaining];
   return (
     <main className="room-page" id="main-content">
+      {copyToast && createPortal(
+        <div className="room-copy-toast" aria-hidden="true">
+          {copyToast.failed ? <CircleAlert size={17} /> : <Check size={17} />}
+          <span>{copyToast.text}</span>
+        </div>,
+        document.body,
+      )}
       <div className="room-heading">
         <div>
           <h1>{session.name}</h1>
@@ -416,7 +427,6 @@ export default function IslandPage() {
           )}
         </div>
         <Button ref={moreTrigger} variant="ghost" className="room-invite" aria-haspopup="dialog" onClick={() => {
-          setCopied('');
           setPasswordStatus({ text: '' });
           setRoomPanel('menu');
         }}>
@@ -618,10 +628,10 @@ export default function IslandPage() {
                     <ArrowLeft size={16} />
                   </Button>
                 )}
-                <DialogTitle ref={panelTitle} tabIndex={-1}>
-                  {roomPanel === 'info' ? '房間資訊' : roomPanel === 'members' ? '島嶼成員與權限' : '房間選單'}
-                </DialogTitle>
               </div>
+              <DialogTitle ref={panelTitle} tabIndex={-1}>
+                {roomPanel === 'info' ? '房間資訊' : roomPanel === 'members' ? '島嶼成員與權限' : '房間選單'}
+              </DialogTitle>
               <DialogDescription className={roomPanel === 'members' ? '' : 'sr-only'}>
                 {roomPanel === 'members' ? '顯示已加入成員，不代表即時在線。' : session.name}
               </DialogDescription>
@@ -648,7 +658,7 @@ export default function IslandPage() {
                   {passwordStatus.text && <p role={passwordStatus.failed ? 'alert' : 'status'}>{passwordStatus.text}</p>}
                 </form>}
               </>}
-              <span role="status" className={copied ? 'room-copy-status' : 'sr-only'}>{copied}</span>
+              <span role="status" className="sr-only">{copyToast?.text}</span>
               {roomPanel === 'members' && <>
                 {message && <p role="alert" className="form-error">{message}</p>}
                 {busy && <p role="status" className="quiet-notice">正在更新成員設定…</p>}
