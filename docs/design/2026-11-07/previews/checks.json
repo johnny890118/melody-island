@@ -1,0 +1,98 @@
+[
+  {
+    "concept": "a",
+    "surface": "home",
+    "size": "desktop",
+    "width": 1440,
+    "documentWidth": 1440,
+    "bodyHeight": 1047
+  },
+  {
+    "concept": "a",
+    "surface": "room",
+    "size": "desktop",
+    "width": 1440,
+    "documentWidth": 1440,
+    "bodyHeight": 1065
+  },
+  {
+    "concept": "b",
+    "surface": "home",
+    "size": "desktop",
+    "width": 1440,
+    "documentWidth": 1440,
+    "bodyHeight": 1047
+  },
+  {
+    "concept": "b",
+    "surface": "room",
+    "size": "desktop",
+    "width": 1440,
+    "documentWidth": 1440,
+    "bodyHeight": 1338
+  },
+  {
+    "concept": "c",
+    "surface": "home",
+    "size": "desktop",
+    "width": 1440,
+    "documentWidth": 1440,
+    "bodyHeight": 1047
+  },
+  {
+    "concept": "c",
+    "surface": "room",
+    "size": "desktop",
+    "width": 1440,
+    "documentWidth": 1440,
+    "bodyHeight": 1133
+  },
+  {
+    "concept": "a",
+    "surface": "home",
+    "size": "mobile",
+    "width": 390,
+    "documentWidth": 390,
+    "bodyHeight": 893
+  },
+  {
+    "concept": "a",
+    "surface": "room",
+    "size": "mobile",
+    "width": 390,
+    "documentWidth": 390,
+    "bodyHeight": 1227
+  },
+  {
+    "concept": "b",
+    "surface": "home",
+    "size": "mobile",
+    "width": 390,
+    "documentWidth": 390,
+    "bodyHeight": 943
+  },
+  {
+    "concept": "b",
+    "surface": "room",
+    "size": "mobile",
+    "width": 390,
+    "documentWidth": 390,
+    "bodyHeight": 1002
+  },
+  {
+    "concept": "c",
+    "surface": "home",
+    "size": "mobile",
+    "width": 390,
+    "documentWidth": 390,
+    "bodyHeight": 893
+  },
+  {
+    "concept": "c",
+    "surface": "room",
+    "size": "mobile",
+    "width": 390,
+    "documentWidth": 390,
+    "bodyHeight": 1292
+  }
+]

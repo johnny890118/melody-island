@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-05T15:48:26.478016Z",
+  "title": "Design System: Melody Island",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Lunar ivory"
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Midnight plum"
+      },
+      "accent": {
+        "role": "accent",
+        "displayName": "Warm moonlight"
+      },
+      "home-paper": {
+        "role": "neutral",
+        "displayName": "Midnight plum"
+      },
+      "home-ink": {
+        "role": "primary",
+        "displayName": "Lunar ivory"
+      },
+      "home-muted": {
+        "role": "neutral",
+        "displayName": "Muted mauve"
+      },
+      "home-accent": {
+        "role": "accent",
+        "displayName": "Warm moonlight"
+      },
+      "home-rule": {
+        "role": "neutral",
+        "displayName": "Mauve rule"
+      },
+      "home-background": {
+        "role": "neutral",
+        "displayName": "Deep night"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Editorial display",
+        "purpose": "Short room titles."
+      },
+      "home-display": {
+        "displayName": "Moon Pass display",
+        "purpose": "Stacked homepage title with an italic second line."
+      },
+      "home-display-mobile": {
+        "displayName": "Moon Pass mobile display",
+        "purpose": "Stacked homepage title at 560px and below."
+      }
+    },
+    "motion": [
+      {
+        "name": "control-transition",
+        "value": "0.2s ease",
+        "purpose": "Control state changes; reduced motion disables transitions."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "1000px"
+      },
+      {
+        "name": "room-stack",
+        "value": "760px"
+      },
+      {
+        "name": "mobile",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary room entry or submission.",
+      "html": "<button class=\"ds-primary\">一起登島</button>",
+      "css": ".ds-primary{background:var(--ink);color:var(--paper);border:1px solid var(--ink);border-radius:4px;padding:15px 20px;min-height:52px;font:13px Manrope,sans-serif}.ds-primary:hover{background:#ffe0bd;color:var(--paper)}.ds-primary:focus-visible{outline:2px solid var(--accent);outline-offset:5px}"
+    },
+    {
+      "name": "Board a friend’s island",
+      "kind": "button",
+      "refersTo": "home-button-board",
+      "description": "Filled homepage join action; paired with the outlined create or return action.",
+      "html": "<button class=\"ds-home-board\">一起登島</button>",
+      "css": ".ds-home-board{background:var(--accent);color:var(--paper);border:1px solid var(--ink);border-radius:4px;padding:15px 18px;min-height:52px;font:13px Manrope,sans-serif;transition:background .2s,color .2s}.ds-home-board:hover{background:#ffe0bd}.ds-home-board:focus-visible{outline:2px solid var(--accent);outline-offset:5px}"
+    },
+    {
+      "name": "Create or return",
+      "kind": "button",
+      "refersTo": "home-button-create",
+      "description": "Outlined secondary homepage action, determined by account and island state.",
+      "html": "<button class=\"ds-home-create\">建立島嶼</button>",
+      "css": ".ds-home-create{background:var(--paper);color:var(--ink);border:1px solid var(--ink);border-radius:4px;padding:15px 18px;min-height:52px;font:13px Manrope,sans-serif;transition:background .2s,color .2s}.ds-home-create:hover{background:var(--hover)}.ds-home-create:focus-visible{outline:2px solid var(--accent);outline-offset:5px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A place between songs",
+    "overview": "A small, tangible island framed as an open listening postcard. The homepage is an Experience surface; the listening room is Operate. Awwwards-level craft is the ambition, not a claim of an award or completed external evaluation.",
+    "keyCharacteristics": [
+      "Real 3D centerpiece",
+      "Midnight plum ground",
+      "Editorial serif with precise controls"
+    ],
+    "rules": [
+      {
+        "name": "Keep the island",
+        "body": "The full miniature silhouette remains a major element; fallback is for unavailable WebGL or load failure.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "Keep the interactive island central and the complete miniature silhouette readable.",
+      "Preserve quiet space, honest connection states and clear Chinese action labels.",
+      "Keep mock-player captures explicitly labelled as test evidence."
+    ],
+    "donts": [
+      "Do not fabricate active users, listening counts, testimonials or perfect synchronization.",
+      "Do not introduce large blur layers, card grids or progress decoration unrelated to actual state."
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "engine": "chromium",
+    "realIframeReady": true,
+    "alerts": [
+      ""
+    ],
+    "failedResources": [],
+    "scope": "External iframe/API readiness only; no audible playback or drift certification."
+  },
+  {
+    "engine": "webkit",
+    "realIframeReady": true,
+    "alerts": [
+      ""
+    ],
+    "failedResources": [],
+    "scope": "External iframe/API readiness only; no audible playback or drift certification."
+  }
+]

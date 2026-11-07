@@ -1,0 +1,29 @@
+{
+  "date": "2026-11-06",
+  "runtimeCommit": "c049dacc13ddfccd47686ef86d9cfb4c7ffc16c5",
+  "environment": "melody-island-stage-20261105",
+  "origin": "https://melody-island-stage-20261105-preview.vercel.app",
+  "method": "Manual interaction with the owner's existing staging room in native Chrome; Network panel observed without exporting authentication headers or key strings",
+  "initialResult": "failed",
+  "initialError": "無法確認影片長度，請稍後再試。",
+  "rootCause": "Staging server key restricted to search.list; videos.list was not allowed",
+  "configurationChange": {
+    "service": "youtube.googleapis.com",
+    "allowedMethodsBefore": ["youtube.api.v3.V3DataSearchService.List"],
+    "allowedMethodsAfter": ["youtube.api.v3.V3DataSearchService.List", "youtube.api.v3.V3DataVideoService.List"],
+    "keyStringRetrievedOrPrinted": false,
+    "productionModified": false
+  },
+  "after": {
+    "metadataHttpStatus": 200,
+    "oneObservedMetadataRequestMs": 5300,
+    "sessionPersisted": true,
+    "roomConnected": true,
+    "chromeActiveAudioIndicator": true,
+    "observedMediaProgressSeconds": [42, 92],
+    "sharedPauseAcknowledged": true,
+    "pausedMediaSecondsApprox": 93,
+    "applicationErrorVisible": false
+  },
+  "scope": "Desktop staging provider/configuration acceptance. No acoustic latency measurement or new physical iPhone/Mac synchronization result. This was not an automated room test."
+}

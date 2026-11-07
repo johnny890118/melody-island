@@ -1,0 +1,46 @@
+[
+  {
+    "engine": "chromium",
+    "realIframeReady": false,
+    "timeline": {
+      "error": "Owner iframe did not become ready."
+    },
+    "alerts": [],
+    "pageErrors": [
+      "Cannot read properties of null (reading 'src')"
+    ],
+    "failedResources": [
+      {
+        "host": "www.youtube.com",
+        "error": "net::ERR_ABORTED"
+      },
+      {
+        "host": "www.youtube.com",
+        "error": "net::ERR_ABORTED"
+      },
+      {
+        "host": "www.youtube.com",
+        "error": "net::ERR_ABORTED"
+      }
+    ],
+    "scope": "Real YouTube HTML media clocks in two isolated contexts on one host. No acoustic or cross-device measurement."
+  },
+  {
+    "engine": "webkit",
+    "realIframeReady": false,
+    "timeline": {
+      "error": "Owner iframe did not become ready."
+    },
+    "alerts": [],
+    "pageErrors": [
+      "null is not an object (evaluating 'this.h.src')"
+    ],
+    "failedResources": [
+      {
+        "host": "www.youtube.com",
+        "error": "cancelled"
+      }
+    ],
+    "scope": "Real YouTube HTML media clocks in two isolated contexts on one host. No acoustic or cross-device measurement."
+  }
+]

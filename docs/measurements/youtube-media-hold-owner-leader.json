@@ -1,0 +1,115 @@
+[
+  {
+    "engine": "chromium",
+    "realIframeReady": true,
+    "timeline": {
+      "samples": [
+        {
+          "ownerSeconds": 0.366159,
+          "guestSeconds": 0.565474,
+          "observationGapMs": -0.099853515625,
+          "timelineDifferenceMs": 199
+        },
+        {
+          "ownerSeconds": 1.377474,
+          "guestSeconds": 1.577105,
+          "observationGapMs": 0.10009765625,
+          "timelineDifferenceMs": 200
+        },
+        {
+          "ownerSeconds": 2.392711,
+          "guestSeconds": 2.593174,
+          "observationGapMs": 0.900146484375,
+          "timelineDifferenceMs": 200
+        },
+        {
+          "ownerSeconds": 3.400518,
+          "guestSeconds": 3.600902,
+          "observationGapMs": 0.800048828125,
+          "timelineDifferenceMs": 200
+        },
+        {
+          "ownerSeconds": 4.421398,
+          "guestSeconds": 4.621315,
+          "observationGapMs": 0.30029296875,
+          "timelineDifferenceMs": 200
+        }
+      ],
+      "autoAdvance": {
+        "duration": 1343.661,
+        "positionMs": 1334661,
+        "nextVideo": "aqz-KE-bpKQ",
+        "versionDelta": 2,
+        "mediaHold": {
+          "delayedRequests": 1,
+          "readyStateDuringHold": 0
+        }
+      }
+    },
+    "alerts": [
+      ""
+    ],
+    "pageErrors": [],
+    "failedResources": [],
+    "scope": "Real YouTube HTML media clocks in two isolated contexts on one host. No acoustic or cross-device measurement."
+  },
+  {
+    "engine": "webkit",
+    "realIframeReady": true,
+    "timeline": {
+      "samples": [
+        {
+          "ownerSeconds": 0.256081999,
+          "guestSeconds": 0.426,
+          "observationGapMs": 1,
+          "timelineDifferenceMs": 169
+        },
+        {
+          "ownerSeconds": 1.263369665,
+          "guestSeconds": 1.400899792,
+          "observationGapMs": 1,
+          "timelineDifferenceMs": 137
+        },
+        {
+          "ownerSeconds": 2.271021666,
+          "guestSeconds": 2.408713376,
+          "observationGapMs": 1,
+          "timelineDifferenceMs": 137
+        },
+        {
+          "ownerSeconds": 3.283737625,
+          "guestSeconds": 3.42054225,
+          "observationGapMs": 1,
+          "timelineDifferenceMs": 136
+        },
+        {
+          "ownerSeconds": 4.290393249,
+          "guestSeconds": 4.427432584,
+          "observationGapMs": 1,
+          "timelineDifferenceMs": 136
+        }
+      ],
+      "autoAdvance": {
+        "duration": 1343.661,
+        "positionMs": 1334661,
+        "nextVideo": "aqz-KE-bpKQ",
+        "versionDelta": 2,
+        "mediaHold": {
+          "delayedRequests": 2,
+          "readyStateDuringHold": 0
+        }
+      }
+    },
+    "alerts": [
+      ""
+    ],
+    "pageErrors": [],
+    "failedResources": [
+      {
+        "host": "www.youtube.com",
+        "error": "cancelled"
+      }
+    ],
+    "scope": "Real YouTube HTML media clocks in two isolated contexts on one host. No acoustic or cross-device measurement."
+  }
+]
