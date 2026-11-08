@@ -7,7 +7,6 @@ import { preload } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { ArrowUpRight } from 'lucide-react';
 import { db } from '@/app/config/firebase';
@@ -145,9 +144,6 @@ export default function HomePage() {
             )}
 
           </div>
-          <Link className="home-about-link" href={localizedPath(locale, '/about')}>
-            {locale === 'en' ? 'How it works' : '共聽指南'}
-          </Link>
         </div>
         {notice && (
           <p className="home-caption quiet-notice" role="status">

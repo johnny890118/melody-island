@@ -255,6 +255,13 @@ export default function IslandPage() {
       document.removeEventListener('visibilitychange', visible);
     };
   }, [gate, roomClock, t]);
+  const hasTrack = Boolean(session?.currentVideo);
+  useEffect(() => {
+    if (!hasTrack) {
+      setPlayerReady(false);
+      setBlocked(false);
+    }
+  }, [hasTrack]);
   const admittedDuration = session?.playlist.find(song => song.videoId === session.currentVideo)?.durationMs;
   useEffect(() => {
     if (gate !== 'ready' || !session?.currentVideo || admittedDuration) return;
@@ -471,11 +478,11 @@ export default function IslandPage() {
           />
           <div className="track-details">
           <h2 className="now-playing-title">
-            {displayYouTubeTitle(current?.title ?? '') || (session.playlist.length ? t('歌單準備好了。') : t('讓第一首歌登島。'))}
+            {displayYouTubeTitle(current?.title ?? '') || (session.playlist.length ? t('歌單準備好了。') : t('島上沒有播放任何歌曲'))}
           </h2>
-          {!current && (
+          {!current && session.playlist.length > 0 && (
             <p className="quiet-notice">
-              {session.playlist.length ? t('按下播放，一起開始聽。') : t('搜尋喜歡的歌，加入大家的播放佇列。')}
+              {t('按下播放，一起開始聽。')}
             </p>
           )}
           {needsListening && (
@@ -483,7 +490,7 @@ export default function IslandPage() {
               <p>{t('此裝置尚未開啟聲音，請按下方「開始聆聽」。')}</p>
             </div>
           )}
-          {!playerReady && (
+          {hasTrack && !playerReady && (
             <Button
               variant="ghost"
               className="resync"
@@ -503,9 +510,7 @@ export default function IslandPage() {
             {!canEdit && <p className="quiet-notice">{t('島主尚未開放加歌。')}</p>}
             {!session.playlist.length ? (
               <p className="room-empty">
-                {t('島上還很安靜。')}
-                <br />
-                {t('搜尋一首喜歡的歌，邀請大家一起聽。')}
+                {t('開始為島嶼新增歌曲')}
               </p>
             ) : (
               <ol className="queue-list">
@@ -531,7 +536,6 @@ export default function IslandPage() {
                       onClick={() => command({ type: 'select', videoId: song.videoId })}
                     >
                       <span>{displayYouTubeTitle(song.title)}</span>
-                      {song.videoId === session.currentVideo && session.isPlaying && <span className="playing-label">{t('播放中')}</span>}
                     </Button>
                     <Button
                       variant="ghost"
@@ -549,13 +553,12 @@ export default function IslandPage() {
             )}
           </section>
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-            <DialogContent className="song-search-dialog" aria-describedby="song-search-description" onCloseAutoFocus={(event) => { event.preventDefault(); searchTrigger.current?.focus(); }}>
-            <DialogTitle>{t('找一段旋律')}</DialogTitle>
-            <DialogDescription id="song-search-description">{t('找到喜歡的歌，放進大家的下一段旋律。')}</DialogDescription>
+            <DialogContent className="song-search-dialog" aria-describedby={undefined} onCloseAutoFocus={(event) => { event.preventDefault(); searchTrigger.current?.focus(); }}>
+            <DialogTitle>{t('搜尋')}</DialogTitle>
             <form onSubmit={search} className="room-search">
               <Input
                 aria-label={t('搜尋歌曲或歌手')}
-                placeholder={t('搜尋歌曲或歌手')}
+                placeholder={t('想聽什麼？')}
                 maxLength={100}
                 value={query}
                 onChange={(event) => {
@@ -627,7 +630,7 @@ export default function IslandPage() {
                 <Button variant="ghost" onClick={() => setRoomPanel('info')}><Info size={17} />{t('島嶼資訊')}</Button>
                 <Button variant="ghost" onClick={() => setRoomPanel('members')}><Users size={17} />{t('島民與權限')} <span>{t('{count} 位', { count: members.length })}</span></Button>
                 <Button variant="ghost" onClick={() => void copy('invite')}><Link2 size={17} />{t('複製邀請連結')}</Button>
-                <Button variant="ghost" disabled={!playerReady} onClick={() => {
+                <Button variant="ghost" disabled={!hasTrack || !playerReady} onClick={() => {
                   player.current?.sync();
                   setRoomPanel(null);
                 }}><RefreshCw size={17} />{t('重新同步播放')} <span>{t('僅此裝置')}</span></Button>

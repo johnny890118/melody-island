@@ -7,7 +7,7 @@ type Event = { target: PlayerTarget; data?: number };
 interface Events { onReady(event: Event): void; onStateChange(event: Event): void; onAutoplayBlocked(): void }
 const hooks = vi.hoisted(() => ({ ready: (_event: Event) => {}, state: (_event: Event) => {}, blocked: () => {} }));
 vi.mock('../../components/YouTubeFrame', () => ({ default: (props: Events) => {
-  hooks.ready = props.onReady; hooks.state = props.onStateChange; hooks.blocked = props.onAutoplayBlocked; return null;
+  hooks.ready = props.onReady; hooks.state = props.onStateChange; hooks.blocked = props.onAutoplayBlocked; return React.createElement('div', { 'data-testid': 'youtube-frame' });
 } }));
 import SyncedPlayer from '../../components/SyncedPlayer';
 const target = {
@@ -33,12 +33,16 @@ it('cues paused content once and prevents native local playback from changing th
   expect(target.loadVideoById).not.toHaveBeenCalled(); expect(target.pauseVideo).toHaveBeenCalledOnce();
   act(() => hooks.state({ data: 1, target })); expect(callbacks.onAdvance).not.toHaveBeenCalled();
 });
-it('loads the authoritative position and stops only when a newer snapshot clears content', () => {
+it('detaches YouTube when the last track is removed and attaches again when playback resumes', () => {
   vi.spyOn(Date, 'now').mockReturnValue(4000);
   const view = render(<SyncedPlayer session={{ ...base, positionMs: 2000, isPlaying: true }} {...callbacks} />);
   act(() => hooks.ready({ target })); expect(target.loadVideoById).toHaveBeenCalledExactlyOnceWith('aaaaaaaaaaa', 5);
   view.rerender(<SyncedPlayer session={{ ...base, currentVideo: '', playbackRevision: 1 }} {...callbacks} />);
-  expect(target.stopVideo).toHaveBeenCalledOnce();
+  expect(view.queryByTestId('youtube-frame')).toBeNull();
+  view.rerender(<SyncedPlayer session={{ ...base, isPlaying: true, playbackRevision: 2 }} {...callbacks} />);
+  expect(view.getByTestId('youtube-frame')).toBeTruthy();
+  act(() => hooks.ready({ target }));
+  expect(target.loadVideoById).toHaveBeenCalledTimes(2);
 });
 it('applies a new authoritative play to cued and unstarted states without reloading the resource', () => {
   vi.spyOn(Date, 'now').mockReturnValue(1000); target.getPlayerState.mockReturnValue(5);

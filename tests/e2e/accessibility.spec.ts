@@ -137,7 +137,7 @@ test('English navigation and joining keep the selected language on narrow screen
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-Hant');
-  await page.getByRole('link', { name: 'English', exact: true }).click();
+  await page.getByRole('combobox', { name: '語言' }).selectOption('en');
   await expect(page).toHaveURL(/\/en$/);
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
@@ -162,7 +162,7 @@ test('English navigation and joining keep the selected language on narrow screen
   }).toBe(true);
   await accessible(page);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
-  await page.getByRole('link', { name: '繁體中文' }).click();
+  await page.getByRole('combobox', { name: 'Language' }).selectOption('zh-Hant');
   await expect(page).toHaveURL(new RegExp(`/island/${id}$`));
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-Hant');
   await expect(page.getByRole('button', { name: '搜尋歌曲' })).toBeVisible();
