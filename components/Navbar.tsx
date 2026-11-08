@@ -18,6 +18,8 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
+  const [languageReady, setLanguageReady] = useState(false);
+  useEffect(() => setLanguageReady(true), []);
   useEffect(() => {
     void dispatch(fetchUser()).then((result) => {
       if (fetchUser.rejected.match(result))
@@ -49,6 +51,7 @@ export default function Navbar() {
           <select
             aria-label={t('語言')}
             value={locale}
+            disabled={!languageReady}
             onChange={(event) => {
               const nextLocale = event.target.value;
               if (isLocale(nextLocale) && nextLocale !== locale)
