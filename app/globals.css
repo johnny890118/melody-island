@@ -843,7 +843,6 @@ body:has(.room-page) { background: radial-gradient(ellipse at 82% 0%, #33233b, #
 .queue-position { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; min-width: 18px; }
 .queue-song { display: flex; flex-direction: column; align-items: flex-start; white-space: normal; padding: 6px 0; }
 .queue-song > span:first-child { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.playing-label { display: block; font-size: 10px; color: var(--accent); margin-top: 3px; }
 .transport { background: #211a2e; border-color: #a78d9c60; }
 .transport-title { white-space: normal; min-width: 0; }
 .transport-title > span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -862,10 +861,26 @@ body:has(.room-page) { background: radial-gradient(ellipse at 82% 0%, #33233b, #
 }
 
 .site-nav { display: flex; align-items: center; gap: 10px; }
-.locale-link { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; font-size: 12px; }
+.locale-picker { position: relative; display: inline-flex; align-items: center; }
+.locale-picker select {
+  appearance: none;
+  min-height: 44px;
+  width: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.locale-picker select:hover { border-color: var(--rule); }
+.locale-picker option { background: var(--paper); color: var(--ink); }
+.locale-picker svg { position: absolute; color: var(--ink); pointer-events: none; }
+.locale-picker-icon { inset-inline-start: 6px; }
+.locale-picker-chevron { inset-inline-end: 5px; }
 .public-about { width: min(680px, 100% - 40px); margin: 48px auto; line-height: 1.7; }
 .public-about h1 { font-size: clamp(28px, 5vw, 40px); margin-bottom: 16px; }
 .public-about h2 { font-size: 18px; margin: 24px 0 6px; }
 .public-about p { color: var(--muted); }
 .public-about a { display: inline-flex; margin-top: 24px; text-decoration: underline; }
-.home-about-link { display: inline-flex; align-items: center; min-height: 32px; margin-top: 4px; font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }

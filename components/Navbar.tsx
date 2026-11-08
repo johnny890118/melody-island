@@ -1,18 +1,18 @@
 'use client';
 import { useLocale } from '@/components/LocaleProvider';
-import { localizedPath } from '@/lib/locales';
+import { isLocale, localizedPath } from '@/lib/locales';
 import { Button } from '@/components/ui/button';
 import React, { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { fetchUser, logout, startGoogleLogin } from '@/store/authSlice';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { AudioLines, ArrowUpRight, LogOut } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { AudioLines, ArrowUpRight, ChevronDown, Languages, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { t, locale } = useLocale();
   const pathname = usePathname();
-  const alternate = locale === 'en' ? 'zh-Hant' : 'en';
+  const router = useRouter();
   const currentPath = pathname.replace(/^\/(en|zh-Hant)(?=\/|$)/, '') || '/';
   const { user, status } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
@@ -45,9 +45,22 @@ export default function Navbar() {
         </span>
       </Link>
       <nav aria-label={t('主要導覽')} className="site-nav">
-        <Link href={localizedPath(alternate, currentPath)} hrefLang={alternate} lang={alternate} aria-label={alternate === 'en' ? 'English' : '繁體中文'} className="locale-link">
-          {alternate === 'en' ? 'EN' : '繁中'}
-        </Link>
+        <div className="locale-picker">
+          <select
+            aria-label={t('語言')}
+            value={locale}
+            onChange={(event) => {
+              const nextLocale = event.target.value;
+              if (isLocale(nextLocale) && nextLocale !== locale)
+                router.push(localizedPath(nextLocale, currentPath) + window.location.search + window.location.hash);
+            }}
+          >
+            <option value="zh-Hant" lang="zh-Hant">繁體中文</option>
+            <option value="en" lang="en">English</option>
+          </select>
+          <Languages className="locale-picker-icon" size={16} aria-hidden="true" />
+          <ChevronDown className="locale-picker-chevron" size={12} aria-hidden="true" />
+        </div>
         {user && !user.isAnonymous ? (
           <Button
             variant="ghost"

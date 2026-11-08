@@ -35,6 +35,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
   const executing = useRef(false);
   const [ready, setReady] = useState(false);
   const [muted, setMuted] = useState(false);
+  const hasTrack = Boolean(props.session.currentVideo);
   const testPlayer = process.env.NEXT_PUBLIC_USE_EMULATORS === 'true' && process.env.NEXT_PUBLIC_TEST_PLAYER === 'true';
   const run = useCallback((trigger: RadioTrigger) => {
     const target = player.current;
@@ -86,10 +87,16 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     return () => { active.current = false; player.current = null; };
   }, []);
   useEffect(() => {
-    if (ready) return;
+    if (hasTrack || testPlayer) return;
+    player.current = null;
+    policy.current = new RadioPlayer();
+    setReady(false);
+  }, [hasTrack, testPlayer]);
+  useEffect(() => {
+    if (!hasTrack || ready) return;
     const timer = setTimeout(() => latest.current.onError('連接 YouTube 逾時，請重試播放器或確認網路。'), 15000);
     return () => clearTimeout(timer);
-  }, [ready]);
+  }, [hasTrack, ready]);
   useEffect(() => { run('snapshot'); }, [ready, props.session, props.durationMs, props.clockOffset, props.canRelay, run]);
   useEffect(() => {
     const timer = setInterval(() => { if (!document.hidden) run('tick'); }, 1000);
@@ -121,6 +128,7 @@ const SyncedPlayer = forwardRef<PlayerHandle, SyncedPlayerProps>(function Synced
     return () => { player.current = null; };
   }, [testPlayer]);
   if (testPlayer) return <div className="video-frame" data-testid="test-player" data-video={props.session.currentVideo} data-playing={props.session.isPlaying}><div className="test-player-label">{t('模擬播放器 · E2E 測試資料')}</div></div>;
+  if (!hasTrack) return <div className="video-frame" aria-hidden="true" />;
   return <div className="video-frame" aria-busy={!ready}><YouTubeFrame
     onReady={({ target }) => {
       if (player.current && player.current !== target) policy.current = new RadioPlayer();

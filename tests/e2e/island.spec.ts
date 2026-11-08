@@ -221,6 +221,14 @@ test('two friends join, refresh, share playback and concurrently delete by ident
   await a.keyboard.press('Escape');
   await expect(membersButton).toBeFocused();
   expect(await mountedPlayer?.evaluate(element => element === document.querySelector('[data-testid="test-player"]'))).toBe(true);
+  await a.getByRole('button', { name: '播放', exact: true }).click();
+  await expect(guestPlayer).toHaveAttribute('data-playing', 'true');
+  await a.getByRole('button', { name: `移除 Song ${songIds[2]}`, exact: true }).click();
+  for (const client of [a, b]) {
+    await expect(client.getByRole('button', { name: `移除 Song ${songIds[2]}`, exact: true })).toHaveCount(0);
+    await expect(client.getByTestId('test-player')).toHaveAttribute('data-video', '');
+    await expect(client.getByTestId('test-player')).toHaveAttribute('data-playing', 'false');
+  }
   await first.close();
   await second.close();
 });
