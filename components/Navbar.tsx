@@ -14,7 +14,7 @@ import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { fetchUser, logout, startGoogleLogin } from '@/store/authSlice';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { AudioLines, ArrowUpRight, ChevronDown, Languages, LogOut } from 'lucide-react';
+import { AudioLines, ArrowUpRight, ChevronDown, Globe, LogOut } from 'lucide-react';
 
 export default function Navbar() {
   const { t, locale } = useLocale();
@@ -59,7 +59,7 @@ export default function Navbar() {
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button type="button" variant="ghost" className="locale-picker" aria-label={`${t('語言')} · ${languageLabel}`} disabled={!languageReady}>
-                <Languages size={16} aria-hidden="true" />
+                <Globe size={16} aria-hidden="true" />
                 <span className="locale-picker-label" lang={locale}>{languageLabel}</span>
                 <ChevronDown size={12} aria-hidden="true" />
               </Button>
