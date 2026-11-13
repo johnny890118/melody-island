@@ -861,24 +861,23 @@ body:has(.room-page) { background: radial-gradient(ellipse at 82% 0%, #33233b, #
 }
 
 .site-nav { display: flex; align-items: center; gap: 10px; }
-.locale-picker { position: relative; display: inline-flex; align-items: center; }
-.locale-picker select {
-  appearance: none;
+.site-header .locale-picker {
+  min-width: 44px;
   min-height: 44px;
-  width: 44px;
-  padding: 0;
+  gap: 6px;
+  padding-inline: 8px;
   border: 1px solid transparent;
   border-radius: 4px;
-  background: transparent;
-  color: transparent;
-  font: inherit;
-  cursor: pointer;
+  color: var(--ink);
 }
-.locale-picker select:hover { border-color: var(--rule); }
-.locale-picker option { background: var(--paper); color: var(--ink); }
-.locale-picker svg { position: absolute; color: var(--ink); pointer-events: none; }
-.locale-picker-icon { inset-inline-start: 6px; }
-.locale-picker-chevron { inset-inline-end: 5px; }
+.site-header .locale-picker:is(:hover, [data-state="open"]):not(:disabled) {
+  border-color: var(--rule);
+  background: var(--hover);
+}
+.locale-menu [aria-checked="true"] svg { color: var(--accent); }
+@media (max-width: 420px) {
+  .locale-picker-label { display: none; }
+}
 .public-about { width: min(680px, 100% - 40px); margin: 48px auto; line-height: 1.7; }
 .public-about h1 { font-size: clamp(28px, 5vw, 40px); margin-bottom: 16px; }
 .public-about h2 { font-size: 18px; margin: 24px 0 6px; }

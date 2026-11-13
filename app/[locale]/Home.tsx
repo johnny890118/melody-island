@@ -91,7 +91,7 @@ export default function HomePage() {
           </h1>
           <p>{t('不同的地方，同一首歌。')}</p>
         </div>
-        <div className="home-actions" aria-label={t('開始共聽')}>
+        <div data-nosnippet className="home-actions" aria-label={t('開始共聽')}>
           <div className="home-action-list">
             <CustomDialog
               title={t('朋友在島上等你')}

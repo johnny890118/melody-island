@@ -1,6 +1,13 @@
 'use client';
 import { useLocale } from '@/components/LocaleProvider';
 import { isLocale, localizedPath } from '@/lib/locales';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import React, { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
@@ -11,6 +18,7 @@ import { AudioLines, ArrowUpRight, ChevronDown, Languages, LogOut } from 'lucide
 
 export default function Navbar() {
   const { t, locale } = useLocale();
+  const languageLabel = locale === 'en' ? 'English' : '繁體中文';
   const pathname = usePathname();
   const router = useRouter();
   const currentPath = pathname.replace(/^\/(en|zh-Hant)(?=\/|$)/, '') || '/';
@@ -46,45 +54,51 @@ export default function Navbar() {
           Melody <span className="wordmark-island">Island</span>
         </span>
       </Link>
-      <nav aria-label={t('主要導覽')} className="site-nav">
-        <div className="locale-picker">
-          <select
-            aria-label={t('語言')}
-            value={locale}
-            disabled={!languageReady}
-            onChange={(event) => {
-              const nextLocale = event.target.value;
-              if (isLocale(nextLocale) && nextLocale !== locale)
-                router.push(localizedPath(nextLocale, currentPath) + window.location.search + window.location.hash);
-            }}
-          >
-            <option value="zh-Hant" lang="zh-Hant">繁體中文</option>
-            <option value="en" lang="en">English</option>
-          </select>
-          <Languages className="locale-picker-icon" size={16} aria-hidden="true" />
-          <ChevronDown className="locale-picker-chevron" size={12} aria-hidden="true" />
-        </div>
-        {user && !user.isAnonymous ? (
-          <Button
-            variant="ghost"
-            className="nav-action"
-            disabled={status === 'loading'}
-            onClick={() => dispatch(logout())}
-          >
-            {t('登出')} <LogOut size={15} aria-hidden="true" />
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            className="nav-action"
-            disabled={pending || status === 'loading'}
-            onClick={login}
-          >
-            {pending ? t('正在前往登入…') : t('登入')}
-            <ArrowUpRight size={16} aria-hidden="true" />
-          </Button>
-        )}
-      </nav>
+      <div data-nosnippet>
+        <nav aria-label={t('主要導覽')} className="site-nav">
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="ghost" className="locale-picker" aria-label={`${t('語言')} · ${languageLabel}`} disabled={!languageReady}>
+                <Languages size={16} aria-hidden="true" />
+                <span className="locale-picker-label" lang={locale}>{languageLabel}</span>
+                <ChevronDown size={12} aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" collisionPadding={12} className="locale-menu" aria-label={t('語言')}>
+              <DropdownMenuRadioGroup
+                value={locale}
+                onValueChange={(nextLocale) => {
+                  if (isLocale(nextLocale) && nextLocale !== locale)
+                    router.push(localizedPath(nextLocale, currentPath) + window.location.search + window.location.hash);
+                }}
+              >
+                <DropdownMenuRadioItem value="zh-Hant" lang="zh-Hant">繁體中文</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="en" lang="en">English</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {user && !user.isAnonymous ? (
+            <Button
+              variant="ghost"
+              className="nav-action"
+              disabled={status === 'loading'}
+              onClick={() => dispatch(logout())}
+            >
+              {t('登出')} <LogOut size={15} aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              className="nav-action"
+              disabled={pending || status === 'loading'}
+              onClick={login}
+            >
+              {pending ? t('正在前往登入…') : t('登入')}
+              <ArrowUpRight size={16} aria-hidden="true" />
+            </Button>
+          )}
+        </nav>
+      </div>
       {error && (
         <p className="nav-error" role="alert">
           {t(error)}
