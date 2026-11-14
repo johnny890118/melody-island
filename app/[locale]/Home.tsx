@@ -2,7 +2,7 @@
 import { useLocale } from '@/components/LocaleProvider';
 import { localizedPath } from '@/lib/locales';
 import { Button } from '@/components/ui/button';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
 import { preload } from 'react-dom';
 import dynamic from 'next/dynamic';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -45,6 +45,26 @@ export default function HomePage() {
     }
   };
   const router = useRouter();
+  const [arriving, setArriving] = useState(false);
+  const [navigating, startNavigation] = useTransition();
+  const arrivalTimer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(arrivalTimer.current), []);
+
+  const enterIsland = (id: string) => {
+    if (arrivalTimer.current !== undefined || navigating) return;
+    const destination = localizedPath(locale, `/island/${id}`);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      router.push(destination);
+      return;
+    }
+    setArriving(true);
+    arrivalTimer.current = window.setTimeout(() => {
+      startNavigation(() => router.push(destination));
+      arrivalTimer.current = undefined;
+      setArriving(false);
+    }, 480);
+  };
   useEffect(() => {
     let cancelled = false;
     setOwnIsland('');
@@ -66,7 +86,7 @@ export default function HomePage() {
       islandName: values.islandName || '',
       islandPassword: values.islandPassword || '',
     } satisfies CreateRoomInput);
-    router.push(localizedPath(locale, `/island/${result.id}`));
+    enterIsland(result.id);
   };
   const join = async (values: FormValues) => {
     const id = values.islandId?.trim();
@@ -74,14 +94,15 @@ export default function HomePage() {
     const result = await api<RoomResponse>(`/api/islands/${id}/join`, {
       islandPassword: values.islandPassword,
     });
-    router.push(localizedPath(locale, `/island/${result.id}`));
+    enterIsland(result.id);
   };
   return (
-    <main className="home-page" id="main-content">
+    <main className="home-page" id="main-content" data-arriving={arriving || navigating || undefined}>
+      {(arriving || navigating) && <div className="island-arrival-veil" aria-hidden="true" />}
       <div className="moon-atmosphere" aria-hidden="true">
         <div className="moon-disc" />
       </div>
-      <div className="home-composition">
+      <div className="home-composition" inert={arriving || navigating}>
         <Hero />
         <div className="hero-title">
           <h1 lang="en">
@@ -118,7 +139,7 @@ export default function HomePage() {
               <Button
                 variant="ghost"
                 className="action-button"
-                onClick={() => router.push(localizedPath(locale, `/island/${ownIsland}`))}
+                onClick={() => enterIsland(ownIsland)}
               >
                 {t('我的島嶼')}
                 <ArrowUpRight size={18} />
