@@ -501,7 +501,7 @@ export default function IslandPage() {
           )}
           </div>
         </section>
-        <aside className="listening-sidebar" aria-label={t('共用歌單')}>
+        <aside className="listening-sidebar" data-empty={session.playlist.length === 0} aria-label={t('共用歌單')}>
           <section className="room-section">
             <Button ref={searchTrigger} variant="ghost" className="queue-search-entry" disabled={!canEdit} onClick={() => setSearchOpen(true)}>
               <Search size={16} />{t('搜尋歌曲')}
@@ -552,6 +552,7 @@ export default function IslandPage() {
               </ol>
             )}
           </section>
+          <div className="room-shore" aria-hidden="true" />
           <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
             <DialogContent className="song-search-dialog" aria-describedby={undefined} onCloseAutoFocus={(event) => { event.preventDefault(); searchTrigger.current?.focus(); }}>
             <DialogTitle>{t('搜尋')}</DialogTitle>

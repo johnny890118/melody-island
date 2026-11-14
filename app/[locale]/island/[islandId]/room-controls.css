@@ -144,3 +144,27 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
 @media (max-width: 760px) {
   .room-menu-dialog { max-width: none; }
 }
+
+/* Render of Fox's islands by nimzu (CC BY 4.0), with a custom lantern and lighting.
+   https://sketchfab.com/3d-models/foxs-islands-163b68e09fcc47618450150be7785907
+   https://creativecommons.org/licenses/by/4.0/ */
+.room-shore {
+  position: relative;
+  width: min(100%, 340px);
+  height: 148px;
+  margin-block-start: -16px;
+  margin-inline-start: auto;
+  pointer-events: none;
+  background: url('/art/island-shore.webp') center / cover no-repeat;
+  mask-image: radial-gradient(ellipse 55% 56% at 52% 55%, #000 24%, transparent 100%);
+  opacity: 0.64;
+}
+@media (max-width: 760px) {
+  .listening-sidebar[data-empty='false'] .room-shore { display: none; }
+  .room-shore {
+    width: min(100%, 270px);
+    height: 106px;
+    margin-block-start: -36px;
+    margin-inline: auto;
+  }
+}
