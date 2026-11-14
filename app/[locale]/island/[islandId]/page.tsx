@@ -416,10 +416,6 @@ export default function IslandPage() {
   const needsListening = session.isPlaying && (blocked || !listening);
   return (
     <main className="room-page" id="main-content">
-      <div className="room-terrain" aria-hidden="true">
-        <div className="room-terrain-canopy" />
-        <div className="room-terrain-shore" />
-      </div>
       {copyToast && createPortal(
         <div className="room-copy-toast" aria-hidden="true">
           {copyToast.failed ? <CircleAlert size={17} /> : <Check size={17} />}
