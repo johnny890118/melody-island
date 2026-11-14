@@ -883,3 +883,37 @@ body:has(.room-page) { background: radial-gradient(ellipse at 82% 0%, #33233b, #
 .public-about h2 { font-size: 18px; margin: 24px 0 6px; }
 .public-about p { color: var(--muted); }
 .public-about a { display: inline-flex; margin-top: 24px; text-decoration: underline; }
+
+.home-page[data-arriving] .island-stage {
+  transform-origin: 57% 49%;
+  animation: island-approach 480ms cubic-bezier(.55, 0, .95, .65) both;
+}
+.home-page[data-arriving] :is(.hero-title, .home-actions, .home-caption) {
+  animation: island-departure 220ms ease-out both;
+}
+.island-arrival-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--paper);
+  animation: island-veil 480ms ease-in both;
+}
+@keyframes island-approach {
+  from { transform: scale(1); }
+  to { transform: scale(2.65); }
+}
+@keyframes island-departure {
+  to { opacity: 0; }
+}
+@keyframes island-veil {
+  0%, 32% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@media (max-width: 760px) {
+  .home-page[data-arriving] .island-stage { transform-origin: 50% 48%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-page[data-arriving] :is(.island-stage, .hero-title, .home-actions, .home-caption),
+  .island-arrival-veil { animation: none; }
+  .island-arrival-veil { display: none; }
+}

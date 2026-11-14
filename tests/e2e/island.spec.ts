@@ -580,19 +580,31 @@ test('starting local listening never rewrites the shared room timeline', async (
   expect(playbackWrites).toEqual([]);
 });
 
- test('an existing owner returns through My Island while guest joining stays available', async ({ page, request }) => {
-  const owner = await identity(request);
-  const response = await post(request, '/api/islands', owner, { islandName: '我的島嶼入口', islandPassword: 'home-action-123' });
-  expect(response.status()).toBe(201);
-  const data: unknown = await response.json();
-  if (!data || typeof data !== 'object' || !('id' in data) || typeof data.id !== 'string') throw Error('Invalid room fixture');
-  await login(page, owner);
-  await page.goto('/');
-  await expect(page.getByRole('button', { name: '加入島嶼', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '我的島嶼', exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`/island/${data.id}$`));
-  await expect(page.getByRole('heading', { name: '我的島嶼入口', exact: true })).toBeVisible();
-});
+for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+  test(`an existing owner returns through My Island with motion preference ${reducedMotion}`, async ({ page, request }) => {
+    await page.emulateMedia({ reducedMotion });
+    const owner = await identity(request);
+    const response = await post(request, '/api/islands', owner, { islandName: '我的島嶼入口', islandPassword: 'home-action-123' });
+    expect(response.status()).toBe(201);
+    const data: unknown = await response.json();
+    if (!data || typeof data !== 'object' || !('id' in data) || typeof data.id !== 'string') throw Error('Invalid room fixture');
+    await login(page, owner);
+    await page.goto('/');
+    await expect(page.getByRole('button', { name: '加入島嶼', exact: true })).toBeVisible();
+    await page.evaluate(() => {
+      const home = document.querySelector('.home-page');
+      if (!home) throw new Error('Missing homepage');
+      new MutationObserver(() => {
+        if (home.hasAttribute('data-arriving')) sessionStorage.setItem('island-arrival-observed', 'true');
+      }).observe(home, { attributes: true, attributeFilter: ['data-arriving'] });
+    });
+    await page.getByRole('button', { name: '我的島嶼', exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/island/${data.id}$`));
+    await expect(page.getByRole('heading', { name: '我的島嶼入口', exact: true })).toBeVisible();
+    expect(await page.evaluate(() => sessionStorage.getItem('island-arrival-observed')))
+      .toBe(reducedMotion === 'reduce' ? null : 'true');
+  });
+}
 
 test('only the owner can rotate the join password without interrupting members', async ({ request, page }) => {
   const owner = await identity(request);
