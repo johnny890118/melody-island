@@ -145,46 +145,50 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
   .room-menu-dialog { max-width: none; }
 }
 
-/* Decorative stills sit beside the room content and never intercept controls. */
-.room-heading::after,
-.listening-stage::after,
-.listening-sidebar::after {
-  content: '';
-  display: block;
+.room-page:has(.room-terrain) {
+  position: relative;
+  isolation: isolate;
+}
+.room-terrain {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
   pointer-events: none;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
 }
-.room-heading::after {
-  flex: 0 0 clamp(54px, 7vw, 96px);
-  height: 46px;
-  background-image: url('/art/island-stones.webp');
-  opacity: .72;
+.room-terrain-canopy {
+  position: absolute;
+  inset-block-start: 6px;
+  inset-inline-start: -154px;
+  width: 250px;
+  height: 250px;
+  background: url('/art/island-tree.webp') center / contain no-repeat;
+  mask-image: linear-gradient(to right, #000 45%, transparent 100%);
+  opacity: .45;
 }
-.listening-stage::after {
-  width: 80px;
-  height: 62px;
-  margin-inline-start: auto;
-  background-image: url('/art/island-tree.webp');
-  opacity: .78;
-}
-.listening-sidebar::after {
-  width: 84px;
-  height: 62px;
-  margin-block-start: -16px;
-  background-image: url('/art/island-lantern.webp');
-  opacity: .86;
+.room-terrain-shore {
+  position: absolute;
+  inset-block-start: clamp(420px, 55svh, 610px);
+  inset-inline-end: -66px;
+  width: 340px;
+  height: 235px;
+  background:
+    url('/art/island-lantern.webp') right 108px bottom 39px / 125px no-repeat,
+    radial-gradient(ellipse 104px 52px at 52% 68%, #cc874b32, transparent),
+    url('/art/island-stones.webp') right -36px bottom -63px / 320px no-repeat;
+  mask-image: linear-gradient(to left, #000 46%, transparent);
+  opacity: .63;
 }
 @media (max-width: 760px) {
-  .room-heading::after { height: 40px; }
-  .listening-stage { position: relative; }
-  .listening-stage::after {
-    position: absolute;
-    inset-inline-end: 0;
-    inset-block-end: -27px;
-    width: 44px;
-    height: 44px;
+  .room-terrain-canopy { display: none; }
+  .room-terrain-shore {
+    inset-block-start: auto;
+    inset-block-end: 123px;
+    inset-inline-end: -57px;
+    width: 207px;
+    height: 90px;
+    background-size: 78px, auto, 211px;
+    background-position: right 79px bottom 14px, center, right -28px bottom -54px;
+    opacity: .53;
   }
-  .listening-sidebar::after { width: 62px; height: 48px; }
 }
