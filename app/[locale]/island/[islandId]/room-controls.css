@@ -145,26 +145,46 @@ body:has(.room-page) { background: radial-gradient(ellipse at 12% 0%, #302438, t
   .room-menu-dialog { max-width: none; }
 }
 
-/* Render of Fox's islands by nimzu (CC BY 4.0), with a custom lantern and lighting.
-   https://sketchfab.com/3d-models/foxs-islands-163b68e09fcc47618450150be7785907
-   https://creativecommons.org/licenses/by/4.0/ */
-.room-shore {
-  position: relative;
-  width: min(100%, 340px);
-  height: 148px;
-  margin-block-start: -16px;
-  margin-inline-start: auto;
+/* Decorative stills sit beside the room content and never intercept controls. */
+.room-heading::after,
+.listening-stage::after,
+.listening-sidebar::after {
+  content: '';
+  display: block;
   pointer-events: none;
-  background: url('/art/island-shore.webp') center / cover no-repeat;
-  mask-image: radial-gradient(ellipse 55% 56% at 52% 55%, #000 24%, transparent 100%);
-  opacity: 0.64;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+}
+.room-heading::after {
+  flex: 0 0 clamp(54px, 7vw, 96px);
+  height: 46px;
+  background-image: url('/art/island-stones.webp');
+  opacity: .72;
+}
+.listening-stage::after {
+  width: 80px;
+  height: 62px;
+  margin-inline-start: auto;
+  background-image: url('/art/island-tree.webp');
+  opacity: .78;
+}
+.listening-sidebar::after {
+  width: 84px;
+  height: 62px;
+  margin-block-start: -16px;
+  background-image: url('/art/island-lantern.webp');
+  opacity: .86;
 }
 @media (max-width: 760px) {
-  .listening-sidebar[data-empty='false'] .room-shore { display: none; }
-  .room-shore {
-    width: min(100%, 270px);
-    height: 106px;
-    margin-block-start: -36px;
-    margin-inline: auto;
+  .room-heading::after { height: 40px; }
+  .listening-stage { position: relative; }
+  .listening-stage::after {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-block-end: -27px;
+    width: 44px;
+    height: 44px;
   }
+  .listening-sidebar::after { width: 62px; height: 48px; }
 }
